@@ -1,4 +1,4 @@
-package com.schedule_hanaro.server.WebsocketTest;
+package com.schedule_hanaro.server.Websocket.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.WebSocketHandler;
