@@ -12,7 +12,6 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.schedule_hanaro.server.websocket.dto.response.WebsocketResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,13 +27,19 @@ public class WebsocketHandler extends TextWebSocketHandler {
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session)throws Exception{
 		sessions.add(session);
+		try  {
+			session.sendMessage(
+				new TextMessage("웹소켓 연결 성공"));
+		} catch (Exception e) {
+			// log.error(e.getMessage());
+		}
 	}
 
 	@Override
 	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
 		String payload = message.getPayload();
 		for (WebSocketSession s : sessions) {
-			s.sendMessage(new TextMessage("Hello!"));
+			s.sendMessage(new TextMessage("Hello!" + payload));
 		}
 	}
 
