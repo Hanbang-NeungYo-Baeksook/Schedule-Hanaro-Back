@@ -1,4 +1,4 @@
-package com.schedule_hanaro.server.Websocket;
+package com.schedule_hanaro.server.websocket;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,6 +12,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.schedule_hanaro.server.websocket.dto.response.WebsocketResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,8 +31,11 @@ public class WebsocketHandler extends TextWebSocketHandler {
 	}
 
 	@Override
-	protected void handleTextMessage(WebSocketSession session, TextMessage message)throws Exception{
+	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
 		String payload = message.getPayload();
+		for (WebSocketSession s : sessions) {
+			s.sendMessage(new TextMessage("Hello!"));
+		}
 	}
 
 	@Override

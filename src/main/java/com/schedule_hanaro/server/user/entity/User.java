@@ -1,4 +1,4 @@
-package com.schedule_hanaro.server.User.entity;
+package com.schedule_hanaro.server.user.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

@@ -1,4 +1,4 @@
-package com.schedule_hanaro.server.User.controller;
+package com.schedule_hanaro.server.user.controller;
 
 import org.springframework.stereotype.Controller;
 
