@@ -1,4 +1,4 @@
-package com.schedule_hanaro.server.websocket;
+package com.hanaro.schedule_hanaro.websocket;
 
 import java.util.HashMap;
 import java.util.HashSet;
