@@ -1,4 +1,4 @@
-package com.schedule_hanaro.server.websocket.service;
+package com.hanaro.schedule_hanaro.websocket.service;
 
 import org.springframework.stereotype.Service;
 
