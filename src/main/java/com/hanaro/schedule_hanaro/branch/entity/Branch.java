@@ -24,11 +24,11 @@ public class Branch {
 	private Long id;
 
 	@Column(name = "branch_num")
-	private Long branchNum;
+	private String branchNum;
 	@Column(name = "branch_name")
 	private String name;
 	@Column(name = "branch_type")
-	private int type;
+	private String type;
 	@Column(name = "x_position")
 	private String xPosition;
 	@Column(name = "y_position")
@@ -41,9 +41,9 @@ public class Branch {
 	private String businessTime;
 
 	public static Branch of(
-		Long branchNum,
+		String branchNum,
 		String name,
-		int type,
+		String type,
 		String xPosition,
 		String yPosition,
 		String address,
