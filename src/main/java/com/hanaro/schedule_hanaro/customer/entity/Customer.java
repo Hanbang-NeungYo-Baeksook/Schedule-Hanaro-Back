@@ -19,15 +19,18 @@ public class Customer {
     @Column(name = "customer_id")
     private Long id;
 
-    private String customerName;
+    @Column(name = "id")
+    private String authId;
+    private String password;
+    private String name;
     private String phoneNum;
 
     public static Customer of(
-        String customerName,
+        String name,
         String phoneNum
     ){
         return Customer.builder()
-            .customerName(customerName)
+            .name(name)
             .phoneNum(phoneNum)
             .build();
     }
