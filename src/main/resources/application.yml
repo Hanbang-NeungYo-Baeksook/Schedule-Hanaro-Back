@@ -1,7 +1,5 @@
 spring:
   config:
-    activate:
-      on-profile: dev
     import: application-secret.yml
   datasource:
     url: jdbc:h2:tcp://localhost/~/test
