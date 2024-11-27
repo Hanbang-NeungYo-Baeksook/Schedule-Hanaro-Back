@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import com.hanaro.schedule_hanaro.customer.dto.request.CustomerCreateRequest;
 import com.hanaro.schedule_hanaro.customer.dto.response.CustomerResponse;
 import com.hanaro.schedule_hanaro.customer.entity.Customer;
 import com.hanaro.schedule_hanaro.customer.repository.CustomerRepository;
