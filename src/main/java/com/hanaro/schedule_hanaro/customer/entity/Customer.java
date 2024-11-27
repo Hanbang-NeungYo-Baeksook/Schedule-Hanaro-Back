@@ -1,17 +1,18 @@
 package com.hanaro.schedule_hanaro.customer.entity;
 
+import java.time.LocalDate;
+
+import com.hanaro.schedule_hanaro.customer.entity.enums.Gender;
+
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Customer {
 
     @Id
@@ -19,19 +20,29 @@ public class Customer {
     @Column(name = "customer_id")
     private Long id;
 
-    @Column(name = "id")
+    @Column(name = "auth_id")
     private String authId;
     private String password;
     private String name;
     private String phoneNum;
+    private LocalDate birth;
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
 
-    public static Customer of(
+    @Builder
+    public Customer(
+        String authId,
+        String password,
         String name,
-        String phoneNum
+        String phoneNum,
+        LocalDate birth,
+        Gender gender
     ){
-        return Customer.builder()
-            .name(name)
-            .phoneNum(phoneNum)
-            .build();
+        this.authId = authId;
+        this.password = password;
+        this.name = name;
+        this.phoneNum = phoneNum;
+        this.birth = birth;
+        this.gender = gender;
     }
 }

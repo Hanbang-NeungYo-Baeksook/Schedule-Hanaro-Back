@@ -24,10 +24,4 @@ public class CustomerController {
 	public ResponseEntity<CustomerResponse> getCustomer(@PathVariable Long id){
 		return ResponseEntity.ok().body(customerService.getCustomerById(id));
 	}
-
-	@PostMapping("/create")
-	public ResponseEntity<String>createCustomer(@RequestBody CustomerCreateRequest customerCreateRequest){
-		return ResponseEntity.ok().body(customerService.createCustomer(customerCreateRequest));
-	}
-
 }
