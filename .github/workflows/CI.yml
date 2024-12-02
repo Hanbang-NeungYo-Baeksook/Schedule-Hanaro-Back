@@ -30,7 +30,7 @@ jobs:
 
     - name: Set YML
       run: |
-      # 현위치
+       # 현위치
        pwd
        mkdir -p src/main/resources
        echo "${{secrets.APPLICATION_SECRET_YML}}" | base64 --decode > ./application-secret.yml
