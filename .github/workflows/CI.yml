@@ -28,6 +28,13 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
+    - name: Set YML
+      run: |
+       cd ./src/main/resources
+       echo "${{secrets.APPLICATION_SECRET_YML}}" | base64 --decode > ./application-secret.yml
+       find src
+      
+
     # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
     # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
     - name: Setup Gradle
