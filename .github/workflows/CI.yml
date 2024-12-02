@@ -30,7 +30,9 @@ jobs:
 
     - name: Set YML
       run: |
-       cd ./src/main/resources
+      # 현위치
+       pwd
+       mkdir -p src/main/resources
        echo "${{secrets.APPLICATION_SECRET_YML}}" | base64 --decode > ./application-secret.yml
        find src
       
