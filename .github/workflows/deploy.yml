@@ -75,7 +75,10 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           port: ${{ 22 }}
           script: |
-            sh /home/ubuntu/deploy.sh
+            docker pull
+            docker stop ${{ secrets.DOCKERHUB_USERNAME }}/schedule-hanaro-back:1.0.0
+            docker run ${{ secrets.DOCKERHUB_USERNAME }}/schedule-hanaro-back:1.0.0
+            docekr system prune -f
           
          
 
