@@ -34,9 +34,9 @@ jobs:
        ls -al
        
        mkdir -p src/main/resources
-       echo "${{secrets.APPLICATION_SECRET_YML}}" | base64 --decode > ./application-secret.yml
+       echo "${{secrets.APPLICATION_SECRET_YML}}" | base64 --decode > src/main/resources/application-secret.yml
        # secret.yml 잘 생성되었는지 확인
-       # cat ./src/main/resources/application-secret.yml
+       cat src/main/resources/application-secret.yml
       
 
     # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
