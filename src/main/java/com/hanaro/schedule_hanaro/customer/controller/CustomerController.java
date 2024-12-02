@@ -8,17 +8,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.hanaro.schedule_hanaro.customer.dto.response.CustomerResponse;
 import com.hanaro.schedule_hanaro.customer.service.CustomerService;
+import com.hanaro.schedule_hanaro.global.dto.ResponseDto;
 
 import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/customer")
+@RequestMapping("/api/customer")
 public class CustomerController {
 	private final CustomerService customerService;
 
-	@GetMapping("/{id}")
-	public ResponseEntity<CustomerResponse> getCustomer(@PathVariable Long id){
-		return ResponseEntity.ok().body(customerService.getCustomerById(id));
+	@GetMapping("/v1/{id}")
+	public ResponseDto<CustomerResponse> getCustomer(@PathVariable Long id){
+		return ResponseDto.ok(customerService.getCustomerById(id));
 	}
 }
