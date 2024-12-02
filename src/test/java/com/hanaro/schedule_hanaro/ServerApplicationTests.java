@@ -1,4 +1,4 @@
-package com.schedule_hanaro.server;
+package com.hanaro.schedule_hanaro;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
