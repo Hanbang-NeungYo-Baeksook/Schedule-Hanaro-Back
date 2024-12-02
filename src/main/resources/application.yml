@@ -1,11 +1,12 @@
 spring:
   config:
     import: application-secret.yml
-  datasource:
-    url: jdbc:h2:tcp://localhost/~/test
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
   jpa:
     hibernate:
       ddl-auto: create-drop
+    show-sql: true
+  datasource:
+    url: ${DATABASE.ENDPOINT_URL}
+    username: ${DATABASE.USERNAME}
+    password: ${DATABASE.PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
