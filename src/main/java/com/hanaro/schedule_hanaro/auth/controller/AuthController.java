@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hanaro.schedule_hanaro.auth.dto.request.AuthSignUpRequest;
 import com.hanaro.schedule_hanaro.auth.service.AuthService;
+import com.hanaro.schedule_hanaro.global.dto.ResponseDto;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,9 +21,10 @@ public class AuthController {
 	private final AuthService authService;
 
 	@PostMapping("/sign-up")
-	public ResponseEntity<?> sginUp(@RequestBody AuthSignUpRequest authSignUpRequest){
+	public ResponseDto<?> sginUp(@RequestBody AuthSignUpRequest authSignUpRequest){
 		log.info("signUp 컨트롤러 진입");
 		authService.signUp(authSignUpRequest);
-		return ResponseEntity.ok("회원가입 성공");
+		return ResponseDto.created(null);
 	}
+
 }
