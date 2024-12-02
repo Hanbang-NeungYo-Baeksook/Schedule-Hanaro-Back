@@ -75,10 +75,10 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           port: ${{ 22 }}
           script: |
-            docker pull
-            docker stop ${{ secrets.DOCKERHUB_USERNAME }}/schedule-hanaro-back:1.0.0
-            docker run ${{ secrets.DOCKERHUB_USERNAME }}/schedule-hanaro-back:1.0.0
-            docekr system prune -f
+            sudo docker pull
+            sudo docker stop ${{ secrets.DOCKERHUB_USERNAME }}/schedule-hanaro-back:1.0.0
+            sudo docker run -d -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/schedule-hanaro-back:1.0.0
+            sudo docker system prune -f
           
          
 
