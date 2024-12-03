@@ -3,7 +3,7 @@ package com.hanaro.schedule_hanaro.global.dto;
 import org.springframework.http.HttpStatus;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.hanaro.schedule_hanaro.global.exception.Exception;
+import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
@@ -30,7 +30,7 @@ public record ResponseDto<T>(
 			,null
 		);
 	}
-	public static ResponseDto<Object> fail(@NotNull Exception e){
+	public static ResponseDto<Object> fail(@NotNull GlobalException e){
 		return new ResponseDto<>(
 			e.getErrorCode().getHttpStatus(),
 			false,
