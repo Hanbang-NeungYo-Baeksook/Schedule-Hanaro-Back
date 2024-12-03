@@ -12,7 +12,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Builder
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -40,7 +39,8 @@ public class Branch {
 	@Column(name = "business_time")
 	private String businessTime;
 
-	public static Branch of(
+	@Builder
+	public  Branch (
 		String branchNum,
 		String name,
 		String type,
@@ -50,15 +50,13 @@ public class Branch {
 		String tel,
 		String businessTime
 	) {
-		return Branch.builder()
-			.branchNum(branchNum)
-			.name(name)
-			.type(type)
-			.xPosition(xPosition)
-			.yPosition(yPosition)
-			.address(address)
-			.tel(tel)
-			.businessTime(businessTime)
-			.build();
+		this.branchNum = branchNum;
+		this.name = name;
+		this.type = type;
+		this.xPosition = xPosition;
+		this.yPosition = yPosition;
+		this.address = address;
+		this.tel = tel;
+		this.businessTime = businessTime;
 	}
 }

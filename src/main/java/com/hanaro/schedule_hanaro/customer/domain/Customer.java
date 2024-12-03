@@ -30,7 +30,7 @@ public class Customer {
     private Gender gender;
 
     @Builder
-    public Customer(
+    public Customer (
         String authId,
         String password,
         String name,
