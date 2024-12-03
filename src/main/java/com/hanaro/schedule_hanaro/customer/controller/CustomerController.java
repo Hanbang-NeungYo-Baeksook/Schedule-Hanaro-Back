@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/api/customer")
+@RequestMapping("/api/v1/customer")
 public class CustomerController {
 	private final CustomerService customerService;
 
