@@ -75,9 +75,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           port: ${{ 22 }}
           script: |
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/schedule-hanaro-back:1.0.0
-            sudo docker stop ${{ secrets.DOCKERHUB_USERNAME }}/schedule-hanaro-back:1.0.0
-            sudo docker-compose up -d --remove-orphans
+            sh /home/ubuntu/deploy.sh
           
          
 
