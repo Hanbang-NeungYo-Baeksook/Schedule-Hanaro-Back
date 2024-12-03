@@ -30,8 +30,16 @@ public class BranchService {
 	public String saveBranchList(BranchListCreateRequest branchList){
 		branchList.branches()
 			.forEach(branchDto -> branchRepository.save(
-				Branch.of(branchDto.id(), branchDto.name(), branchDto.type(), branchDto.position_x(),
-					branchDto.position_y(), branchDto.address(), branchDto.tel(), branchDto.business_hours())));
+				Branch.builder()
+					.branchNum(branchDto.id())
+					.name(branchDto.name())
+					.type(branchDto.type())
+					.xPosition(branchDto.position_x())
+					.yPosition(branchDto.position_y())
+					.address(branchDto.address())
+					.tel(branchDto.tel())
+					.businessTime(branchDto.business_hours())
+					.build()));
 		return "Success";
 	}
 }
