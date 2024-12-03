@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/branch")
+@RequestMapping("/api/branch")
 public class BranchController {
 	private final BranchService branchService;
 

@@ -1,6 +1,5 @@
 package com.hanaro.schedule_hanaro.customer.controller;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,11 +13,11 @@ import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/customer")
+@RequestMapping("/api/customer")
 public class CustomerController {
 	private final CustomerService customerService;
 
-	@GetMapping("/v1/{id}")
+	@GetMapping("/{id}")
 	public ResponseDto<CustomerResponse> getCustomer(@PathVariable Long id){
 		return ResponseDto.ok(customerService.getCustomerById(id));
 	}
