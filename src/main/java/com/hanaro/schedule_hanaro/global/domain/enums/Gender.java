@@ -1,4 +1,4 @@
-package com.hanaro.schedule_hanaro.customer.domain.enums;
+package com.hanaro.schedule_hanaro.global.domain.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.hanaro.schedule_hanaro.customer.domain.Customer;
+import com.hanaro.schedule_hanaro.global.domain.Customer;
 
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
 

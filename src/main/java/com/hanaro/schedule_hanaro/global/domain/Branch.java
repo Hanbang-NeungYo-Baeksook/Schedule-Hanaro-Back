@@ -1,4 +1,4 @@
-package com.hanaro.schedule_hanaro.customer.domain;
+package com.hanaro.schedule_hanaro.global.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

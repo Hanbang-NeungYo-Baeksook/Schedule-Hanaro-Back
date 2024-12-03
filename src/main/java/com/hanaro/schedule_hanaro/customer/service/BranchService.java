@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import com.hanaro.schedule_hanaro.customer.dto.request.BranchListCreateRequest;
 import com.hanaro.schedule_hanaro.customer.dto.response.AllBranchResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchDetailResponse;
-import com.hanaro.schedule_hanaro.customer.domain.Branch;
+import com.hanaro.schedule_hanaro.global.domain.Branch;
 import com.hanaro.schedule_hanaro.customer.repository.BranchRepository;
 
 import lombok.RequiredArgsConstructor;

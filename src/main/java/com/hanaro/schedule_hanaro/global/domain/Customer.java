@@ -1,8 +1,8 @@
-package com.hanaro.schedule_hanaro.customer.domain;
+package com.hanaro.schedule_hanaro.global.domain;
 
 import java.time.LocalDate;
 
-import com.hanaro.schedule_hanaro.customer.domain.enums.Gender;
+import com.hanaro.schedule_hanaro.global.domain.enums.Gender;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

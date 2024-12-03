@@ -1,6 +1,6 @@
 package com.hanaro.schedule_hanaro.customer.dto.response;
 
-import com.hanaro.schedule_hanaro.customer.domain.Branch;
+import com.hanaro.schedule_hanaro.global.domain.Branch;
 
 import lombok.Builder;
 

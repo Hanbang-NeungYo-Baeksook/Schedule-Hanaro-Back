@@ -5,8 +5,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.hanaro.schedule_hanaro.global.auth.dto.request.AuthSignUpRequest;
-import com.hanaro.schedule_hanaro.customer.domain.Customer;
-import com.hanaro.schedule_hanaro.customer.domain.enums.Gender;
+import com.hanaro.schedule_hanaro.global.domain.Customer;
+import com.hanaro.schedule_hanaro.global.domain.enums.Gender;
 import com.hanaro.schedule_hanaro.customer.repository.CustomerRepository;
 
 import lombok.RequiredArgsConstructor;
