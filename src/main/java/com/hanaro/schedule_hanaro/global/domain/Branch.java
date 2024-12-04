@@ -22,6 +22,8 @@ public class Branch {
 	@Column(name = "branch_id")
 	private Long id;
 
+	@Column(name = "branch_num")
+	private String branchNum;
 	@Column(name = "branch_name")
 	private String name;
 	@Column(name = "branch_type")
@@ -39,6 +41,7 @@ public class Branch {
 
 	@Builder
 	public  Branch (
+		String branchNum,
 		String name,
 		String type,
 		String xPosition,
@@ -47,6 +50,7 @@ public class Branch {
 		String tel,
 		String businessTime
 	) {
+		this.branchNum = branchNum;
 		this.name = name;
 		this.type = type;
 		this.xPosition = xPosition;
