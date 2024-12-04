@@ -19,7 +19,7 @@ public class CsVisit {
 	private Long id;
 
 	@OneToOne(fetch = FetchType.LAZY)  // 1:1 관계 설정
-	@JoinColumn(name = "branch_id", nullable = false)  // 외래키 연결
+	@JoinColumn(name = "branch_id", nullable = false, unique = true)  // 외래키 연결
 	private Branch branch;
 
 	@Column(name = "current_num", nullable = false, columnDefinition = "int default 0")
