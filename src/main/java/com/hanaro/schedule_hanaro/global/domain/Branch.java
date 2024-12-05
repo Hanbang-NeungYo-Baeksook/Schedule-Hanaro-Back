@@ -22,21 +22,21 @@ public class Branch {
 	@Column(name = "branch_id")
 	private Long id;
 
-	@Column(name = "branch_num")
+	@Column(name = "branch_num", nullable = false)
 	private String branchNum;
-	@Column(name = "branch_name")
+	@Column(name = "branch_name", nullable = false)
 	private String name;
-	@Column(name = "branch_type")
+	@Column(name = "branch_type", nullable = false)
 	private String type;
-	@Column(name = "x_position")
+	@Column(name = "x_position", nullable = false)
 	private String xPosition;
-	@Column(name = "y_position")
+	@Column(name = "y_position", nullable = false)
 	private String yPosition;
-	@Column(name = "address")
+	@Column(name = "address", nullable = false)
 	private String address;
 	@Column(name = "tel")
 	private String tel;
-	@Column(name = "business_time")
+	@Column(name = "business_time", nullable = false)
 	private String businessTime;
 
 	@Builder
