@@ -27,8 +27,6 @@ public class SecurityConfig {
 				request
 					// Security 다 구현하면 줏석 바꾸기
 					.requestMatchers("api/**").permitAll()
-					.requestMatchers("/test").permitAll()
-					.requestMatchers("/hello").permitAll()
 					// .requestMatchers("api/v1/auth/sign-up").permitAll()
 					// .requestMatchers("api/v1/**").hasAnyRole("customer")
 					.anyRequest().authenticated()
