@@ -21,11 +21,16 @@ public class Recommend {
 	@Column(name = "recommend_id")
 	private Long id;
 
+	@Column(nullable = false)
 	private String query;
+
+	@Column(nullable = false)
 	private String response;
+
+	@Column(nullable = false)
 	private Category category;
 
-	@Column(name = "query_vector")
+	@Column(name = "query_vector", nullable = false)
 	private String queryVector;
 
 	@Builder

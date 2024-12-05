@@ -20,12 +20,22 @@ public class Customer {
     @Column(name = "customer_id")
     private Long id;
 
-    @Column(name = "auth_id")
+    @Column(name = "auth_id", nullable = false)
     private String authId;
+
+    @Column(nullable = false)
     private String password;
+
+    @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false)
     private String phoneNum;
+
+    @Column(nullable = false)
     private LocalDate birth;
+
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
