@@ -14,9 +14,9 @@ import lombok.NoArgsConstructor;
 public class InquiryResponse {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "inquiry_id")
-	private Long id;
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "inquiry_id", nullable = false, unique = true)
+	private Inquiry inquiry;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "admin_id", nullable = false)
@@ -29,7 +29,8 @@ public class InquiryResponse {
 	private LocalDateTime createdAt;
 
 	@Builder
-	public InquiryResponse(Admin admin, String content, LocalDateTime createdAt) {
+	public InquiryResponse(Inquiry inquiry, Admin admin, String content, LocalDateTime createdAt) {
+		this.inquiry = inquiry;
 		this.admin = admin;
 		this.content = content;
 		this.createdAt = createdAt;

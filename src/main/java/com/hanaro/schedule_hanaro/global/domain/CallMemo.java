@@ -11,9 +11,9 @@ import lombok.NoArgsConstructor;
 public class CallMemo {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "call_id")
-	private Long id;
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "call_id", nullable = false, unique = true)
+	private Call call;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "admin_id", nullable = false)
@@ -23,7 +23,8 @@ public class CallMemo {
 	private String contents;
 
 	@Builder
-	public CallMemo(Admin admin, String contents) {
+	public CallMemo(Call call, Admin admin, String contents) {
+		this.call = call;
 		this.admin = admin;
 		this.contents = contents;
 	}

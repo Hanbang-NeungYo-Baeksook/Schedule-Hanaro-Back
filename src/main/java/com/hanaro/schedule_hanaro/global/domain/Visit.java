@@ -24,8 +24,9 @@ public class Visit {
 	@JoinColumn(name = "customer_id", nullable = false)
 	private Customer customer;
 
-	@Column(name = "branch_id", nullable = false)
-	private Long branchId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "branch_id", nullable = false)
+	private Branch branch;
 
 	@Column(name = "visit_date", nullable = false)
 	private Date visitDate;
@@ -52,7 +53,7 @@ public class Visit {
 	@Builder
 	public Visit(
 		Customer customer,
-		Long branchId,
+		Branch branch,
 		Date visitDate,
 		int num,
 		Status status,
@@ -62,7 +63,7 @@ public class Visit {
 		String tags
 	) {
 		this.customer = customer;
-		this.branchId = branchId;
+		this.branch = branch;
 		this.visitDate = visitDate;
 		this.num = num;
 		this.status = status;
