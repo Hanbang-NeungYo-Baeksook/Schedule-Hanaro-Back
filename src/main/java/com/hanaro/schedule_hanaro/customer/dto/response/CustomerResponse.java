@@ -7,7 +7,7 @@ import lombok.Builder;
 
 @Builder(access = AccessLevel.PRIVATE)
 public record CustomerResponse(String customerName, String phoneNum) {
-	public static CustomerResponse from(Customer customer){
+	public static CustomerResponse from(final Customer customer){
 		return CustomerResponse.builder()
 			.customerName(customer.getName())
 			.phoneNum(customer.getPhoneNum())
