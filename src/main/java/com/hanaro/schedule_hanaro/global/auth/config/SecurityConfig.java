@@ -26,10 +26,12 @@ public class SecurityConfig {
 			.authorizeHttpRequests(request ->
 				request
 					// Security 다 구현하면 줏석 바꾸기
-					.requestMatchers("api/**").permitAll()
-					// .requestMatchers("api/v1/auth/sign-up").permitAll()
-					// .requestMatchers("api/v1/**").hasAnyRole("customer")
-					.anyRequest().authenticated()
+					// .requestMatchers("api/customer/").permitAll()
+					// .requestMatchers("api/auth/sign-up").permitAll()
+					// .requestMatchers("api/branch/**").permitAll()
+					// .requestMatchers("api/**").hasAnyRole("customer")
+					.anyRequest().permitAll()
+					// .authenticated()
 			)
 			.getOrBuild();
 	}

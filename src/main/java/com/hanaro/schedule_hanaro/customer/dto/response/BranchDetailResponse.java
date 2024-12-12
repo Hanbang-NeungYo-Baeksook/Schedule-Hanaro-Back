@@ -16,7 +16,7 @@ public record BranchDetailResponse(
 	String businessTime
 ) {
 	public static BranchDetailResponse from(
-		Branch branch
+		final Branch branch
 	){
 		return BranchDetailResponse.builder()
 			.branchNum(branch.getBranchNum())

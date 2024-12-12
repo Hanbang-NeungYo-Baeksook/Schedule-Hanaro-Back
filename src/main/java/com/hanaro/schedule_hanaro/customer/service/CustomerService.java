@@ -17,7 +17,7 @@ public class CustomerService {
 	private final CustomerRepository customerRepository;
 
 	public CustomerResponse getCustomerById(long id) {
-		Optional<Customer> customer= customerRepository.findById(id);
-		return new CustomerResponse(customer.get().getName(), customer.get().getPhoneNum());
+		Customer customer= customerRepository.findById(id).orElseThrow();
+		return CustomerResponse.from(customer);
 	}
 }
