@@ -33,6 +33,6 @@ public class BranchController {
 
 	@PostMapping("/create")
 	public ResponseEntity<String> createBranches(@RequestBody BranchListCreateRequest branchList){
-		return ResponseEntity.ok().body(branchService.saveBranchList(branchList));
+		return ResponseEntity.ok(branchService.saveBranchList(branchList));
 	}
 }
