@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hanaro.schedule_hanaro.customer.dto.request.BranchListCreateRequest;
-import com.hanaro.schedule_hanaro.customer.dto.response.AllBranchResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchDetailResponse;
 import com.hanaro.schedule_hanaro.customer.service.BranchService;
 
@@ -17,18 +16,13 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/branch")
+@RequestMapping("/api/branches")
 public class BranchController {
 	private final BranchService branchService;
 
 	@GetMapping("/{branchId}")
-	public ResponseEntity<BranchDetailResponse> getBranch(@PathVariable Long branchId){
-		return ResponseEntity.ok().body(branchService.findByBranchNum(branchId));
-	}
-
-	@GetMapping("/all")
-	public ResponseEntity<AllBranchResponse> getBranchList(){
-		return ResponseEntity.ok().body(branchService.findAllBranch());
+	public ResponseEntity<BranchDetailResponse> getBranchDetail(@PathVariable Long branchId){
+		return ResponseEntity.ok().body(branchService.findBranchById(branchId));
 	}
 
 	@PostMapping("/create")
