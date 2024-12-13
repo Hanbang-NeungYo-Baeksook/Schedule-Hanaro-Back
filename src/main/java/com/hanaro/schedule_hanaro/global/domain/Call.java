@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@Table(name = "Call")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Call {
 

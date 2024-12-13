@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@Table(name = "Customer")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Customer {
 
@@ -29,7 +30,7 @@ public class Customer {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(name = "phone",nullable = false)
     private String phoneNum;
 
     @Column(nullable = false)

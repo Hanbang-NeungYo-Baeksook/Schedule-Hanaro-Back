@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@Table(name = "CS_Call")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CsCall {
 

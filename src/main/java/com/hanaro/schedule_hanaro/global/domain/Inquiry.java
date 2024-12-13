@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@Table(name = "Inquiry")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Inquiry {
 	@Id
@@ -21,9 +22,9 @@ public class Inquiry {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "customer_id", nullable = false)
 	private Customer customer;
-
-	@Column(name = "title", nullable = false)
-	private String title;
+	//
+	// @Column(name = "title", nullable = false)
+	// private String title;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "category", nullable = false)
@@ -39,9 +40,9 @@ public class Inquiry {
 	private String tags;
 
 	@Builder
-	public Inquiry(Customer customer, String title, Category category, String content, LocalDateTime createdAt, String tags) {
+	public Inquiry(Customer customer, Category category, String content, LocalDateTime createdAt, String tags) {
 		this.customer = customer;
-		this.title = title;
+		// this.title = title;
 		this.category = category;
 		this.content = content;
 		this.createdAt = createdAt;

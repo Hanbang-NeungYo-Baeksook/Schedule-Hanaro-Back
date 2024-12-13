@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@Table(name = "CS_Visit")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CsVisit {
 

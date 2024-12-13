@@ -1,4 +1,5 @@
 package com.hanaro.schedule_hanaro.global.domain;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 
@@ -12,6 +13,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@Table(name = "Visit")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Visit {
 
@@ -29,7 +31,7 @@ public class Visit {
 	private Branch branch;
 
 	@Column(name = "visit_date", nullable = false)
-	private Date visitDate;
+	private LocalDate visitDate;
 
 	@Column(name = "num", nullable = false)
 	private int num;
@@ -54,7 +56,7 @@ public class Visit {
 	public Visit(
 		Customer customer,
 		Branch branch,
-		Date visitDate,
+		LocalDate visitDate,
 		int num,
 		Status status,
 		LocalDateTime startedAt,
