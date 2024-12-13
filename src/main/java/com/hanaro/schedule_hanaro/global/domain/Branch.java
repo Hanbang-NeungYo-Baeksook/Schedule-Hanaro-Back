@@ -46,7 +46,6 @@ public class Branch {
 
 	@Builder
 	public  Branch (
-		// String branchNum,
 		String name,
 		BranchType branchType,
 		String xPosition,
@@ -55,7 +54,6 @@ public class Branch {
 		String tel,
 		String businessTime
 	) {
-		// this.branchNum = branchNum;
 		this.name = name;
 		this.branchType = branchType;
 		this.xPosition = xPosition;
