@@ -25,17 +25,17 @@ public class Recommend {
 	@Column(name = "recommend_id")
 	private Long id;
 
-	@Column(nullable = false)
+	@Column(length = 500, nullable = false)
 	private String query;
 
-	@Column(nullable = false)
+	@Column(length = 500, nullable = false)
 	private String response;
 
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private Category category;
 
-	@Column(name = "query_vector", nullable = false)
+	@Column(name = "query_vector", length = 405, nullable = false)
 	private String queryVector;
 
 	@Builder

@@ -30,7 +30,7 @@ public class Inquiry {
 	@Column(name = "category", nullable = false)
 	private Category category;
 
-	@Column(name = "content", nullable = false)
+	@Column(name = "content",length = 500, nullable = false)
 	private String content;
 
 	@Column(name = "created_at", nullable = false)

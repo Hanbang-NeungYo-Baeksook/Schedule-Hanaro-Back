@@ -46,10 +46,10 @@ public class Visit {
 	@Column(name = "ended_at")
 	private LocalDateTime endedAt;
 
-	@Column(name = "content")
+	@Column(name = "content",length = 500)
 	private String content;
 
-	@Column(name = "tags")
+	@Column(name = "tags", length = 50)
 	private String tags;
 
 	@Builder

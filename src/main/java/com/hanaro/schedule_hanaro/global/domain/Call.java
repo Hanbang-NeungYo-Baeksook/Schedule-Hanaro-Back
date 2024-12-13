@@ -40,7 +40,7 @@ public class Call {
 	@Column(name = "status", nullable = false)
 	private Status status;
 
-	@Column(name = "content", nullable = false)
+	@Column(name = "content", length = 500, nullable = false)
 	private String content;
 
 	@Column(name = "started_at")

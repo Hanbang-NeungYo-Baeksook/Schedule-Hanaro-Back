@@ -18,19 +18,19 @@ public class Customer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "customer_id")
+    @Column(length = 100, name = "customer_id")
     private Long id;
 
     @Column(name = "auth_id", nullable = false)
     private String authId;
 
-    @Column(nullable = false)
+    @Column(length = 100, nullable = false)
     private String password;
 
-    @Column(nullable = false)
+    @Column(length = 100, nullable = false)
     private String name;
 
-    @Column(name = "phone",nullable = false)
+    @Column(length = 11, name = "phone",nullable = false)
     private String phoneNum;
 
     @Column(nullable = false)

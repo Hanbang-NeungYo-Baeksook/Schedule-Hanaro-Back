@@ -20,13 +20,13 @@ public class CallMemo {
 	@JoinColumn(name = "admin_id", nullable = false)
 	private Admin admin;
 
-	@Column(name = "contents", nullable = false)
-	private String contents;
+	@Column(name = "content",length = 500, nullable = false)
+	private String content;
 
 	@Builder
-	public CallMemo(Call call, Admin admin, String contents) {
+	public CallMemo(Call call, Admin admin, String content) {
 		this.call = call;
 		this.admin = admin;
-		this.contents = contents;
+		this.content = content;
 	}
 }
