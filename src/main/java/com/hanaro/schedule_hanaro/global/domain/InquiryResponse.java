@@ -23,7 +23,7 @@ public class InquiryResponse {
 	@JoinColumn(name = "admin_id", nullable = false)
 	private Admin admin;
 
-	@Column(name = "content", nullable = false)
+	@Column(name = "content",length = 500, nullable = false)
 	private String content;
 	//
 	// @Column(name = "created_at", nullable = false)

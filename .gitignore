@@ -41,3 +41,5 @@ application-secret.yml
 
 **/src/main/resources/application-*.yml
 **/.DS_Store
+
+src/main/generates/
