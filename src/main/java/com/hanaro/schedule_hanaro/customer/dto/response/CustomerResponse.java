@@ -1,16 +1,16 @@
 package com.hanaro.schedule_hanaro.customer.dto.response;
 
-import com.hanaro.schedule_hanaro.global.domain.Customer;
-
-import lombok.AccessLevel;
 import lombok.Builder;
 
-@Builder(access = AccessLevel.PRIVATE)
+@Builder
 public record CustomerResponse(String customerName, String phoneNum) {
-	public static CustomerResponse from(final Customer customer){
+	public static CustomerResponse from(
+			final String name,
+			final String phoneNum
+	) {
 		return CustomerResponse.builder()
-			.customerName(customer.getName())
-			.phoneNum(customer.getPhoneNum())
+			.customerName(name)
+			.phoneNum(phoneNum)
 			.build();
 	}
 }

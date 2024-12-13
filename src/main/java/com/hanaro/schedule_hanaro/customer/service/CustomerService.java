@@ -16,8 +16,8 @@ import lombok.RequiredArgsConstructor;
 public class CustomerService {
 	private final CustomerRepository customerRepository;
 
-	public CustomerResponse getCustomerById(long id) {
+	public CustomerResponse findCustomerById(Long id) {
 		Customer customer= customerRepository.findById(id).orElseThrow();
-		return CustomerResponse.from(customer);
+		return CustomerResponse.from(customer.getName(),customer.getPhoneNum());
 	}
 }

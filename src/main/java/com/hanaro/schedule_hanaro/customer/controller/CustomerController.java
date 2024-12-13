@@ -21,7 +21,7 @@ public class CustomerController {
 	@GetMapping("/{customer_id}")
 	public ResponseEntity<CustomerResponse> getCustomer(@PathVariable Long customer_id){
 		System.out.println("get customer controller 진입"+customer_id);
-		ResponseEntity<CustomerResponse> response = ResponseEntity.ok().body(customerService.getCustomerById(customer_id));
+		ResponseEntity<CustomerResponse> response = ResponseEntity.ok().body(customerService.findCustomerById(customer_id));
 		System.out.println("response 완료"+response);
 		return response;
 	}
