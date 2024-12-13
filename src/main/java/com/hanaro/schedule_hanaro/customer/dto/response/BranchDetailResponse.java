@@ -1,32 +1,51 @@
 package com.hanaro.schedule_hanaro.customer.dto.response;
 
-import com.hanaro.schedule_hanaro.global.domain.Branch;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Builder;
 
 @Builder
 public record BranchDetailResponse(
-	String branchNum,
+	@JsonProperty("branch_id")
+	Long id,
+	@JsonProperty("branch_name")
 	String branchName,
-	String branchType,
-	String xPosition,
-	String yPosition,
 	String address,
 	String tel,
-	String businessTime
+	@JsonProperty("business_hours")
+	String businessHours,
+	@JsonProperty("branch_type")
+	String branchType,
+	@JsonProperty("current_num")
+	int currentNum,
+	@JsonProperty("total_num")
+	int totalNum,
+	@JsonProperty("wait_amount")
+	int waitAmount
+
 ) {
-	public static BranchDetailResponse from(
-		final Branch branch
-	){
+	public static BranchDetailResponse of(
+		Long id,
+		String branchName,
+		String address,
+		String tel,
+		String businessHours,
+		String branchType,
+		int currentNum,
+		int totalNum,
+		int waitAmount
+
+	) {
 		return BranchDetailResponse.builder()
-			// .branchNum(branch.getBranchNum())
-			.branchName(branch.getName())
-			.branchType(branch.getBranchType().toString())
-			.xPosition(branch.getXPosition())
-			.yPosition(branch.getYPosition())
-			.address(branch.getAddress())
-			.tel(branch.getTel())
-			.businessTime(branch.getBusinessTime())
+			.id(id)
+			.branchName(branchName)
+			.address(address)
+			.tel(tel)
+			.businessHours(businessHours)
+			.branchType(branchType)
+			.currentNum(currentNum)
+			.totalNum(totalNum)
+			.waitAmount(waitAmount)
 			.build();
 	}
 }
