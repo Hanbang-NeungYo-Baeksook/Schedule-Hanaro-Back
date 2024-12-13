@@ -9,6 +9,7 @@ import com.hanaro.schedule_hanaro.customer.dto.response.AllBranchResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchDetailResponse;
 import com.hanaro.schedule_hanaro.global.domain.Branch;
 import com.hanaro.schedule_hanaro.customer.repository.BranchRepository;
+import com.hanaro.schedule_hanaro.global.domain.enums.BranchType;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,8 +18,8 @@ import lombok.RequiredArgsConstructor;
 public class BranchService {
 	private final BranchRepository branchRepository;
 
-	public BranchDetailResponse findByBranchNum(long branchNum){
-		Branch branch = branchRepository.findBranchByBranchNum(branchNum);
+	public BranchDetailResponse findByBranchNum(Long id){
+		Branch branch = branchRepository.findById(id).orElseThrow();
 		return BranchDetailResponse.from(branch);
 	}
 
@@ -31,15 +32,16 @@ public class BranchService {
 		branchList.branches()
 			.forEach(branchDto -> branchRepository.save(
 				Branch.builder()
-					.branchNum(branchDto.id())
+					// .branchNum(branchDto.id())
 					.name(branchDto.name())
-					.type(branchDto.type())
+					.branchType(BranchType.valueOf(branchDto.type()))
 					.xPosition(branchDto.position_x())
 					.yPosition(branchDto.position_y())
 					.address(branchDto.address())
 					.tel(branchDto.tel())
 					.businessTime(branchDto.business_hours())
 					.build()));
+
 		return "Success";
 	}
 }

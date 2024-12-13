@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@Table(name = "Call_Memo")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CallMemo {
 

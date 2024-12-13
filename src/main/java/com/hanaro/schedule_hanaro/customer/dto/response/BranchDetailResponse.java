@@ -19,9 +19,9 @@ public record BranchDetailResponse(
 		final Branch branch
 	){
 		return BranchDetailResponse.builder()
-			.branchNum(branch.getBranchNum())
+			// .branchNum(branch.getBranchNum())
 			.branchName(branch.getName())
-			.branchType(branch.getType())
+			.branchType(branch.getBranchType().toString())
 			.xPosition(branch.getXPosition())
 			.yPosition(branch.getYPosition())
 			.address(branch.getAddress())

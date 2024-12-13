@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@Table(name = "Inquiry_Response")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class InquiryResponse {
 
@@ -24,15 +25,15 @@ public class InquiryResponse {
 
 	@Column(name = "content", nullable = false)
 	private String content;
-
-	@Column(name = "created_at", nullable = false)
-	private LocalDateTime createdAt;
+	//
+	// @Column(name = "created_at", nullable = false)
+	// private LocalDateTime createdAt;
 
 	@Builder
-	public InquiryResponse(Inquiry inquiry, Admin admin, String content, LocalDateTime createdAt) {
+	public InquiryResponse(Inquiry inquiry, Admin admin, String content) {
 		this.inquiry = inquiry;
 		this.admin = admin;
 		this.content = content;
-		this.createdAt = createdAt;
+		// this.createdAt = createdAt;
 	}
 }
