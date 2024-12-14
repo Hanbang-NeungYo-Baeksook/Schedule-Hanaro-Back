@@ -5,7 +5,17 @@ import java.time.LocalDateTime;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,7 +23,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Table(name = "Call")
+@Table(name = "`Call`")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Call {
 
@@ -53,7 +63,8 @@ public class Call {
 	private String tags;
 
 	@Builder
-	public Call(Customer customer, LocalDateTime callDate, int callNum, Category category, Status status, String content, LocalDateTime startedAt, LocalDateTime endedAt, String tags) {
+	public Call(Customer customer, LocalDateTime callDate, int callNum, Category category, Status status,
+		String content, LocalDateTime startedAt, LocalDateTime endedAt, String tags) {
 		this.customer = customer;
 		this.callDate = callDate;
 		this.callNum = callNum;
