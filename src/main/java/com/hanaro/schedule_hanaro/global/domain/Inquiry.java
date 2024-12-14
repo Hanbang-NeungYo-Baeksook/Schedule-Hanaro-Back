@@ -2,6 +2,7 @@ package com.hanaro.schedule_hanaro.global.domain;
 import java.time.LocalDateTime;
 
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
+import com.hanaro.schedule_hanaro.global.domain.enums.InquiryStatus;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -22,9 +23,11 @@ public class Inquiry {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "customer_id", nullable = false)
 	private Customer customer;
-	//
 	// @Column(name = "title", nullable = false)
-	// private String title;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "status", nullable = false)
+	private InquiryStatus inquiryStatus = InquiryStatus.REGISTRATIONCOMPLETE;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "category", nullable = false)
