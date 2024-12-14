@@ -9,10 +9,5 @@ import com.hanaro.schedule_hanaro.global.domain.Customer;
 
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
-
-	@Override
-	Optional<Customer> findById(Long Long);
-
-	Optional<Customer> findCustomerByAuthId(String authId);
-
+	Optional<Customer> findByAuthId(String authId);
 }
