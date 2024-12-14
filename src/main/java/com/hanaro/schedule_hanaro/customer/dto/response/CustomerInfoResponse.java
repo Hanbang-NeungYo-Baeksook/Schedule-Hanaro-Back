@@ -7,7 +7,7 @@ public record CustomerInfoResponse(
 		String customerName,
 		String phoneNum
 ) {
-	public static CustomerInfoResponse from(
+	public static CustomerInfoResponse of(
 			final String name,
 			final String phoneNum
 	) {
