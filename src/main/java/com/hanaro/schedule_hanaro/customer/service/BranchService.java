@@ -23,7 +23,8 @@ public class BranchService {
 	public BranchDetailResponse findBranchById(Long id){
 		Branch branch = branchRepository.findById(id).orElseThrow();
 		System.out.println(LocalDate.now());
-		CsVisit csVisit = csVisitRepository.findCsVisitByBranch_IdAndDate(id, LocalDate.now());
+		CsVisit csVisit = csVisitRepository.findCsVisitByBranchIdAndDate(id, LocalDate.now());
+		System.out.println(csVisit);
 		return BranchDetailResponse.of(branch.getId(), branch.getName(), branch.getAddress(), branch.getTel(),
 			branch.getBusinessTime(), branch.getBranchType().toString(), csVisit.getCurrentNum(), csVisit.getTotalNum(),
 			csVisit.getWaitAmount());

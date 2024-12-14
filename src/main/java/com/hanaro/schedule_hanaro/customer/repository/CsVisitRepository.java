@@ -10,5 +10,5 @@ import com.hanaro.schedule_hanaro.global.domain.CsVisit;
 @Repository
 public interface CsVisitRepository extends JpaRepository<CsVisit, Integer> {
 
-	CsVisit findCsVisitByBranch_IdAndDate(Long branchId, LocalDate date);
+	 CsVisit findCsVisitByBranchIdAndDate(Long branchId, LocalDate date);
 }
