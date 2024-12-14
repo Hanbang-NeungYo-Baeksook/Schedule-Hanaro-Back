@@ -11,7 +11,7 @@ import com.hanaro.schedule_hanaro.admin.dto.response.AdminCustomerInfoResponse;
 import com.hanaro.schedule_hanaro.admin.service.AdminCustomerService;
 
 @RestController
-@RequestMapping("/admin/customers")
+@RequestMapping("/admin/api/customers")
 public class AdminCustomerController {
 
     @Autowired

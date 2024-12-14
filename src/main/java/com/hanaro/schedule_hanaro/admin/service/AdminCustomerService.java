@@ -14,7 +14,7 @@ public class AdminCustomerService {
     private CustomerRepository customerRepository;
 
     public AdminCustomerInfoResponse findCustomerById(Long customerId) {
-        Customer customer = customerRepository.findById(customerId).orElseThrow(() -> new RuntimeException("Customer not found"));
+        Customer customer = customerRepository.findById(customerId).orElseThrow();
         return AdminCustomerInfoResponse.from(customer);
     }
 

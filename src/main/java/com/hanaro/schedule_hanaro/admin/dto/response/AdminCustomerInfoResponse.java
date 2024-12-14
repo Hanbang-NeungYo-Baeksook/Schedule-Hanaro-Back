@@ -7,7 +7,6 @@ import lombok.Builder;
 
 @Builder
 public record AdminCustomerInfoResponse(
-
         @JsonProperty("customer_id")
         Long customerId,
 
