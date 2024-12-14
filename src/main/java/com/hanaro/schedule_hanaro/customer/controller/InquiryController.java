@@ -21,6 +21,6 @@ public class InquiryController {
 		@RequestParam(required = false) Integer size
 	) {
 		InquiryListRequest request = InquiryListRequest.of(status, page, size);
-		return ResponseEntity.ok().body(inquiryService.getInquiryList(request));
+		return ResponseEntity.ok().body(inquiryService.getInquiries(request));
 		}
 }
