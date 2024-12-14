@@ -2,7 +2,7 @@ package com.hanaro.schedule_hanaro.global.domain;
 import java.time.LocalDateTime;
 
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
-import com.hanaro.schedule_hanaro.global.domain.enums.Status;
+import com.hanaro.schedule_hanaro.global.domain.enums.InquiryStatus;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -27,7 +27,7 @@ public class Inquiry {
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "status", nullable = false)
-	private Status status;
+	private InquiryStatus inquiryStatus = InquiryStatus.REGISTRATIONCOMPLETE;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "category", nullable = false)
@@ -43,13 +43,12 @@ public class Inquiry {
 	private String tags;
 
 	@Builder
-	public Inquiry(Customer customer, Category category, String content, LocalDateTime createdAt, String tags, Status status) {
+	public Inquiry(Customer customer, Category category, String content, LocalDateTime createdAt, String tags) {
 		this.customer = customer;
 		// this.title = title;
 		this.category = category;
 		this.content = content;
 		this.createdAt = createdAt;
 		this.tags = tags;
-		this.status = status;
 	}
 }

@@ -11,13 +11,9 @@ import java.util.List;
 @Repository
 public interface InquiryRepository<Inquiry, Long> {
 
-	@Query("SELECT i FROM Inquiry i WHERE i.status = :status ORDER BY i.createdAt DESC")
+	@Query("SELECT i FROM Inquiry i WHERE i.inquiryStatus = :status ORDER BY i.createdAt DESC")
 	List<Inquiry> findByStatus(Status status);
 
-	@Query("SELECT COUNT(i) FROM Inquiry i WHERE i.status = :status")
+	@Query("SELECT COUNT(i) FROM Inquiry i WHERE i.inquiryStatus = :status")
 	int countByStatus(Status status);
-
-	List<InquiryResponse> findInquiriesByStatus(String status);
-
-	int countByStatus(String status);
 }

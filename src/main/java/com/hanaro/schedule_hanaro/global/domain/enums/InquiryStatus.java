@@ -5,9 +5,8 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum Status {
-	PENDING("대기중"),
-	PROGRESS("진행중"),
-	COMPLETE("완료");
-	private final String status;
+public enum InquiryStatus {
+	PENDING("답변 대기중"),
+	REGISTRATIONCOMPLETE("답변완료");
+	private final String inquiryStatus;
 }

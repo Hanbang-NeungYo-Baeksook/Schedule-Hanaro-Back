@@ -18,7 +18,6 @@ import java.util.List;
 public class InquiryService {
 	private final InquiryRepository inquiryRepository;
 
-	@Transactional(readOnly = true)
 	public InquiryListResponse getInquiries(InquiryListRequest request) {
 		Status status = Status.valueOf(request.status().toUpperCase());
 		Integer page = request.page() != null ? request.page() : 1;
@@ -34,7 +33,7 @@ public class InquiryService {
 				inquiry.getId(),
 				null,
 				inquiry.getCategory().toString(),
-				inquiry.getStatus().getStatus(),
+				inquiry.getInquiryStatus().getInquiryStatus(),
 				inquiry.getContent(),
 				List.of(inquiry.getTags().split(","))
 			))
