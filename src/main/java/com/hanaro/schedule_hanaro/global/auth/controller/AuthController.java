@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.hanaro.schedule_hanaro.global.auth.dto.request.AuthAdminSignUpRequest;
 import com.hanaro.schedule_hanaro.global.auth.dto.request.AuthSignUpRequest;
 import com.hanaro.schedule_hanaro.global.auth.service.AuthService;
 
@@ -24,6 +25,12 @@ public class AuthController {
 		log.info("signUp 컨트롤러 진입");
 		authService.signUp(authSignUpRequest);
 		return ResponseEntity.ok(null);
+	}
+
+	@PostMapping("/admin/sign-up")
+	public ResponseEntity<String> postAdmin(@RequestBody AuthAdminSignUpRequest authAdminSignUpRequest) {
+		// 관리자 등록 - 테스트용
+		return ResponseEntity.ok(authService.adminSignUpAdmin(authAdminSignUpRequest));
 	}
 
 }
