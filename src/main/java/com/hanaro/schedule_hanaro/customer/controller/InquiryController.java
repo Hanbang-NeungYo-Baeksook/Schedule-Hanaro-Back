@@ -27,15 +27,15 @@ public class InquiryController {
 		}
 
 	// 1:1 상담 상세
-	@GetMapping("/{inquiryId}")
-	public ResponseEntity<InquiryResponse> getInquiryDetail(@PathVariable Long inquiryId) {
+	@GetMapping("/{inquiry-id}")
+	public ResponseEntity<InquiryResponse> getInquiryDetail(@PathVariable("inquiry-id") Long inquiryId) {
 		InquiryResponse response = inquiryService.getInquiryDetail(inquiryId);
 		return ResponseEntity.ok(response);
 	}
 
 	// 1:1 상담 답변 상세
-	@GetMapping("/{inquiryId}/reply")
-	public ResponseEntity<String> getInquiryReply(@PathVariable Long inquiryId) {
+	@GetMapping("/{inquiry-id}/reply")
+	public ResponseEntity<String> getInquiryReply(@PathVariable("inquiry-id") Long inquiryId) {
 		String replyContent = inquiryService.getInquiryReply(inquiryId);
 		return ResponseEntity.ok(replyContent);
 	}
