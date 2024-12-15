@@ -17,13 +17,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Customer {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(length = 100, name = "customer_id")
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(length = 100, name = "customer_id")
+	private Long id;
 
-    @Column(name = "auth_id", nullable = false, unique = true)
-    private String authId;
+	@Column(name = "auth_id", unique = true, nullable = false)
+	private String authId;
 
     @Column(length = 100, nullable = false)
     private String password;
@@ -41,25 +41,25 @@ public class Customer {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private Role role;
+	@Column(nullable = false)
+	@Enumerated(EnumType.STRING)
+	private Role role;
 
-    @Builder
-    public Customer (
-        String authId,
-        String password,
-        String name,
-        String phoneNum,
-        LocalDate birth,
-        Gender gender
-    ){
-        this.authId = authId;
-        this.password = password;
-        this.name = name;
-        this.phoneNum = phoneNum;
-        this.birth = birth;
-        this.gender = gender;
-        this.role = Role.CUSTOMER;
-    }
+	@Builder
+	public Customer(
+		String authId,
+		String password,
+		String name,
+		String phoneNum,
+		LocalDate birth,
+		Gender gender
+	) {
+		this.authId = authId;
+		this.password = password;
+		this.name = name;
+		this.phoneNum = phoneNum;
+		this.birth = birth;
+		this.gender = gender;
+		this.role = Role.CUSTOMER;
+	}
 }
