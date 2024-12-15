@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hanaro.schedule_hanaro.customer.dto.request.BranchListCreateRequest;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchDetailResponse;
-import com.hanaro.schedule_hanaro.customer.dto.response.BranchListResponse;
 import com.hanaro.schedule_hanaro.customer.service.BranchService;
 
 import lombok.RequiredArgsConstructor;
@@ -21,8 +20,8 @@ import lombok.RequiredArgsConstructor;
 public class BranchController {
 	private final BranchService branchService;
 
-	@GetMapping("/{branchId}")
-	public ResponseEntity<BranchDetailResponse> getBranchDetail(@PathVariable Long branchId) {
+	@GetMapping("/{branch-id}")
+	public ResponseEntity<BranchDetailResponse> getBranchDetail(@PathVariable("branch-id") Long branchId) {
 		return ResponseEntity.ok().body(branchService.findBranchById(branchId));
 	}
 
