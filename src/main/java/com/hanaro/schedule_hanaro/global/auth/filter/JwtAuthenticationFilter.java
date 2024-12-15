@@ -31,6 +31,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 		FilterChain filterChain) throws ServletException, IOException {
 
+		if (request.getRequestURI().equals("/api/auth/sign-in")) {
+			filterChain.doFilter(request, response);
+			return;
+		}
+
 		String header = request.getHeader("Authorization");
 		if (header == null || !header.startsWith("Bearer "))
 			throw new RuntimeException("올바르지 않은 토큰입니다.");
