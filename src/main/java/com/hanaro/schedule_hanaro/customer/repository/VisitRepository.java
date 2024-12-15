@@ -2,8 +2,9 @@ package com.hanaro.schedule_hanaro.customer.repository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.hanaro.schedule_hanaro.global.domain.Branch;
@@ -27,7 +28,7 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
 
 	List<Visit> findAllByBranchIdAndNumLessThanAndStatus(Long branchId, int num, Status status);
 
-	Optional<Visit> findByBranchId(Long id);
-
 	List<Visit> findAllByBranchId(Long id);
+
+	Slice<Visit> findByCustomerIdAndStatus(Long customerId, Status status, Pageable pageable);
 }

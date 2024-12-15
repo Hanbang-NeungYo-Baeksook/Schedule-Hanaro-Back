@@ -1,10 +1,12 @@
 package com.hanaro.schedule_hanaro.customer.controller;
 
+import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.time.LocalDate;
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -26,6 +28,7 @@ import com.hanaro.schedule_hanaro.customer.repository.BranchRepository;
 import com.hanaro.schedule_hanaro.customer.repository.CsVisitRepository;
 import com.hanaro.schedule_hanaro.customer.repository.CustomerRepository;
 import com.hanaro.schedule_hanaro.customer.repository.VisitRepository;
+import com.hanaro.schedule_hanaro.customer.service.VisitService;
 import com.hanaro.schedule_hanaro.global.domain.Branch;
 import com.hanaro.schedule_hanaro.global.domain.CsVisit;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
@@ -56,9 +59,12 @@ public class VisitControllerTest {
 	@Autowired
 	VisitRepository visitRepository;
 
+	@Autowired
+	VisitService visitService;
+
 	@BeforeAll
 	public void beforeAll() {
-		Customer addTest = Customer
+		Customer customer = Customer
 			.builder()
 			.authId("TestAuthId")
 			.name("TestUser")
@@ -67,9 +73,31 @@ public class VisitControllerTest {
 			.birth(LocalDate.of(2002, 4, 15))
 			.gender(Gender.FEMALE)
 			.build();
-		customerRepository.save(addTest);
+		customerRepository.save(customer);
 
-		for (int i = 1; i <= 4; i++) {
+		Customer customer2 = Customer
+			.builder()
+			.authId("TestAuthId2")
+			.name("TestUser2")
+			.password("TestPassword")
+			.phoneNum("01012341234")
+			.birth(LocalDate.of(2002, 4, 15))
+			.gender(Gender.FEMALE)
+			.build();
+		customerRepository.save(customer2);
+
+		Customer customer3 = Customer
+			.builder()
+			.authId("TestAuthId3")
+			.name("TestUser3")
+			.password("TestPassword")
+			.phoneNum("01012341234")
+			.birth(LocalDate.of(2002, 4, 15))
+			.gender(Gender.FEMALE)
+			.build();
+		customerRepository.save(customer3);
+
+		for (int i = 1; i <= 5; i++) {
 			Branch normalBranch = Branch
 				.builder()
 				.address("TestAddress" + i)
@@ -95,7 +123,7 @@ public class VisitControllerTest {
 			.build();
 		branchRepository.save(abnormalBranch);
 
-		for (int i = 1; i <= 4; i++) {
+		for (int i = 1; i <= 5; i++) {
 			CsVisit normalCsVisit = CsVisit
 				.builder()
 				.currentNum(0)
@@ -120,23 +148,29 @@ public class VisitControllerTest {
 
 	@AfterAll
 	public void afterAll() {
-		for (int i = 1; i <= 4; i++) {
+		for (int i = 1; i <= 5; i++) {
 			Branch branch = branchRepository.findByName("NormalTestBranch" + i).orElseThrow();
 			CsVisit csVisit = csVisitRepository.findByBranchId(branch.getId()).orElseThrow();
-			Optional<Visit> byBranchId = visitRepository.findByBranchId(branch.getId());
+			List<Visit> visits = visitRepository.findAllByBranchId(branch.getId());
 			csVisitRepository.delete(csVisit);
-			byBranchId.ifPresent(visit -> visitRepository.delete(visit));
+			visitRepository.deleteAll(visits);
 			branchRepository.delete(branch);
 		}
 		Branch branch = branchRepository.findByName("AbnormalTestBranch").orElseThrow();
 		CsVisit csVisit = csVisitRepository.findByBranchId(branch.getId()).orElseThrow();
-		Optional<Visit> byBranchId = visitRepository.findByBranchId(branch.getId());
+		List<Visit> visits = visitRepository.findAllByBranchId(branch.getId());
 		csVisitRepository.delete(csVisit);
-		byBranchId.ifPresent(visit -> visitRepository.delete(visit));
+		visitRepository.deleteAll(visits);
 		branchRepository.delete(branch);
 
 		Customer customer = customerRepository.findByAuthId("TestAuthId").orElseThrow();
 		customerRepository.delete(customer);
+
+		Customer customer2 = customerRepository.findByAuthId("TestAuthId2").orElseThrow();
+		customerRepository.delete(customer2);
+
+		Customer customer3 = customerRepository.findByAuthId("TestAuthId3").orElseThrow();
+		customerRepository.delete(customer3);
 	}
 
 	@Test
@@ -242,5 +276,76 @@ public class VisitControllerTest {
 		result.andExpect(status().is5xxServerError())
 			.andExpect(content().string("Limit Over"));
 
+	}
+
+	@Test
+	@Order(4)
+	public void getVisitDetailTest() throws Exception {
+		Customer customer = customerRepository.findByName("TestUser2").orElseThrow();
+		Branch branch = branchRepository.findByName("NormalTestBranch5").orElseThrow();
+		Long visitId = visitService.addVisitReservation(VisitCreateRequest
+			.builder()
+			.customerId(customer.getId())
+			.branchId(branch.getId())
+			.content("Test Content")
+			.build()
+		);
+		CsVisit csVisit = csVisitRepository.findByBranchIdAndDate(branch.getId(), LocalDate.now()).orElseThrow();
+
+		String url = "/api/visits/" + visitId;
+		ResultActions result = mockMvc.perform(get(url));
+
+		result.andExpect(status().isOk())
+			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+			.andExpect(jsonPath("$.visit_id").value(visitId))
+			.andExpect(jsonPath("$.branch_name").value(branch.getName()))
+			.andExpect(jsonPath("$.visit_num").value(csVisit.getTotalNum()))
+			.andExpect(jsonPath("$.waiting_amount").value(csVisit.getWaitAmount() - 1))
+			.andExpect(jsonPath("$.waiting_time").exists())
+			.andDo(System.out::print);
+	}
+
+	@Test
+	@Order(5)
+	public void getVistListTest() throws Exception {
+		Customer customer = customerRepository.findByName("TestUser3").orElseThrow();
+
+		List<Branch> branchList = new ArrayList<>();
+		branchList.add(branchRepository.findByName("NormalTestBranch1").orElseThrow());
+		branchList.add(branchRepository.findByName("NormalTestBranch2").orElseThrow());
+		branchList.add(branchRepository.findByName("NormalTestBranch3").orElseThrow());
+
+		List<Long> visitIdList = new ArrayList<>();
+		for (Branch branch : branchList) {
+			visitIdList.add(visitService.addVisitReservation(VisitCreateRequest
+				.builder()
+				.customerId(customer.getId())
+				.branchId(branch.getId())
+				.content("Test Content")
+				.build()
+			));
+		}
+
+		List<Visit> visitList = new ArrayList<>();
+		for (Long visitId : visitIdList) {
+			visitList.add(visitRepository.findById(visitId).orElseThrow());
+		}
+
+		String url = "/api/visits";
+		ResultActions result = mockMvc.perform(get(url).param("customerId", String.valueOf(customer.getId())));
+		result.andExpect(status().isOk())
+			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+			.andExpect(jsonPath("$.data").exists())
+			.andExpect(jsonPath("$.data", hasSize(3)));
+
+		for (int i = 0; i < 3; i++) {
+			result
+				.andExpect(jsonPath(String.format("$.data[%d].visit_id", i)).value(visitIdList.get(i)))
+				.andExpect(jsonPath(String.format("$.data[%d].branch_name", i)).value(branchList.get(i).getName()))
+				.andExpect(jsonPath(String.format("$.data[%d].visit_num", i)).value(visitList.get(i).getNum()))
+				.andExpect(jsonPath(String.format("$.data[%d].waiting_amount", i)).exists())
+				.andExpect(jsonPath(String.format("$.data[%d].waiting_time", i)).exists())
+				.andDo(System.out::print);
+		}
 	}
 }

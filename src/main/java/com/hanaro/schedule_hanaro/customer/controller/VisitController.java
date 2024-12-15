@@ -6,10 +6,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hanaro.schedule_hanaro.customer.dto.request.VisitCreateRequest;
 import com.hanaro.schedule_hanaro.customer.dto.response.VisitDetailResponse;
+import com.hanaro.schedule_hanaro.customer.dto.response.VisitListResponse;
 import com.hanaro.schedule_hanaro.customer.service.VisitService;
 
 @RestController
@@ -22,8 +24,12 @@ public class VisitController {
 	}
 
 	@GetMapping
-	public String getVisitList() {
-		return "test";
+	public ResponseEntity<VisitListResponse> getVisitList(
+		@RequestParam(value = "customerId") Long customerId,
+		@RequestParam(value = "page", defaultValue = "1") int page,
+		@RequestParam(value = "size", defaultValue = "10") int size
+	) {
+		return ResponseEntity.ok(visitService.getVisitList(customerId, page, size));
 	}
 
 	@GetMapping("/{visit-id}")
