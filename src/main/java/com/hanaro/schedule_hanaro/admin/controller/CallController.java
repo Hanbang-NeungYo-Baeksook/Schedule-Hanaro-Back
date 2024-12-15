@@ -42,6 +42,7 @@ public class CallController {
 	@PostMapping("/{callId}")
 	public ResponseEntity<String> postCallMemo(@PathVariable Long callId, @RequestBody String content) {
 		// 전화 상담 메모 등록
+		// TODO: call_memo table에 id 추가
 		return ResponseEntity.ok(callService.saveCallMemo(callId, content));
 	}
 }
