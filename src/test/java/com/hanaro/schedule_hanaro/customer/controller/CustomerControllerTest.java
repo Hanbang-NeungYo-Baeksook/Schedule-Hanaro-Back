@@ -69,7 +69,7 @@ public class CustomerControllerTest {
 		String url = "/api/customers/" + testCustomer.getId();
 
 		String reqStr = objectMapper.writeValueAsString(
-			CustomerInfoResponse.from(testCustomer.getName(), testCustomer.getPhoneNum()));
+			CustomerInfoResponse.of(testCustomer.getName(), testCustomer.getPhoneNum()));
 
 		ResultActions result = mockMvc.perform(get(url));
 		result.andExpect(status().isOk())
