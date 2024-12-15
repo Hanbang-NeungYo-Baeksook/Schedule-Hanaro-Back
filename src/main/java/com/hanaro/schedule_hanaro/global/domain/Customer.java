@@ -3,6 +3,7 @@ package com.hanaro.schedule_hanaro.global.domain;
 import java.time.LocalDate;
 
 import com.hanaro.schedule_hanaro.global.domain.enums.Gender;
+import com.hanaro.schedule_hanaro.global.domain.enums.Role;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -21,7 +22,7 @@ public class Customer {
     @Column(length = 100, name = "customer_id")
     private Long id;
 
-    @Column(name = "auth_id", nullable = false)
+    @Column(name = "auth_id", nullable = false, unique = true)
     private String authId;
 
     @Column(length = 100, nullable = false)
@@ -40,6 +41,10 @@ public class Customer {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
     @Builder
     public Customer (
         String authId,
@@ -55,5 +60,6 @@ public class Customer {
         this.phoneNum = phoneNum;
         this.birth = birth;
         this.gender = gender;
+        this.role = Role.CUSTOMER;
     }
 }

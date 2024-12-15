@@ -11,7 +11,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CallMemo {
 
+
 	@Id
+	@Column(name = "call_id")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
+	// @Id
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "call_id", nullable = false, unique = true)
 	private Call call;
