@@ -1,6 +1,8 @@
 package com.hanaro.schedule_hanaro.customer.controller;
 
+import com.hanaro.schedule_hanaro.customer.dto.request.InquiryCreateRequest;
 import com.hanaro.schedule_hanaro.customer.dto.request.InquiryListRequest;
+import com.hanaro.schedule_hanaro.customer.dto.response.InquiryCreateResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryListResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryResponse;
 import com.hanaro.schedule_hanaro.customer.service.InquiryService;
@@ -38,5 +40,13 @@ public class InquiryController {
 	public ResponseEntity<String> getInquiryReply(@PathVariable("inquiry-id") Long inquiryId) {
 		String replyContent = inquiryService.getInquiryReply(inquiryId);
 		return ResponseEntity.ok(replyContent);
+	}
+
+	// 1:1 상담 예약
+	@PostMapping
+	public ResponseEntity<InquiryCreateResponse> createInquiry(
+		@RequestParam Long customerId, @RequestBody InquiryCreateRequest request) {
+		InquiryCreateResponse response = inquiryService.createInquiry(customerId, request);
+		return ResponseEntity.status(201).body(response);
 	}
 }

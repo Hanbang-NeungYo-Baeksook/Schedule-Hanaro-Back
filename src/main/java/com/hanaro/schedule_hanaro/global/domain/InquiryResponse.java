@@ -25,15 +25,15 @@ public class InquiryResponse {
 
 	@Column(name = "content",length = 500, nullable = false)
 	private String content;
-	//
-	// @Column(name = "created_at", nullable = false)
-	// private LocalDateTime createdAt;
+
+	@Column(name = "created_at", nullable = false)
+	private LocalDateTime createdAt;
 
 	@Builder
-	public InquiryResponse(Inquiry inquiry, Admin admin, String content) {
+	public InquiryResponse(Inquiry inquiry, Admin admin, String content, LocalDateTime createdAt) {
 		this.inquiry = inquiry;
 		this.admin = admin;
 		this.content = content;
-		// this.createdAt = createdAt;
+		this.createdAt = createdAt;
 	}
 }
