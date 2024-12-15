@@ -69,4 +69,11 @@ public class InquiryService {
 			List.of(inquiry.getTags().split(","))
 		);
 	}
+
+	// 1:1 상담 답변 상세
+	public String getInquiryReply(Long inquiryId) {
+		Inquiry inquiry = inquiryRepository.findById(inquiryId)
+			.orElseThrow(() -> new RuntimeException("존재하지 않는 ID입니다."));
+		return inquiry.getContent();
+	}
 }
