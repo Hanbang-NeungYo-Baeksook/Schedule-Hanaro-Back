@@ -44,6 +44,7 @@ public class Admin {
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private Role role;
+
 	@Builder
 	public Admin(
 		String authId,
