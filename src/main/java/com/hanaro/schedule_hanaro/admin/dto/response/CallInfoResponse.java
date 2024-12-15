@@ -11,17 +11,23 @@ import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 
 public record CallInfoResponse(
 	Long id,
+	@JsonProperty("waiting_num")
 	int waitingNum,
 	Category category,
 	String tags,
 	String content,
+	@JsonProperty("reservation_time")
 	LocalDateTime reservationTime,
+	@JsonProperty("start_time")
 	LocalDateTime startTime,
+	@JsonProperty("end_time")
 	LocalDateTime endTime,
-
+	@JsonProperty("user_name")
 	String userName,
+	@JsonProperty("auth_id")
 	String authId,
 	String mobile,
+	@JsonProperty("birth_dt")
 	LocalDate birthDt,
 
 	List<CallHistoryResponse> calls,
