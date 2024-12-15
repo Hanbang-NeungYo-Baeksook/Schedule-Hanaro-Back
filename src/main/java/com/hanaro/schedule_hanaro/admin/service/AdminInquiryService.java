@@ -8,37 +8,37 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.hanaro.schedule_hanaro.admin.dto.request.InquiryListRequest;
-import com.hanaro.schedule_hanaro.admin.dto.response.InquiryListResponse;
-import com.hanaro.schedule_hanaro.admin.repository.InquiryRepository;
+import com.hanaro.schedule_hanaro.admin.dto.request.AdminInquiryListRequest;
+import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryListResponse;
+import com.hanaro.schedule_hanaro.admin.repository.AdminInquiryRepository;
 import com.hanaro.schedule_hanaro.global.domain.Inquiry;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class InquiryService {
+public class AdminInquiryService {
 
-	private final InquiryRepository inquiryRepository;
+	private final AdminInquiryRepository adminInquiryRepository;
 
-	public InquiryListResponse getInquiries(InquiryListRequest request) {
+	public AdminInquiryListResponse getInquiries(AdminInquiryListRequest request) {
 		Pageable pageable = PageRequest.of(request.page(), request.size());
 
-		Page<Inquiry> inquiries = inquiryRepository.findFilteredInquiries(
+		Page<Inquiry> inquiries = adminInquiryRepository.findFilteredInquiries(
 			request.status(),
 			request.category().toString(),
 			request.searchContent(),
 			pageable
 		);
 
-		List<InquiryListResponse.InquiryData> inquiryDataList = inquiries.getContent().stream()
-			.map(inquiry -> InquiryListResponse.InquiryData.from(
+		List<AdminInquiryListResponse.InquiryData> inquiryDataList = inquiries.getContent().stream()
+			.map(inquiry -> AdminInquiryListResponse.InquiryData.from(
 				inquiry,
 				inquiry.getCustomer().getName()
 			))
 			.collect(Collectors.toList());
 
-		return InquiryListResponse.from(
+		return AdminInquiryListResponse.from(
 			inquiryDataList,
 			inquiries.getNumber(),
 			inquiries.getSize(),

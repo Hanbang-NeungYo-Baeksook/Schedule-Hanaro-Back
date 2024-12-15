@@ -8,7 +8,7 @@ import com.hanaro.schedule_hanaro.global.domain.Inquiry;
 import lombok.Builder;
 
 @Builder
-public record InquiryListResponse(
+public record AdminInquiryListResponse(
 	@JsonProperty("inquiry_list")
 	List<InquiryData> inquiryList, // 문의 목록 데이터
 
@@ -24,8 +24,8 @@ public record InquiryListResponse(
 	@JsonProperty("total_pages")
 	Integer totalPages             // 전체 페이지 수
 ) {
-	public static InquiryListResponse from(List<InquiryData> data, Integer currentPage, Integer pageSize, Long totalItems, Integer totalPages) {
-		return InquiryListResponse.builder()
+	public static AdminInquiryListResponse from(List<InquiryData> data, Integer currentPage, Integer pageSize, Long totalItems, Integer totalPages) {
+		return AdminInquiryListResponse.builder()
 			.inquiryList(data)
 			.currentPage(currentPage)
 			.pageSize(pageSize)

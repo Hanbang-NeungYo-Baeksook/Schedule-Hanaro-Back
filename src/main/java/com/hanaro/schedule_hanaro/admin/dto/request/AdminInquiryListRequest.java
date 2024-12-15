@@ -7,15 +7,15 @@ import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import lombok.Builder;
 
 @Builder
-public record InquiryListRequest(
+public record AdminInquiryListRequest(
 	String status,
 	Category category,
 	String searchContent,
 	Integer page,
 	Integer size
 ) {
-	public static InquiryListRequest from(String status, Category category, String searchContent, Integer page, Integer size) {
-		return InquiryListRequest.builder()
+	public static AdminInquiryListRequest from(String status, Category category, String searchContent, Integer page, Integer size) {
+		return AdminInquiryListRequest.builder()
 			.status(Optional.ofNullable(status).orElse("pending"))
 			.category(category)
 			.searchContent(searchContent)
