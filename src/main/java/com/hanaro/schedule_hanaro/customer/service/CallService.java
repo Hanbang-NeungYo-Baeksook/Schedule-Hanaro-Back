@@ -1,10 +1,16 @@
 package com.hanaro.schedule_hanaro.customer.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.hanaro.schedule_hanaro.customer.dto.request.CallRequest;
+import com.hanaro.schedule_hanaro.customer.dto.response.CallListResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallResponse;
 import com.hanaro.schedule_hanaro.customer.repository.CallRepository;
 import com.hanaro.schedule_hanaro.customer.repository.CustomerRepository;
@@ -62,6 +68,36 @@ public class CallService {
 		}
 
 		callRepository.delete(call);
+	}
+
+	public CallListResponse getCallList(String status, int page, int size) {
+		Status callStatus = Status.valueOf(status.toUpperCase());
+
+		Pageable pageable = PageRequest.of(page - 1, size);
+
+		Slice<Call> callSlice = callRepository.findByStatus(callStatus, pageable);
+
+		List<CallListResponse.CallData> callDataList = callSlice.getContent().stream()
+			.map(call -> CallListResponse.CallData.builder()
+				.callId(call.getId())
+				.callDate(call.getCallDate().toLocalDate().toString())
+				.callTime(call.getCallDate().toLocalTime().toString())
+				.callNum(call.getCallNum())
+				.category(call.getCategory().name())
+				.status(call.getStatus().getStatus())
+				.build())
+			.toList();
+
+		CallListResponse.Pagination pagination = CallListResponse.Pagination.builder()
+			.currentPage(page)
+			.pageSize(size)
+			.hasNext(callSlice.hasNext())
+			.build();
+
+		return CallListResponse.builder()
+			.data(callDataList)
+			.pagination(pagination)
+			.build();
 	}
 
 }
