@@ -1,5 +1,7 @@
 package com.hanaro.schedule_hanaro.global.domain;
 
+import com.hanaro.schedule_hanaro.global.domain.enums.Role;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -21,10 +23,10 @@ import lombok.NoArgsConstructor;
 public class Admin {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name="admin_id")
+	@Column(name = "admin_id")
 	private Long id;
 
-	@Column(name = "auth_id", nullable = false)
+	@Column(name = "auth_id", unique = true, nullable = false)
 	private String authId;
 
 	@Column(nullable = false)
@@ -37,16 +39,20 @@ public class Admin {
 	@JoinColumn(name = "branch_id")
 	private Branch branch;
 
+	@Column(nullable = false)
+	private Role role;
+
 	@Builder
 	public Admin(
 		String authId,
 		String password,
 		String name,
 		Branch branch
-	){
+	) {
 		this.authId = authId;
 		this.password = password;
 		this.name = name;
 		this.branch = branch;
+		this.role = Role.ADMIN;
 	}
 }
