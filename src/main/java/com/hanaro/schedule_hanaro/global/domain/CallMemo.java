@@ -17,7 +17,6 @@ public class CallMemo {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	// @Id
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "call_id", nullable = false, unique = true)
 	private Call call;

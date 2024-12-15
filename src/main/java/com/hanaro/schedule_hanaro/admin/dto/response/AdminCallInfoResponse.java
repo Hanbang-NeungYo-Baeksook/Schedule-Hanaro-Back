@@ -9,7 +9,7 @@ import com.hanaro.schedule_hanaro.global.domain.Call;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 
-public record CallInfoResponse(
+public record AdminCallInfoResponse(
 	Long id,
 	@JsonProperty("waiting_num")
 	int waitingNum,
@@ -30,13 +30,13 @@ public record CallInfoResponse(
 	@JsonProperty("birth_dt")
 	LocalDate birthDt,
 
-	List<CallHistoryResponse> calls,
-	List<InquiryHistoryResponse> inquires
+	List<AdminCallHistoryResponse> calls,
+	List<AdminInquiryHistoryResponse> inquires
 ) {
-	public static CallInfoResponse from(final Call call, final Customer customer,
-		final List<CallHistoryResponse> calls,
-		final List<InquiryHistoryResponse> inquires) {
-		return new CallInfoResponse(
+	public static AdminCallInfoResponse from(final Call call, final Customer customer,
+		final List<AdminCallHistoryResponse> calls,
+		final List<AdminInquiryHistoryResponse> inquires) {
+		return new AdminCallInfoResponse(
 			call.getId(),
 			call.getCallNum(),
 			call.getCategory(),
