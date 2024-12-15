@@ -47,4 +47,6 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 		@Param("category") Category category,
 		@Param("keyword") String keyword
 	);
+
+	List<Call> findByCustomerId(Long customerId);
 }
