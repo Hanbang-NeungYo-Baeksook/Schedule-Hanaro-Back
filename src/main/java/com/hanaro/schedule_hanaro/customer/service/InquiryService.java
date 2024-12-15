@@ -18,6 +18,7 @@ import java.util.List;
 public class InquiryService {
 	private final InquiryRepository inquiryRepository;
 
+	// 1:1 상담 목록
 	public InquiryListResponse getInquiries(InquiryListRequest request) {
 		Status status = Status.valueOf(request.status().toUpperCase());
 		Integer page = request.page() != null ? request.page() : 1;
@@ -48,6 +49,24 @@ public class InquiryService {
 			size,
 			totalItems,
 			totalPages
+		);
+	}
+
+	// 1:1 상담 상세
+	public InquiryResponse getInquiryDetail(Long inquiryId) {
+		Inquiry inquiry = inquiryRepository.findById(inquiryId).orElse(null);
+
+		if (inquiry == null) {
+			throw new RuntimeException("존재하지 않는 사용자 ID입니다");
+		}
+
+		return InquiryResponse.of(
+			inquiry.getId(),
+			null,
+			inquiry.getCategory().toString(),
+			inquiry.getInquiryStatus().getInquiryStatus(),
+			inquiry.getContent(),
+			List.of(inquiry.getTags().split(","))
 		);
 	}
 }

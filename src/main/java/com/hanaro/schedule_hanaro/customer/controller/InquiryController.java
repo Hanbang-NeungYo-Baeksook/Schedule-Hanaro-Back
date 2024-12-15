@@ -2,6 +2,7 @@ package com.hanaro.schedule_hanaro.customer.controller;
 
 import com.hanaro.schedule_hanaro.customer.dto.request.InquiryListRequest;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryListResponse;
+import com.hanaro.schedule_hanaro.customer.dto.response.InquiryResponse;
 import com.hanaro.schedule_hanaro.customer.service.InquiryService;
 
 import lombok.RequiredArgsConstructor;
@@ -23,4 +24,10 @@ public class InquiryController {
 		InquiryListRequest request = InquiryListRequest.of(status, page, size);
 		return ResponseEntity.ok().body(inquiryService.getInquiries(request));
 		}
+
+	@GetMapping("/{inquiryId}")
+	public ResponseEntity<InquiryResponse> getInquiryDetail(@PathVariable Long inquiryId) {
+		InquiryResponse response = inquiryService.getInquiryDetail(inquiryId);
+		return ResponseEntity.ok(response);
+	}
 }
