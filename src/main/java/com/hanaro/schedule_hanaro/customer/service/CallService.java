@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.hanaro.schedule_hanaro.customer.dto.request.CallRequest;
+import com.hanaro.schedule_hanaro.customer.dto.response.CallDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallListResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallResponse;
 import com.hanaro.schedule_hanaro.customer.repository.CallRepository;
@@ -97,6 +98,24 @@ public class CallService {
 		return CallListResponse.builder()
 			.data(callDataList)
 			.pagination(pagination)
+			.build();
+	}
+
+	public CallDetailResponse getCallDetail(Long callId) {
+		Call call = callRepository.findById(callId)
+			.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 상담 id입니다."));
+
+		return CallDetailResponse.builder()
+			.callId(call.getId())
+			.customerName(call.getCustomer().getName())
+			.callDate(call.getCallDate().toLocalDate().toString())
+			.callTime(call.getCallDate().toLocalTime().toString() + "Z")
+			.callNum(call.getCallNum())
+			.category(call.getCategory().name())
+			.status(call.getStatus().getStatus())
+			.content(call.getContent())
+			//이 부분 tag 어떤식으로 넘어오는지 모르겠어서 일단 이렇게 구현했습니다..
+			.tags(List.of(call.getTags().split(",")))
 			.build();
 	}
 
