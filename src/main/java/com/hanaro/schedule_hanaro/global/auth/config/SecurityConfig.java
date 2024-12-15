@@ -7,7 +7,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.hanaro.schedule_hanaro.global.auth.filter.JwtAuthenticationFilter;
 import com.hanaro.schedule_hanaro.global.auth.provider.JwtAuthenticationProvider;
@@ -33,20 +33,20 @@ public class SecurityConfig {
 			)
 			.authorizeHttpRequests(request ->
 					request
-						.requestMatchers("api/auth/sign-up").permitAll()
-						.requestMatchers("api/auth/sign-in").permitAll()
-						.requestMatchers("api/**").hasAnyRole("USER")
-						.requestMatchers("admin/api/**").hasAnyRole("ADMIN")
+						.requestMatchers("/api/auth/sign-up").permitAll()
+						.requestMatchers("/api/auth/sign-in").permitAll()
+						// .requestMatchers("/api/**").hasAnyRole("USER")
+						.requestMatchers("/admin/api/**").hasAnyRole("ADMIN")
 						.anyRequest().authenticated()
 				// .anyRequest().permitAll()
 			)
-			.logout(logout ->
-				logout
-					.logoutSuccessUrl("api/auth/sign-out")
-			)
-			.addFilterBefore(
+			// .logout(logout ->
+			// 	logout
+			// 		.logoutSuccessUrl("api/auth/sign-out")
+			// )
+			.addFilterAfter(
 				new JwtAuthenticationFilter(jwtTokenProvider, jwtAuthenticationProvider),
-				LogoutFilter.class
+				UsernamePasswordAuthenticationFilter.class
 			)
 			.getOrBuild();
 	}
