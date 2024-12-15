@@ -22,8 +22,11 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
 
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-		System.out.println("Authenticate Provider 진입 성공");
-		CustomUserDetails userDetails = customUserDetailService.loadUserByUsername(authentication.getName());
+		System.out.println("Authenticate Provider 진입 성공 ");
+		CustomUserDetails userDetails = customUserDetailService.loadUserByUsername(
+			authentication.getPrincipal().toString());
+		System.out.println(authentication.getCredentials().toString());
+		System.out.println(userDetails.getUsername());
 		if (!bCryptPasswordEncoder.matches(authentication.getCredentials().toString(), userDetails.getPassword()))
 			throw new UsernameNotFoundException("비밀번호가 일치하지 않습니다.");
 
