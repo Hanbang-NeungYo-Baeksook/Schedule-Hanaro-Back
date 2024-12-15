@@ -4,10 +4,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import com.hanaro.schedule_hanaro.customer.dto.request.VisitCreateRequest;
 import com.hanaro.schedule_hanaro.customer.dto.response.VisitDetailResponse;
+import com.hanaro.schedule_hanaro.customer.dto.response.VisitListResponse;
 import com.hanaro.schedule_hanaro.customer.repository.BranchRepository;
 import com.hanaro.schedule_hanaro.customer.repository.CsVisitRepository;
 import com.hanaro.schedule_hanaro.customer.repository.CustomerRepository;
@@ -82,7 +86,7 @@ public class VisitService {
 				System.out.println("Try Lock");
 				CsVisit optimisticLock = csVisitRepository.findByWithOptimisticLock(csVisitId).orElseThrow();
 				optimisticLock.increase();
-				int totalNum = optimisticLock.getTotalNum() + 1;
+				int totalNum = optimisticLock.getTotalNum();
 				csVisitRepository.saveAndFlush(optimisticLock);
 
 				Visit savedVisit = visitRepository.save(
@@ -168,5 +172,40 @@ public class VisitService {
 
 	private int calculateWaitingTime(List<Visit> visits) {
 		return visits.size() * 5;
+	}
+
+	public VisitListResponse getVisitList(Long customerId, int page, int size) {
+		Pageable pageable = PageRequest.of(page - 1, size);
+
+		Slice<Visit> visitSlice = visitRepository.findByCustomerIdAndStatus(customerId, Status.PENDING, pageable);
+
+		List<VisitListResponse.VisitData> visitDataList = visitSlice.getContent().stream()
+			.map(visit -> {
+				CsVisit csVisit = csVisitRepository.findByBranchIdAndDate(
+					visit.getBranch().getId(), LocalDate.now()
+				).orElseThrow();
+				List<Visit> visits = visitRepository.findAllByBranchId(
+					visit.getBranch().getId()
+				);
+				return VisitListResponse.VisitData.builder()
+					.visitId(visit.getId())
+					.visitNum(visit.getNum())
+					.branchName(visit.getBranch().getName())
+					.waitingAmount(csVisit.getWaitAmount())
+					.waitingTime(calculateWaitingTime(visits))
+					.build();
+			})
+			.toList();
+
+		VisitListResponse.Pagination pagination = VisitListResponse.Pagination.builder()
+			.currentPage(page)
+			.pageSize(size)
+			.hasNext(visitSlice.hasNext())
+			.build();
+
+		return VisitListResponse.builder()
+			.data(visitDataList)
+			.pagination(pagination)
+			.build();
 	}
 }
