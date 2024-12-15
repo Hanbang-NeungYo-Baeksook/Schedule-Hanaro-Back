@@ -19,13 +19,13 @@ public record AdminCustomerInfoResponse(
 
         String birth
 ) {
-        public static AdminCustomerInfoResponse from(Customer customer) {
-                return AdminCustomerInfoResponse.builder()
-                        .customerId(customer.getId())
-                        .name(customer.getName())
-                        .authId(customer.getAuthId())
-                        .phone(customer.getPhoneNum())
-                        .birth(String.valueOf(customer.getBirth()))
-                        .build();
-        }
+    public static AdminCustomerInfoResponse from(Customer customer) {
+        return AdminCustomerInfoResponse.builder()
+                .customerId(customer.getId())
+                .name(customer.getName())
+                .authId(customer.getAuthId())
+                .phone(customer.getPhoneNum())
+                .birth(String.valueOf(customer.getBirth()))
+                .build();
+    }
 }

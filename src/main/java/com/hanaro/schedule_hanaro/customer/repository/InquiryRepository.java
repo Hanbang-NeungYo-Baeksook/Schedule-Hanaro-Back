@@ -21,4 +21,6 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
 
 	@Query("SELECT i FROM Inquiry i WHERE i.customer.id = :customerId")
 	List<Inquiry> findByCustomerId(Long customerId);
+
+	List<Inquiry> findAllByCustomerId(Long customerId);
 }
