@@ -21,7 +21,7 @@ public class AdminInquiryService {
 
 	private final AdminInquiryRepository adminInquiryRepository;
 
-	public AdminInquiryListResponse getInquiries(AdminInquiryListRequest request) {
+	public AdminInquiryListResponse findInquiryList(AdminInquiryListRequest request) {
 		Pageable pageable = PageRequest.of(request.page(), request.size());
 
 		Page<Inquiry> inquiries = adminInquiryRepository.findFilteredInquiries(

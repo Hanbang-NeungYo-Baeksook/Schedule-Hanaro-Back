@@ -27,7 +27,7 @@ public class AdminInquiryController {
 		@RequestParam(defaultValue = "5") Integer size
 	) {
 		AdminInquiryListRequest request = AdminInquiryListRequest.from(status, category,searchContent,page,size);
-		AdminInquiryListResponse response = adminInquiryService.getInquiries(request);
+		AdminInquiryListResponse response = adminInquiryService.findInquiryList(request);
 		return ResponseEntity.ok().body(response);
 	}
 }
