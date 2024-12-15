@@ -42,13 +42,15 @@ public class JwtTokenProvider implements InitializingBean {
 
 	public String generateToken(String id, Role role, Integer expiration) {
 		Claims claims = Jwts.claims().setId(id);
+		Date now = new Date();
+		Date expirationDate = new Date(now.getTime() + expiration * 60 * 60 * 1000);
 		if (role != null) {
 			claims.put("role", role);
 		}
 		return Jwts.builder()
 			.setClaims(claims)
-			.setIssuedAt(new Date(System.currentTimeMillis()))
-			.setExpiration(new Date(System.currentTimeMillis() + expiration))
+			.setIssuedAt(now)
+			.setExpiration(expirationDate)
 			.signWith(key)
 			.compact();
 	}
