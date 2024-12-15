@@ -9,25 +9,34 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallHistoryResponse;
+import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallInfoResponse;
+import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryHistoryResponse;
+import com.hanaro.schedule_hanaro.admin.service.AdminCallService;
 import com.hanaro.schedule_hanaro.customer.dto.request.CallRequest;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallListResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallResponse;
 import com.hanaro.schedule_hanaro.customer.repository.CallRepository;
 import com.hanaro.schedule_hanaro.customer.repository.CustomerRepository;
+import com.hanaro.schedule_hanaro.customer.repository.InquiryRepository;
 import com.hanaro.schedule_hanaro.global.domain.Call;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
+import com.hanaro.schedule_hanaro.global.domain.Inquiry;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
+import com.hanaro.schedule_hanaro.global.websocket.handler.WebsocketHandler;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class CallService {
 
-	@Autowired
-	private CallRepository callRepository;
-
-	@Autowired
-	private CustomerRepository customerRepository;
+	private final CallRepository callRepository;
+	private final CustomerRepository customerRepository;
+	private final WebsocketHandler websocketHandler;
+	private final AdminCallService adminCallService;
 
 	@Transactional
 	public CallResponse createCall(Long customerId, CallRequest request) {
@@ -53,6 +62,9 @@ public class CallService {
 			.build();
 
 		Call savedCall = callRepository.save(call);
+
+		AdminCallInfoResponse adminCallInfoResponse = adminCallService.getCallInfo(savedCall);
+		websocketHandler.notifySubscribers(1L, "새로운 Call 등록: " + adminCallInfoResponse);
 
 		return CallResponse.builder()
 			.callId(savedCall.getId())
