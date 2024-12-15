@@ -17,9 +17,9 @@ public class AdminCustomerController {
     @Autowired
     private AdminCustomerService adminCustomerService;
 
-    @GetMapping("/{customerId}")
-    public ResponseEntity<AdminCustomerInfoResponse> getCustomerInfo(@PathVariable Long customerId) {
-        return ResponseEntity.ok().body(adminCustomerService.findCustomerById(customerId));
+    @GetMapping("/{customer_id}")
+    public ResponseEntity<AdminCustomerInfoResponse> getCustomerInfo(@PathVariable Long customer_id) {
+        return ResponseEntity.ok().body(adminCustomerService.findCustomerById(customer_id));
     }
 
 }
