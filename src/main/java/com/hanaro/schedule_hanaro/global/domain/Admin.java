@@ -41,10 +41,12 @@ public class Admin {
 	public Admin(
 		String authId,
 		String password,
+		String name,
 		Branch branch
 	){
 		this.authId = authId;
 		this.password = password;
+		this.name = name;
 		this.branch = branch;
 	}
 }
