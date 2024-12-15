@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 
 import com.hanaro.schedule_hanaro.customer.dto.request.CallRequest;
+import com.hanaro.schedule_hanaro.customer.dto.response.CallListResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.ErrorResponse;
 import com.hanaro.schedule_hanaro.customer.service.CallService;
@@ -45,6 +46,17 @@ public class CallController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 				.body(new ErrorResponse("2010303", e.getMessage()));
 		}
+	}
+
+	@GetMapping
+	public ResponseEntity<CallListResponse> getCallList(
+		@RequestHeader("Authorization") String authorization,
+		@RequestParam(value = "status", defaultValue = "pending") String status,
+		@RequestParam(value = "page", defaultValue = "1") int page,
+		@RequestParam(value = "size", defaultValue = "10") int size
+	) {
+		CallListResponse response = callService.getCallList(status, page, size);
+		return ResponseEntity.ok(response);
 	}
 
 	// 추후 수정 - 실제 구현에서는 토큰 파싱 로직 필요
