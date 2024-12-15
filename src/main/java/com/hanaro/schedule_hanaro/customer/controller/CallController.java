@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 
 import com.hanaro.schedule_hanaro.customer.dto.request.CallRequest;
+import com.hanaro.schedule_hanaro.customer.dto.response.CallDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallListResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.ErrorResponse;
@@ -57,6 +58,20 @@ public class CallController {
 	) {
 		CallListResponse response = callService.getCallList(status, page, size);
 		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/{call_id}")
+	public ResponseEntity<?> getCallDetail(
+		@RequestHeader("Authorization") String authorization,
+		@PathVariable("call_id") Long callId
+	) {
+		try {
+			CallDetailResponse response = callService.getCallDetail(callId);
+			return ResponseEntity.ok(response);
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.status(404)
+				.body(new ErrorResponse("2010201", "존재하지 않는 상담 데이터입니다."));
+		}
 	}
 
 	// 추후 수정 - 실제 구현에서는 토큰 파싱 로직 필요
