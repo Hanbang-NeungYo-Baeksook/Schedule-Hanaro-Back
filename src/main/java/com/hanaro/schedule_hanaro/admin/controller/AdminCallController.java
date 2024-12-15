@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -21,6 +22,7 @@ import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallHistoryResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallWaitResponse;
 import com.hanaro.schedule_hanaro.admin.service.AdminCallService;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
+import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 
 import lombok.RequiredArgsConstructor;
 
@@ -42,9 +44,9 @@ public class AdminCallController {
 		try {
 			return ResponseEntity.ok(callService.changeCallStatus(callId));
 		} catch (IllegalArgumentException e) {
-			return ResponseEntity.badRequest().body(e.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 		} catch (IllegalStateException e) {
-			return ResponseEntity.status(405).body(e.getMessage());
+			return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
 		}
 	}
 
@@ -57,15 +59,16 @@ public class AdminCallController {
 
 	@GetMapping()
 	public ResponseEntity<AdminCallHistoryListResponse> getCallList(
-		@RequestHeader("Authorization") String authorization,
-		@RequestParam(value = "status", defaultValue = "pending") String status,
+		// @RequestHeader("Authorization") String authorization,
+		@RequestParam(value = "status", defaultValue = "pending") Status status,
 		@RequestParam(value = "page", defaultValue = "1") int page,
-		@RequestParam(value = "size", defaultValue = "10") int size,
+		@RequestParam(value = "size", defaultValue = "5") int size,
 		@RequestParam(required = false) LocalDate startedAt,
 		@RequestParam(required = false) LocalDate endedAt,
 		@RequestParam(required = false) Category category,
 		@RequestParam(required = false) String keyword
 	) {
+		// 전화 상담 목록 조회
 		return ResponseEntity.ok(callService.findFilteredCalls(page, size, status, startedAt, endedAt, category, keyword));
 	}
 
@@ -73,12 +76,13 @@ public class AdminCallController {
 	public ResponseEntity<?> getCallDetail(
 		@PathVariable Long callId
 	) {
+		// 전화 상담 상세 조회
 		try {
 			return ResponseEntity.ok(callService.findCall(callId));
 		} catch (IllegalArgumentException e) {
-			return ResponseEntity.badRequest().body(e.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 		} catch (IllegalStateException e) {
-			return ResponseEntity.status(405).body(e.getMessage());
+			return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
 		}
 	}
 }
