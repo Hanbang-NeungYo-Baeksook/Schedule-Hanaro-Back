@@ -25,10 +25,10 @@ import lombok.NoArgsConstructor;
 public class Admin {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name="admin_id")
+	@Column(name = "admin_id")
 	private Long id;
 
-	@Column(name = "auth_id", nullable = false, unique = true)
+	@Column(name = "auth_id", unique = true, nullable = false)
 	private String authId;
 
 	@Column(nullable = false)
@@ -44,13 +44,14 @@ public class Admin {
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private Role role;
+
 	@Builder
 	public Admin(
 		String authId,
 		String password,
 		String name,
 		Branch branch
-	){
+	) {
 		this.authId = authId;
 		this.password = password;
 		this.name = name;

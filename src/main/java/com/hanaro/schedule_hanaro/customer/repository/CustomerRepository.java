@@ -11,4 +11,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 	@Override
 	Optional<Customer> findById(Long Long);
 
+	Optional<Customer> findCustomerByAuthId(String authId);
+
 }
