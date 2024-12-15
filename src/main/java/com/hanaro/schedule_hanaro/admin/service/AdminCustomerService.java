@@ -32,7 +32,7 @@ public class AdminCustomerService {
     }
 
     public AdminCustomerInquiryListResponse findCustomerInquiryList(Long customerId) {
-        List<Call> callList = callRepository.findAllByCustomerId(customerId);
+        List<Call> callList = callRepository.findByCustomerId(customerId);
 
         List<Inquiry> inquiryList = inquiryRepository.findAllByCustomerId(customerId);
 

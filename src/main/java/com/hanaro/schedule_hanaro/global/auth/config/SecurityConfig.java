@@ -7,6 +7,11 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.hanaro.schedule_hanaro.global.auth.filter.JwtAuthenticationFilter;
+import com.hanaro.schedule_hanaro.global.auth.provider.JwtAuthenticationProvider;
+import com.hanaro.schedule_hanaro.global.auth.provider.JwtTokenProvider;
 
 import lombok.RequiredArgsConstructor;
 
@@ -14,24 +19,34 @@ import lombok.RequiredArgsConstructor;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+
+	private final JwtTokenProvider jwtTokenProvider;
+	private final JwtAuthenticationProvider jwtAuthenticationProvider;
+
 	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity http)throws Exception{
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		return http
 			.csrf(AbstractHttpConfigurer::disable)
 			.httpBasic(AbstractHttpConfigurer::disable)
 			.sessionManagement(session ->
-				session
-					.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+				session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 			)
 			.authorizeHttpRequests(request ->
-				request
-					// Security 다 구현하면 줏석 바꾸기
-					// .requestMatchers("api/customer/").permitAll()
-					// .requestMatchers("api/auth/sign-up").permitAll()
-					// .requestMatchers("api/branch/**").permitAll()
-					// .requestMatchers("api/**").hasAnyRole("customer")
-					.anyRequest().permitAll()
-					// .authenticated()
+					request
+						.requestMatchers("/api/auth/sign-up").permitAll()
+						.requestMatchers("/api/auth/sign-in").permitAll()
+						// .requestMatchers("/api/**").hasAnyRole("USER")
+						.requestMatchers("/admin/api/**").hasAnyRole("ADMIN")
+						.anyRequest().authenticated()
+				// .anyRequest().permitAll()
+			)
+			// .logout(logout ->
+			// 	logout
+			// 		.logoutSuccessUrl("api/auth/sign-out")
+			// )
+			.addFilterAfter(
+				new JwtAuthenticationFilter(jwtTokenProvider, jwtAuthenticationProvider),
+				UsernamePasswordAuthenticationFilter.class
 			)
 			.getOrBuild();
 	}
