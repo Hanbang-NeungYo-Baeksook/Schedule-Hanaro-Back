@@ -1,6 +1,7 @@
 package com.hanaro.schedule_hanaro.customer.repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -18,4 +19,6 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 	boolean existsByCallDate(LocalDateTime callDate);
 
 	Slice<Call> findByStatus(Status status, Pageable pageable);
+
+	List<Call> findAllByCustomerId(Long customerId);
 }

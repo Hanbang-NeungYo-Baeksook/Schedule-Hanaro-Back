@@ -1,5 +1,6 @@
 package com.hanaro.schedule_hanaro.admin.controller;
 
+import com.hanaro.schedule_hanaro.admin.dto.response.AdminCustomerInquiryListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,8 +20,13 @@ public class AdminCustomerController {
 
     @GetMapping("/{customer_id}")
     public ResponseEntity<AdminCustomerInfoResponse> getCustomerInfo(@PathVariable Long customer_id) {
-        return ResponseEntity.ok().body(adminCustomerService.findCustomerById(customer_id));
+        return ResponseEntity.ok().body(adminCustomerService.findCustomerInfoById(customer_id));
+    }
+
+    @GetMapping("/customers/{customer_id}/content")
+    public ResponseEntity<AdminCustomerInquiryListResponse> getCustomerInquiries(@PathVariable Long customer_id) {
+        AdminCustomerInquiryListResponse response = adminCustomerService.findCustomerInquiryList(customer_id);
+        return ResponseEntity.ok(response);
     }
 
 }
-
