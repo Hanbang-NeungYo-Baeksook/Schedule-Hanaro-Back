@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.hanaro.schedule_hanaro.global.domain.Inquiry;
+import com.hanaro.schedule_hanaro.global.domain.InquiryResponse;
 
 public interface AdminInquiryRepository extends JpaRepository<Inquiry, Long> {
 	@Query("SELECT i FROM Inquiry i " +
