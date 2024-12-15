@@ -33,6 +33,19 @@ public class CallController {
 		}
 	}
 
+	@DeleteMapping("/{call-id}")
+	public ResponseEntity<?> cancelCall(@PathVariable("call-id") Long callId) {
+		try {
+			callService.cancelCall(callId);
+			return ResponseEntity.noContent().build();
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+				.body(new ErrorResponse("2010301", "존재하지 않는 상담 데이터입니다."));
+		} catch (IllegalStateException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+				.body(new ErrorResponse("2010303", e.getMessage()));
+		}
+	}
 
 	// 추후 수정 - 실제 구현에서는 토큰 파싱 로직 필요
 	private Long extractCustomerIdFromToken(String token) {

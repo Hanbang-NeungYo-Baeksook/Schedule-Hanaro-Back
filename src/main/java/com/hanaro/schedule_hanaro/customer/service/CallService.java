@@ -52,4 +52,16 @@ public class CallService {
 			.build();
 	}
 
+	@Transactional
+	public void cancelCall(Long callId) {
+		Call call = callRepository.findById(callId)
+			.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 상담 id입니다."));
+
+		if (call.getStatus() != Status.PENDING) {
+			throw new IllegalStateException("진행 중이거나 완료된 상담은 취소할 수 없습니다.");
+		}
+
+		callRepository.delete(call);
+	}
+
 }
