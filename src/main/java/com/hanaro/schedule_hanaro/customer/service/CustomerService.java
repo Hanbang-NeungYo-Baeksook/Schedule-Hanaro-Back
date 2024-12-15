@@ -13,9 +13,9 @@ public class CustomerService {
 	public CustomerService(CustomerRepository customerRepository) {
 		this.customerRepository = customerRepository;
 	}
-
+	
 	public CustomerInfoResponse findCustomerById(Long id) {
 		Customer customer = customerRepository.findById(id).orElseThrow();
-		return CustomerInfoResponse.from(customer.getName(), customer.getPhoneNum());
+		return CustomerInfoResponse.of(customer.getName(), customer.getPhoneNum());
 	}
 }
