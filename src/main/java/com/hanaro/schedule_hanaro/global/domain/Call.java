@@ -2,6 +2,8 @@ package com.hanaro.schedule_hanaro.global.domain;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.ColumnDefault;
+
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 
@@ -47,6 +49,7 @@ public class Call {
 	private Category category;
 
 	@Enumerated(EnumType.STRING)
+	@ColumnDefault("'PENDING'")
 	@Column(name = "status", nullable = false)
 	private Status status = Status.PENDING;
 
@@ -63,13 +66,12 @@ public class Call {
 	private String tags;
 
 	@Builder
-	public Call(Customer customer, LocalDateTime callDate, int callNum, Category category, Status status,
+	public Call(Customer customer, LocalDateTime callDate, int callNum, Category category,
 		String content, LocalDateTime startedAt, LocalDateTime endedAt, String tags) {
 		this.customer = customer;
 		this.callDate = callDate;
 		this.callNum = callNum;
 		this.category = category;
-		this.status = status;
 		this.content = content;
 		this.startedAt = startedAt;
 		this.endedAt = endedAt;
