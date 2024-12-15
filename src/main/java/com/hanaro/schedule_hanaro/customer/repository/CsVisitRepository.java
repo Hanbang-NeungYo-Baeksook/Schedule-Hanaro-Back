@@ -9,9 +9,18 @@ import org.springframework.stereotype.Repository;
 
 import com.hanaro.schedule_hanaro.global.domain.CsVisit;
 
+import jakarta.persistence.LockModeType;
+
 @Repository
 public interface CsVisitRepository extends JpaRepository<CsVisit, Integer> {
 
+	Optional<CsVisit> findByBranchIdAndDate(Long branchId, LocalDate date);
+
+	@Lock(value = LockModeType.OPTIMISTIC)
+	@Query("select c from CsVisit c where c.id = :id")
+	Optional<CsVisit> findByWithOptimisticLock(final Long id);
+
+	Optional<CsVisit> findByBranchId(Long id);
 	Optional<CsVisit> findCsVisitByBranchIdAndDate(Long branchId, LocalDate date);
 
 	List<CsVisit> findAllByDateOrderByBranchAsc(LocalDate date);
