@@ -62,6 +62,14 @@ public class CsVisit {
 		this.waitAmount = waitAmount;
 	}
 
+	public void incrementCurrentNum() {
+		this.currentNum++;
+	}
+
+	public void decrementWaitAmount() {
+		this.waitAmount--;
+	}
+
 	public void increase() {
 		totalNum += 1;
 		waitAmount += 1;
