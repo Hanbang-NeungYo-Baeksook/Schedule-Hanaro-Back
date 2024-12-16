@@ -30,8 +30,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 		FilterChain filterChain) throws ServletException, IOException {
+		System.out.println("jwtauthenticationfilter 진입");
+		if (request.getRequestURI().equals("/api/auth/sign-in") || request.getRequestURI()
+			.equals("/api/auth/sign-up")) {
 
-		if (request.getRequestURI().equals("/api/auth/sign-in")) {
 			filterChain.doFilter(request, response);
 			return;
 		}
@@ -43,10 +45,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		Claims claims = jwtTokenProvider.validateToken(token);
 		UserInfo userInfo = new UserInfo(claims.getId(), Role.valueOf(claims.get("role").toString()));
-
+		System.out.println("jwtauthenticationfilter: "+ userInfo.id());
 		UsernamePasswordAuthenticationToken unAuthenticatedToken = new UsernamePasswordAuthenticationToken(userInfo,
 			null, null);
-
+		System.out.println("이어서: "+unAuthenticatedToken.getPrincipal());
 		UsernamePasswordAuthenticationToken authenticatedToken = (UsernamePasswordAuthenticationToken)jwtAuthenticationProvider.authenticate(
 			unAuthenticatedToken);
 

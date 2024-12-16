@@ -20,35 +20,31 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-	private final JwtTokenProvider jwtTokenProvider;
-	private final JwtAuthenticationProvider jwtAuthenticationProvider;
+	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		return http
 			.csrf(AbstractHttpConfigurer::disable)
+			.formLogin(AbstractHttpConfigurer::disable)
 			.httpBasic(AbstractHttpConfigurer::disable)
+			// .anonymous(AbstractHttpConfigurer::disable)
 			.sessionManagement(session ->
 				session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 			)
 			.authorizeHttpRequests(request ->
 					request
-						.requestMatchers("/api/auth/sign-up").permitAll()
-						.requestMatchers("/api/auth/sign-in").permitAll()
-						// .requestMatchers("/api/**").hasAnyRole("USER")
-						.requestMatchers("/admin/api/**").hasAnyRole("ADMIN")
+						.requestMatchers("/api/auth/sign-up","/api/auth/sign-in").permitAll()
+						.requestMatchers("/api/**").hasAuthority("USER")
+						.requestMatchers("/admin/api/**").hasAuthority("ADMIN")
 						.anyRequest().authenticated()
 				// .anyRequest().permitAll()
 			)
-			// .logout(logout ->
-			// 	logout
-			// 		.logoutSuccessUrl("api/auth/sign-out")
-			// )
-			.addFilterAfter(
-				new JwtAuthenticationFilter(jwtTokenProvider, jwtAuthenticationProvider),
+			.addFilterBefore(
+				jwtAuthenticationFilter,
 				UsernamePasswordAuthenticationFilter.class
 			)
-			.getOrBuild();
+			.build();
 	}
 
 }

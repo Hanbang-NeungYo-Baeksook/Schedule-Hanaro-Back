@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hanaro.schedule_hanaro.global.auth.dto.request.AuthAdminSignUpRequest;
 import com.hanaro.schedule_hanaro.global.auth.dto.request.AuthSignUpRequest;
+import com.hanaro.schedule_hanaro.global.auth.dto.request.SignInRequest;
+import com.hanaro.schedule_hanaro.global.auth.dto.response.JwtTokenDto;
 import com.hanaro.schedule_hanaro.global.auth.service.AuthService;
 
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,12 @@ public class AuthController {
 		log.info("signUp 컨트롤러 진입");
 		authService.signUp(authSignUpRequest);
 		return ResponseEntity.ok(null);
+	}
+
+	@PostMapping("/sign-in")
+	public ResponseEntity<JwtTokenDto> signIn(@RequestBody SignInRequest signInRequest) {
+		JwtTokenDto response = authService.signIn(signInRequest);
+		return ResponseEntity.ok().body(response);
 	}
 
 	@PostMapping("/admin/sign-up")
