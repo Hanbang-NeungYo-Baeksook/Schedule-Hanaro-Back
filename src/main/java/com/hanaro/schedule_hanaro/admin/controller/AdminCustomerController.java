@@ -29,14 +29,14 @@ public class AdminCustomerController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{customer_id}")
-    public ResponseEntity<AdminCustomerInfoResponse> getCustomerInfo(@PathVariable Long customer_id) {
-        return ResponseEntity.ok().body(adminCustomerService.findCustomerInfoById(customer_id));
+    @GetMapping("/{customer-id}")
+    public ResponseEntity<AdminCustomerInfoResponse> getCustomerInfo(@PathVariable("customer-id") Long customerId) {
+        return ResponseEntity.ok().body(adminCustomerService.findCustomerInfoById(customerId));
     }
 
     @GetMapping("/customers/{customer_id}/content")
-    public ResponseEntity<AdminCustomerInquiryListResponse> getCustomerInquiries(@PathVariable Long customer_id) {
-        AdminCustomerInquiryListResponse response = adminCustomerService.findCustomerInquiryList(customer_id);
+    public ResponseEntity<AdminCustomerInquiryListResponse> getCustomerInquiries(@PathVariable("customer-id") Long customerId) {
+        AdminCustomerInquiryListResponse response = adminCustomerService.findCustomerInquiryList(customerId);
         return ResponseEntity.ok(response);
     }
 

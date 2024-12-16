@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class AdminVisitController {
     private final AdminVisitService adminVisitService;
 
-    @GetMapping("/{visit_id}/content")
-    public ResponseEntity<AdminVisitInquiryInfoResponse> getVisit(@PathVariable Long visit_id) {
-        Visit visit = adminVisitService.findVisitById(visit_id);
+    @GetMapping("/{visit-id}/content")
+    public ResponseEntity<AdminVisitInquiryInfoResponse> getVisit(@PathVariable("visit-id") Long visitId) {
+        Visit visit = adminVisitService.findVisitById(visitId);
         AdminVisitInquiryInfoResponse response = AdminVisitInquiryInfoResponse.from(visit);
         return ResponseEntity.ok().body(response);
     }
