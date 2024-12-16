@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.hanaro.schedule_hanaro.global.domain.Admin;
 
 public interface AdminRepository extends JpaRepository<Admin, Long> {
-	@Override
-	Optional<Admin> findById(Long aLong);
+    @Override
+    Optional<Admin> findById(Long aLong);
 }
