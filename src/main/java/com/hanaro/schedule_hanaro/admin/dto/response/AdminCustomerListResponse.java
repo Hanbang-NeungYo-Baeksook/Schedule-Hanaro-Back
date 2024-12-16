@@ -23,7 +23,7 @@ public record AdminCustomerListResponse(
 		@JsonProperty("birth_date") String birthDate,
 		String email
 	) {
-		public static CustomerData from(Customer customer) {
+		public static CustomerData of(Customer customer) {
 			return CustomerData.builder()
 				.customerName(customer.getName())
 				.phoneNumber(customer.getPhoneNum())

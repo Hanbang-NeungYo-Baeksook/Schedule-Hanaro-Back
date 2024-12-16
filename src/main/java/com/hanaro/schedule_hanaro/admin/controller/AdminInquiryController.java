@@ -11,9 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hanaro.schedule_hanaro.admin.dto.request.AdminInquiryListRequest;
 import com.hanaro.schedule_hanaro.admin.dto.request.AdminInquiryResponseRequest;
+import com.hanaro.schedule_hanaro.admin.dto.response.AdminCustomerListResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryDetailResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryListResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryResponse;
+import com.hanaro.schedule_hanaro.admin.service.AdminCustomerService;
 import com.hanaro.schedule_hanaro.admin.service.AdminInquiryService;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 
@@ -23,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AdminInquiryController {
 	private final AdminInquiryService adminInquiryService;
+	private final AdminCustomerService adminCustomerService;
 
 	@GetMapping
 	public ResponseEntity<AdminInquiryListResponse> getInquiryList(
@@ -52,5 +55,14 @@ public class AdminInquiryController {
 	) {
 		AdminInquiryResponse response = adminInquiryService.registerInquiryResponse(inquiryId, request);
 		return ResponseEntity.status(201).body(response);
+	}
+
+	@GetMapping
+	public ResponseEntity<AdminCustomerListResponse> getCustomerList(
+		@RequestParam(defaultValue = "1") int page,
+		@RequestParam(defaultValue = "10") int size
+	) {
+		AdminCustomerListResponse response = adminCustomerService.getCustomerList(page, size);
+		return ResponseEntity.ok(response);
 	}
 }
