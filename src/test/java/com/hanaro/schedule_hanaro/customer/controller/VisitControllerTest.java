@@ -75,29 +75,20 @@ public class VisitControllerTest {
 			.build();
 		customerRepository.save(customer);
 
-		Customer customer2 = Customer
-			.builder()
-			.authId("TestAuthId2")
-			.name("TestUser2")
-			.password("TestPassword")
-			.phoneNum("01012341234")
-			.birth(LocalDate.of(2002, 4, 15))
-			.gender(Gender.FEMALE)
-			.build();
-		customerRepository.save(customer2);
+		for (int i = 2; i <= 7; i++) {
+			customerRepository.save(Customer
+				.builder()
+				.authId("TestAuthId" + i)
+				.name("TestUser" + i)
+				.password("TestPassword")
+				.phoneNum("01012341234")
+				.birth(LocalDate.of(2002, 4, 15))
+				.gender(Gender.FEMALE)
+				.build()
+			);
+		}
 
-		Customer customer3 = Customer
-			.builder()
-			.authId("TestAuthId3")
-			.name("TestUser3")
-			.password("TestPassword")
-			.phoneNum("01012341234")
-			.birth(LocalDate.of(2002, 4, 15))
-			.gender(Gender.FEMALE)
-			.build();
-		customerRepository.save(customer3);
-
-		for (int i = 1; i <= 5; i++) {
+		for (int i = 1; i <= 6; i++) {
 			Branch normalBranch = Branch
 				.builder()
 				.address("TestAddress" + i)
@@ -123,7 +114,7 @@ public class VisitControllerTest {
 			.build();
 		branchRepository.save(abnormalBranch);
 
-		for (int i = 1; i <= 5; i++) {
+		for (int i = 1; i <= 6; i++) {
 			CsVisit normalCsVisit = CsVisit
 				.builder()
 				.currentNum(0)
@@ -148,7 +139,7 @@ public class VisitControllerTest {
 
 	@AfterAll
 	public void afterAll() {
-		for (int i = 1; i <= 5; i++) {
+		for (int i = 1; i <= 6; i++) {
 			Branch branch = branchRepository.findByName("NormalTestBranch" + i).orElseThrow();
 			CsVisit csVisit = csVisitRepository.findByBranchId(branch.getId()).orElseThrow();
 			List<Visit> visits = visitRepository.findAllByBranchId(branch.getId());
@@ -171,6 +162,18 @@ public class VisitControllerTest {
 
 		Customer customer3 = customerRepository.findByAuthId("TestAuthId3").orElseThrow();
 		customerRepository.delete(customer3);
+
+		Customer customer4 = customerRepository.findByAuthId("TestAuthId4").orElseThrow();
+		customerRepository.delete(customer4);
+
+		Customer customer5 = customerRepository.findByAuthId("TestAuthId5").orElseThrow();
+		customerRepository.delete(customer5);
+
+		Customer customer6 = customerRepository.findByAuthId("TestAuthId6").orElseThrow();
+		customerRepository.delete(customer6);
+
+		Customer customer7 = customerRepository.findByAuthId("TestAuthId7").orElseThrow();
+		customerRepository.delete(customer7);
 	}
 
 	@Test
@@ -347,5 +350,48 @@ public class VisitControllerTest {
 				.andExpect(jsonPath(String.format("$.data[%d].waiting_time", i)).exists())
 				.andDo(System.out::print);
 		}
+	}
+
+	@Test
+	@Order(6)
+	public void addMutipleVisitInOneBranchTest() throws Exception {
+		List<Customer> customerList = new ArrayList<>();
+		customerList.add(customerRepository.findByName("TestUser4").orElseThrow());
+		customerList.add(customerRepository.findByName("TestUser5").orElseThrow());
+		customerList.add(customerRepository.findByName("TestUser6").orElseThrow());
+		customerList.add(customerRepository.findByName("TestUser7").orElseThrow());
+
+		Branch branch = branchRepository.findByName("NormalTestBranch6").orElseThrow();
+
+		List<Long> visitIdList = new ArrayList<>();
+
+		String addUrl = "/api/visits";
+		for (int i = 0; i < customerList.size(); i++) {
+			VisitCreateRequest visitCreateRequest = VisitCreateRequest
+				.builder()
+				.customerId(customerList.get(i).getId())
+				.branchId(branch.getId())
+				.content("Test Content!")
+				.build();
+
+			String reqStr = objectMapper.writeValueAsString(visitCreateRequest);
+
+			ResultActions result = mockMvc.perform(
+				post(addUrl).content(reqStr).contentType(MediaType.APPLICATION_JSON)
+			);
+
+			result.andExpect(status().isOk());
+			String responseContent = result.andReturn().getResponse().getContentAsString();
+			visitIdList.add(Long.valueOf(responseContent));
+		}
+
+		for (int i = 0; i < visitIdList.size(); i++) {
+			String getUrl = "/api/visits/" + visitIdList.get(i);
+			ResultActions result = mockMvc.perform(get(getUrl));
+			result.andExpect(status().isOk())
+				.andExpect(jsonPath("$.visit_num").value(i + 1));
+
+		}
+
 	}
 }
