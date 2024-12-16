@@ -18,8 +18,8 @@ public class AdminInfoController {
 
 
 
-    @GetMapping("/{adminId}/stats")
-    public ResponseEntity<AdminInfoResponse> getAdminStats(@PathVariable Long adminId) {
+    @GetMapping("/{admin-id}/stats")
+    public ResponseEntity<AdminInfoResponse> getAdminStats(@PathVariable("admin-id") Long adminId) {
         return ResponseEntity.ok(adminService.getAdminStats(adminId));
     }
 }
