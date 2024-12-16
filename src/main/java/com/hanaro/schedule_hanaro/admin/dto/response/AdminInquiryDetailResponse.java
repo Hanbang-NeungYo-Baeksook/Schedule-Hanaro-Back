@@ -20,7 +20,7 @@ public record AdminInquiryDetailResponse(
 	@JsonProperty("phone_number") String phoneNumber,
 	@JsonProperty("reply_content") String replyContent
 ) {
-	public static AdminInquiryDetailResponse from(
+	public static AdminInquiryDetailResponse of(
 		Long inquiryId,
 		String inquiryContent,
 		String category,

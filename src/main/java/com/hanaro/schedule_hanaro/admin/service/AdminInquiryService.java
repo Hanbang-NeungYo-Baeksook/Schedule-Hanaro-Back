@@ -60,7 +60,7 @@ public class AdminInquiryService {
 		Customer customer = inquiry.getCustomer();
 		Optional<InquiryResponse> inquiryResponse = adminInquiryResponseRepository.findByInquiryId(inquiryId);
 
-		return AdminInquiryDetailResponse.from(
+		return AdminInquiryDetailResponse.of(
 			inquiry.getId(),
 			inquiry.getContent(),
 			inquiry.getCategory().toString(),
