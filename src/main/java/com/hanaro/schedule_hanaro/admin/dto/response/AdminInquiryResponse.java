@@ -13,7 +13,7 @@ public record AdminInquiryResponse(
 	@JsonProperty("content") String content,
 	@JsonProperty("created_at") LocalDateTime createdAt
 ) {
-	public static AdminInquiryResponse from(Long inquiryId, Long adminId, String content, LocalDateTime createdAt) {
+	public static AdminInquiryResponse of(Long inquiryId, Long adminId, String content, LocalDateTime createdAt) {
 		return AdminInquiryResponse.builder()
 			.inquiryId(inquiryId)
 			.adminId(adminId)
