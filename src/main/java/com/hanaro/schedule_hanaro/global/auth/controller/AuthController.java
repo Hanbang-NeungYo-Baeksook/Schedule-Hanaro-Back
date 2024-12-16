@@ -36,9 +36,15 @@ public class AuthController {
 	}
 
 	@PostMapping("/admin/sign-up")
-	public ResponseEntity<String> postAdmin(@RequestBody AuthAdminSignUpRequest authAdminSignUpRequest) {
+	public ResponseEntity<String> signUpAdmin(@RequestBody AuthAdminSignUpRequest authAdminSignUpRequest) {
 		// 관리자 등록 - 테스트용
 		return ResponseEntity.ok(authService.adminSignUpAdmin(authAdminSignUpRequest));
+	}
+
+	@PostMapping("/admin/sign-in")
+	public ResponseEntity<JwtTokenDto> signInAdmin(@RequestBody SignInRequest signInRequest) {
+		JwtTokenDto response = authService.adminSignIn(signInRequest);
+		return ResponseEntity.ok().body(response);
 	}
 
 }

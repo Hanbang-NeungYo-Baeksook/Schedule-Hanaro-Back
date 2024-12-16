@@ -20,8 +20,22 @@ public class CustomUserDetailService implements UserDetailsService {
 
 	@Override
 	public CustomUserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		Customer customer = customerRepository.findByAuthId(username).orElseThrow();
-		return CustomUserDetails.of(customer.getId(), customer.getAuthId(), customer.getPassword(),
-			customer.getRole());
+		return customerRepository.findByAuthId(username)
+			.map(customer -> CustomUserDetails.of(
+				customer.getId(),
+				customer.getAuthId(),
+				customer.getPassword(),
+				customer.getRole()
+			))
+			.orElseGet(() -> {
+				return adminRepository.findByAuthId(username)
+					.map(admin -> CustomUserDetails.of(
+						admin.getId(),
+						admin.getAuthId(),
+						admin.getPassword(),
+						admin.getRole()
+					))
+					.orElseThrow(() -> new UsernameNotFoundException("ID가 올바르지 않습니다."));
+			});
 	}
 }

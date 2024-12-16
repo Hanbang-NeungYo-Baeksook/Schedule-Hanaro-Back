@@ -45,6 +45,17 @@ public class AuthService {
 		return jwtTokenProvider.generateTokens(customUserDetails.getUsername(), customUserDetails.getRole());
 	}
 
+	public JwtTokenDto adminSignIn(SignInRequest signInRequest) {
+		String username = signInRequest.authId();
+		String password = signInRequest.password();
+		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username,
+			password);
+		Authentication authentication = authenticationProvider.authenticate(authenticationToken);
+		CustomUserDetails customUserDetails = (CustomUserDetails)authentication.getPrincipal();
+		return jwtTokenProvider.generateTokens(customUserDetails.getUsername(), customUserDetails.getRole());
+
+	}
+
 	public void signUp(AuthSignUpRequest authSignUpRequest){
 		customerRepository.save(Customer.builder()
 			.authId(authSignUpRequest.authId())
