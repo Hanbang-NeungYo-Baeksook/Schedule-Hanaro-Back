@@ -1,7 +1,11 @@
 package com.hanaro.schedule_hanaro.global.domain;
+
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.ColumnDefault;
+
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
+import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 import com.hanaro.schedule_hanaro.global.domain.enums.InquiryStatus;
 
 import jakarta.persistence.*;
@@ -23,6 +27,7 @@ public class Inquiry {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "customer_id", nullable = false)
 	private Customer customer;
+	//
 	// @Column(name = "title", nullable = false)
 
 	@Enumerated(EnumType.STRING)

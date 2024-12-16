@@ -14,6 +14,7 @@ import com.hanaro.schedule_hanaro.customer.dto.response.BranchListResponse;
 import com.hanaro.schedule_hanaro.customer.repository.BranchRepository;
 import com.hanaro.schedule_hanaro.customer.repository.CsVisitRepository;
 import com.hanaro.schedule_hanaro.global.domain.Branch;
+import com.hanaro.schedule_hanaro.customer.repository.BranchRepository;
 import com.hanaro.schedule_hanaro.global.domain.CsVisit;
 import com.hanaro.schedule_hanaro.global.domain.enums.BranchType;
 
@@ -22,12 +23,10 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class BranchService {
-
 	private final BranchRepository branchRepository;
 	private final CsVisitRepository csVisitRepository;
 
-	public BranchDetailResponse findBranchById(Long id) {
-
+	public BranchDetailResponse findBranchById(Long id){
 		Branch branch = branchRepository.findById(id).orElseThrow();
 		System.out.println(LocalDate.now());
 		CsVisit csVisit = csVisitRepository.findCsVisitByBranchIdAndDate(id, LocalDate.now()).orElseThrow();

@@ -7,19 +7,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 
 @Builder
-public record CallListResponse(
-	List<CallData> data,
+public record VisitListResponse(
+	List<VisitData> data,
 	Pagination pagination
 ) {
 
 	@Builder
-	public record CallData(
-		@JsonProperty("call_id") Long callId,
-		@JsonProperty("call_date") String callDate,
-		@JsonProperty("call_time") String callTime,
-		@JsonProperty("call_num") int callNum,
-		String category,
-		String status
+	public record VisitData(
+		@JsonProperty("visit_id") Long visitId,
+		@JsonProperty("branch_name") String branchName,
+		@JsonProperty("visit_num") int visitNum,
+		@JsonProperty("waiting_amount") int waitingAmount,
+		@JsonProperty("waiting_time") int waitingTime
 	) {
 	}
 

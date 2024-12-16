@@ -1,11 +1,23 @@
 package com.hanaro.schedule_hanaro.global.domain;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
+
+import org.hibernate.annotations.ColumnDefault;
 
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,8 +49,9 @@ public class Visit {
 	private int num;
 
 	@Enumerated(EnumType.STRING)
+	@ColumnDefault("'PENDING'")
 	@Column(name = "status", nullable = false)
-	private Status status;
+	private Status status = Status.PENDING;
 
 	@Column(name = "started_at")
 	private LocalDateTime startedAt;
@@ -46,7 +59,7 @@ public class Visit {
 	@Column(name = "ended_at")
 	private LocalDateTime endedAt;
 
-	@Column(name = "content",length = 500)
+	@Column(name = "content", length = 500)
 	private String content;
 
 	@Column(name = "tags", length = 50)
@@ -58,7 +71,6 @@ public class Visit {
 		Branch branch,
 		LocalDate visitDate,
 		int num,
-		Status status,
 		LocalDateTime startedAt,
 		LocalDateTime endedAt,
 		String content,
@@ -68,7 +80,6 @@ public class Visit {
 		this.branch = branch;
 		this.visitDate = visitDate;
 		this.num = num;
-		this.status = status;
 		this.startedAt = startedAt;
 		this.endedAt = endedAt;
 		this.content = content;

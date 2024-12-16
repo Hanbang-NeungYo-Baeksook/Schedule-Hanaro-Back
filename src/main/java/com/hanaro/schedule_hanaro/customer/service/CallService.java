@@ -59,7 +59,6 @@ public class CallService {
 			.callDate(request.callDate())
 			.callNum(newCallNum)
 			.category(Category.valueOf(request.category().toUpperCase()))
-			.status(Status.PENDING)
 			.content(request.content())
 			.tags("default")
 			.build();

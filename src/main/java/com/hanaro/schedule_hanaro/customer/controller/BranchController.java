@@ -21,8 +21,8 @@ import lombok.RequiredArgsConstructor;
 public class BranchController {
 	private final BranchService branchService;
 
-	@GetMapping("/{branchId}")
-	public ResponseEntity<BranchDetailResponse> getBranchDetail(@PathVariable Long branchId) {
+	@GetMapping("/{branch-id}")
+	public ResponseEntity<BranchDetailResponse> getBranchDetail(@PathVariable("branch-id") Long branchId) {
 		return ResponseEntity.ok().body(branchService.findBranchById(branchId));
 	}
 
