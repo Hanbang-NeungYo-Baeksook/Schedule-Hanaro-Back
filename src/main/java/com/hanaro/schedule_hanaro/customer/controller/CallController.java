@@ -21,7 +21,7 @@ public class CallController {
 
 	@PostMapping
 	public ResponseEntity<?> createCall(
-		@RequestHeader("Authorization") String authorization,
+		@RequestHeader(value = "Authorization", required = false) String authorization,
 		@RequestBody CallRequest request
 	) {
 		try {
@@ -51,7 +51,7 @@ public class CallController {
 
 	@GetMapping
 	public ResponseEntity<CallListResponse> getCallList(
-		@RequestHeader("Authorization") String authorization,
+		@RequestHeader(value = "Authorization", required = false) String authorization,
 		@RequestParam(value = "status", defaultValue = "pending") String status,
 		@RequestParam(value = "page", defaultValue = "1") int page,
 		@RequestParam(value = "size", defaultValue = "10") int size
@@ -62,7 +62,7 @@ public class CallController {
 
 	@GetMapping("/{call_id}")
 	public ResponseEntity<?> getCallDetail(
-		@RequestHeader("Authorization") String authorization,
+		@RequestHeader(value = "Authorization", required = false) String authorization,
 		@PathVariable("call_id") Long callId
 	) {
 		try {
@@ -76,7 +76,7 @@ public class CallController {
 
 	// 추후 수정 - 실제 구현에서는 토큰 파싱 로직 필요
 	private Long extractCustomerIdFromToken(String token) {
-		return 1L;
+		return 6L;
 	}
 
 }
