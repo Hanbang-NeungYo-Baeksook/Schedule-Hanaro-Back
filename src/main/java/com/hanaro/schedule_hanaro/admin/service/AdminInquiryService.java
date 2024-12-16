@@ -97,7 +97,7 @@ public class AdminInquiryService {
 
 		InquiryResponse savedResponse = adminInquiryResponseRepository.save(inquiryResponse);
 
-		return AdminInquiryResponse.from(
+		return AdminInquiryResponse.of(
 			savedResponse.getInquiry().getId(),
 			savedResponse.getAdmin().getId(),
 			savedResponse.getContent(),
