@@ -1,5 +1,6 @@
 package com.hanaro.schedule_hanaro.customer.service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +50,9 @@ public class CallService {
 			throw new IllegalStateException("이미 예약된 시간대입니다.");
 		}
 
-		int newCallNum = callRepository.findMaxCallNumByDate(request.callDate()) + 1;
+		LocalDate requestDate = request.callDate().toLocalDate();
+
+		int newCallNum = callRepository.findMaxCallNumByDate(requestDate) + 1;
 
 		Call call = Call.builder()
 			.customer(customer)

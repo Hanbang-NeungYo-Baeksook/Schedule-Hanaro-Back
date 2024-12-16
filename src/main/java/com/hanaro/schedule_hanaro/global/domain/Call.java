@@ -48,7 +48,7 @@ public class Call {
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "status", nullable = false)
-	private Status status;
+	private Status status = Status.PENDING;
 
 	@Column(name = "content", length = 500, nullable = false)
 	private String content;
