@@ -13,7 +13,6 @@ public class CallMemo {
 
 
 	@Id
-	@Column(name = "call_id")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 

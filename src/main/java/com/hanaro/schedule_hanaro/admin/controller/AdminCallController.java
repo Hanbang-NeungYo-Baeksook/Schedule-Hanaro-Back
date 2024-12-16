@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.hanaro.schedule_hanaro.admin.dto.request.AdminCallMemoRequest;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallHistoryListResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallHistoryResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallWaitResponse;
@@ -51,15 +52,13 @@ public class AdminCallController {
 	}
 
 	@PostMapping("/{callId}")
-	public ResponseEntity<String> postCallMemo(@PathVariable Long callId, @RequestBody String content) {
+	public ResponseEntity<String> postCallMemo(@PathVariable Long callId, @RequestBody AdminCallMemoRequest request) {
 		// 전화 상담 메모 등록
-		// TODO: call_memo table에 id 추가
-		return ResponseEntity.ok(callService.saveCallMemo(callId, content));
+		return ResponseEntity.ok(callService.saveCallMemo(callId, request.content()));
 	}
 
 	@GetMapping()
 	public ResponseEntity<AdminCallHistoryListResponse> getCallList(
-		// @RequestHeader("Authorization") String authorization,
 		@RequestParam(value = "status", defaultValue = "pending") Status status,
 		@RequestParam(value = "page", defaultValue = "1") int page,
 		@RequestParam(value = "size", defaultValue = "5") int size,
