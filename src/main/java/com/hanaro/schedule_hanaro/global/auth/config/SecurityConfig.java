@@ -10,9 +10,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.hanaro.schedule_hanaro.global.auth.filter.JwtAuthenticationFilter;
-import com.hanaro.schedule_hanaro.global.auth.provider.JwtAuthenticationProvider;
-import com.hanaro.schedule_hanaro.global.auth.provider.JwtTokenProvider;
-
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -35,7 +32,7 @@ public class SecurityConfig {
 			.authorizeHttpRequests(request ->
 					request
 						.requestMatchers("/api/auth/sign-up","/api/auth/sign-in").permitAll()
-						.requestMatchers("/api/**").hasAuthority("CUSTOMER")
+						.requestMatchers("/api/**").hasAuthority("USER")
 						.requestMatchers("/admin/api/**").hasAuthority("ADMIN")
 						.anyRequest().authenticated()
 				// .anyRequest().permitAll()
