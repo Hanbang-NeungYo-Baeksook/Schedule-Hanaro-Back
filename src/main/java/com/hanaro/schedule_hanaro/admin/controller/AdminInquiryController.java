@@ -57,12 +57,4 @@ public class AdminInquiryController {
 		return ResponseEntity.status(201).body(response);
 	}
 
-	@GetMapping
-	public ResponseEntity<AdminCustomerListResponse> getCustomerList(
-		@RequestParam(defaultValue = "1") int page,
-		@RequestParam(defaultValue = "10") int size
-	) {
-		AdminCustomerListResponse response = adminCustomerService.getCustomerList(page, size);
-		return ResponseEntity.ok(response);
-	}
 }

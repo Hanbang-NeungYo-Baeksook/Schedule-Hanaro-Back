@@ -32,7 +32,7 @@ public class SecurityConfig {
 			.authorizeHttpRequests(request ->
 					request
 						.requestMatchers("/api/auth/sign-up","/api/auth/sign-in").permitAll()
-						.requestMatchers("/api/**").hasAuthority("USER")
+						.requestMatchers("/api/**").hasAuthority("CUSTOMER")
 						.requestMatchers("/admin/api/**").hasAuthority("ADMIN")
 						.anyRequest().authenticated()
 				// .anyRequest().permitAll()
