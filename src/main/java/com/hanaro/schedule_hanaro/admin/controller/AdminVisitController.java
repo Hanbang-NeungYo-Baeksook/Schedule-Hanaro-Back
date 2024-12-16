@@ -1,10 +1,9 @@
 package com.hanaro.schedule_hanaro.admin.controller;
 
-import com.hanaro.schedule_hanaro.admin.dto.response.AdminVisitNumResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminVisitInquiryInfoResponse;
+import com.hanaro.schedule_hanaro.admin.dto.response.AdminVisitNumResponse;
 import com.hanaro.schedule_hanaro.admin.service.AdminVisitService;
 import com.hanaro.schedule_hanaro.global.domain.Visit;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class AdminVisitController {
 
     private final AdminVisitService  adminVisitService;
+
 
     @GetMapping("/{visit-id}/content")
     public ResponseEntity<AdminVisitInquiryInfoResponse> getVisit(@PathVariable("visit-id") Long visitId) {
