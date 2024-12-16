@@ -15,6 +15,9 @@ import lombok.NoArgsConstructor;
 public class InquiryResponse {
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	Long id;
+
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "inquiry_id", nullable = false, unique = true)
 	private Inquiry inquiry;
