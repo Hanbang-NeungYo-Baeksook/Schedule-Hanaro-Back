@@ -67,20 +67,27 @@ public class AdminCallService {
 
 		if (call.getStatus().equals(Status.PROGRESS)) {
 			callRepository.updateStatus(callId, Status.COMPLETE);
+			return "상담 완료 처리되었습니다.";
 		} else if (call.getStatus().equals(Status.PENDING)) {
 			callRepository.updateStatus(callId, Status.PROGRESS);
+			return "상담 진행 처리되었습니다.";
 		} else if (call.getStatus().equals(Status.COMPLETE)){
 			throw new IllegalStateException("이미 완료된 상담입니다.");
+		} else {
+			throw new IllegalStateException("올바르지 않은 상담 상태입니다.");
 		}
 
-		return "Success";
 	}
 
 	@Transactional
 	public String saveCallMemo(Long callId, String content) {
-		Call call = callRepository.findById(callId).orElseThrow();
+		Call call = callRepository.findById(callId).orElseThrow(
+			() -> new IllegalArgumentException("존재하지 않는 문의입니다.")
+		);
 		// TODO: admin id 변경 -> security 연결
-		Admin admin = adminRepository.findById(1L).orElseThrow();
+		Admin admin = adminRepository.findById(3L).orElseThrow(
+			() -> new IllegalArgumentException("존재하지 않는 관리자입니다.")
+		);
 
 		callMemoRepository.save(
 			CallMemo.builder()
