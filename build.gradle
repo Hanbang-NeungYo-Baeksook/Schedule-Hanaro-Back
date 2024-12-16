@@ -32,7 +32,7 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
 //	spring security
-//	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
 
 //	database
 //	runtimeOnly 'com.mysql:mysql-connector-j'

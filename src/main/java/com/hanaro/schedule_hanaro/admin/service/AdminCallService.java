@@ -80,7 +80,7 @@ public class AdminCallService {
 	public String saveCallMemo(Long callId, String content) {
 		Call call = callRepository.findById(callId).orElseThrow();
 		// TODO: admin id 변경 -> security 연결
-		Admin admin = adminRepository.findById(1).orElseThrow();
+		Admin admin = adminRepository.findById(1L).orElseThrow();
 
 		callMemoRepository.save(
 			CallMemo.builder()

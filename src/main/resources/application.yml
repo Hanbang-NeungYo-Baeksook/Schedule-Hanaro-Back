@@ -3,7 +3,7 @@ spring:
     import: application-secret.yml
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
       #      ddl-auto: create
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl

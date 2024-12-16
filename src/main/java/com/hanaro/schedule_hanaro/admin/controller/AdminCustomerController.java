@@ -6,9 +6,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCustomerInfoResponse;
+import com.hanaro.schedule_hanaro.admin.dto.response.AdminCustomerListResponse;
 import com.hanaro.schedule_hanaro.admin.service.AdminCustomerService;
 
 @RestController
@@ -17,6 +19,15 @@ public class AdminCustomerController {
 
     @Autowired
     private AdminCustomerService adminCustomerService;
+
+    @GetMapping
+    public ResponseEntity<AdminCustomerListResponse> getCustomerList(
+        @RequestParam(defaultValue = "1") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        AdminCustomerListResponse response = adminCustomerService.getCustomerList(page, size);
+        return ResponseEntity.ok(response);
+    }
 
     @GetMapping("/{customer_id}")
     public ResponseEntity<AdminCustomerInfoResponse> getCustomerInfo(@PathVariable Long customer_id) {
