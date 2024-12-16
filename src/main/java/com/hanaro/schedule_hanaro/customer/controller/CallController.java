@@ -76,7 +76,7 @@ public class CallController {
 
 	// 추후 수정 - 실제 구현에서는 토큰 파싱 로직 필요
 	private Long extractCustomerIdFromToken(String token) {
-		return 1L;
+		return 6L;
 	}
 
 }

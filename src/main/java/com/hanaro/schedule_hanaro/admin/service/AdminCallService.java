@@ -28,6 +28,7 @@ import com.hanaro.schedule_hanaro.global.domain.CallMemo;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
+import com.hanaro.schedule_hanaro.global.websocket.handler.WebsocketHandler;
 
 import lombok.RequiredArgsConstructor;
 
@@ -42,30 +43,17 @@ public class AdminCallService {
 
 	public AdminCallWaitResponse findWaitList() {
 
-		Function<Call, AdminCallInfoResponse> extractCallInfo = call -> AdminCallInfoResponse.from(
-			call,
-			call.getCustomer(),
-			callRepository.findCallHistoryByCustomerId(call.getCustomer().getId(), call.getId())
-				.stream()
-				.map(AdminCallHistoryResponse::from)
-				.toList(),
-			inquiryRepository.findByCustomerId(call.getCustomer().getId())
-				.stream()
-				.map(AdminInquiryHistoryResponse::from)
-				.toList()
-		);
-
 		// 진행 중
 		AdminCallInfoResponse progressCall = callRepository.findByStatus(Status.PROGRESS)
 			.stream()
-			.map(extractCallInfo)
+			.map(this::getCallInfo)
 			.findFirst()
 			.orElse(null);
 
 		// 대기 중
 		List<AdminCallInfoResponse> pendingCalls = callRepository.findByStatus(Status.PENDING)
 			.stream()
-			.map(extractCallInfo)
+			.map(this::getCallInfo)
 			.toList();
 
 		return AdminCallWaitResponse.of(progressCall, pendingCalls);
@@ -105,7 +93,7 @@ public class AdminCallService {
 		return "Success";
 	}
 
-	public AdminCallHistoryListResponse findFilteredCalls(int page, int size, String status, LocalDate startedAt, LocalDate endedAt, Category category, String keyword) {
+	public AdminCallHistoryListResponse findFilteredCalls(int page, int size, Status status, LocalDate startedAt, LocalDate endedAt, Category category, String keyword) {
 		Pageable pageable = PageRequest.of(page - 1, size);
 
 		Slice<Call> callSlice = callRepository.findByFiltering(pageable, status, startedAt, endedAt, category, keyword);
@@ -140,5 +128,20 @@ public class AdminCallService {
 		);
 
 		return AdminCallDetailResponse.from(call, customer);
+	}
+
+	public AdminCallInfoResponse getCallInfo(Call call) {
+		return AdminCallInfoResponse.from(
+			call,
+			call.getCustomer(),
+			callRepository.findCallHistoryByCustomerId(call.getCustomer().getId(), call.getId())
+				.stream()
+				.map(AdminCallHistoryResponse::from)
+				.toList(),
+			inquiryRepository.findByCustomerId(call.getCustomer().getId())
+				.stream()
+				.map(AdminInquiryHistoryResponse::from)
+				.toList()
+		);
 	}
 }

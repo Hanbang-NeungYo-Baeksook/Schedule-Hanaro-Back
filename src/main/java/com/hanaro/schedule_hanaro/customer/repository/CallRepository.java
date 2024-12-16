@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -41,7 +40,7 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 		"AND (:endedAt IS NULL OR c.endedAt <= :endedAt)")
 	Slice<Call> findByFiltering(
 		Pageable pageable,
-		String status,
+		Status status,
 		@Param("startedAt") LocalDate startedAt,
 		@Param("endedAt") LocalDate endedAt,
 		@Param("category") Category category,
