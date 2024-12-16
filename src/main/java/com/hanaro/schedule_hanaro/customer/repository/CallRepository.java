@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,10 +16,13 @@ import com.hanaro.schedule_hanaro.global.domain.Call;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 
+import jakarta.persistence.LockModeType;
+
 public interface CallRepository extends JpaRepository<Call, Long> {
 
-	@Query("SELECT COALESCE(MAX(c.callNum), 0) FROM Call c WHERE c.callDate = :callDate")
-	int findMaxCallNumByDate(@Param("callDate") LocalDateTime callDate);
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	@Query("SELECT COALESCE(MAX(c.callNum), 0) FROM Call c WHERE FUNCTION('DATE', c.callDate) = :callDate")
+	int findMaxCallNumByDate(@Param("callDate") LocalDate callDate);
 
 	boolean existsByCallDate(LocalDateTime callDate);
 
