@@ -27,6 +27,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
 		System.out.println("Authenticate Provider 진입 성공 ");
 		System.out.println(authentication.getPrincipal().toString());
 		if (authentication.getPrincipal().getClass().equals(String.class)) {
+			System.out.println("로그인 시작");
 			return authOfLogin(authentication);
 		} else {
 			return authAfterLogin((UserInfo) authentication.getPrincipal());
@@ -34,18 +35,20 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
 	}
 
 	private Authentication authOfLogin(Authentication authentication) {
-		CustomUserDetails userDetails = customUserDetailService.loadUserByUsername(
+		CustomUserDetails customUserDetails = customUserDetailService.loadUserByUsername(
 			authentication.getPrincipal().toString());
 
-		System.out.println(userDetails.getUsername());
-		if (!bCryptPasswordEncoder.matches(authentication.getCredentials().toString(), userDetails.getPassword()))
+		System.out.println(customUserDetails.getUsername());
+		if (!bCryptPasswordEncoder.matches(authentication.getCredentials().toString(), customUserDetails.getPassword()))
 			throw new UsernameNotFoundException("비밀번호가 일치하지 않습니다.");
 
-		return new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(),
-			userDetails.getAuthorities());
+		System.out.println(customUserDetails.getAuthorities());
+		return new UsernamePasswordAuthenticationToken(customUserDetails, customUserDetails.getPassword(),
+			customUserDetails.getAuthorities());
 	}
 
 	private Authentication authAfterLogin(UserInfo userInfo) {
+		System.out.println(userInfo.id()+userInfo.role());
 		CustomUserDetails customUserDetails = customUserDetailService.loadUserByUsername(
 			userInfo.id());
 		return new UsernamePasswordAuthenticationToken(customUserDetails, customUserDetails.getPassword(),
