@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 
 @RestController
-@RequestMapping("/admin/api/visit")
+@RequestMapping("/admin/api/visits")
 @RequiredArgsConstructor
 public class AdminVisitController {
 
