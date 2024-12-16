@@ -14,7 +14,7 @@ import com.hanaro.schedule_hanaro.global.domain.CsVisit;
 import jakarta.persistence.LockModeType;
 
 @Repository
-public interface CsVisitRepository extends JpaRepository<CsVisit, Integer> {
+public interface CsVisitRepository extends JpaRepository<CsVisit, Long> {
 
 	Optional<CsVisit> findByBranchIdAndDate(Long branchId, LocalDate date);
 
