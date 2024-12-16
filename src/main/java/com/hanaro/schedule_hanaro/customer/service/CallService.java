@@ -40,8 +40,8 @@ public class CallService {
 	private final AdminCallService adminCallService;
 
 	@Transactional
-	public CallResponse createCall(Long customerId, CallRequest request) {
-		Customer customer = customerRepository.findById(customerId)
+	public CallResponse createCall(String customerId, CallRequest request) {
+		Customer customer = customerRepository.findByAuthId(customerId)
 			.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 회원 id입니다."));
 
 		boolean isDuplicate = callRepository.existsByCallDate(request.callDate());
