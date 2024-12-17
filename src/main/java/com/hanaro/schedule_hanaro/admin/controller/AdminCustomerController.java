@@ -34,7 +34,7 @@ public class AdminCustomerController {
         return ResponseEntity.ok().body(adminCustomerService.findCustomerInfoById(customerId));
     }
 
-    @GetMapping("/customers/{customer_id}/content")
+    @GetMapping("/customers/{customer-id}/content")
     public ResponseEntity<AdminCustomerInquiryListResponse> getCustomerInquiries(@PathVariable("customer-id") Long customerId) {
         AdminCustomerInquiryListResponse response = adminCustomerService.findCustomerInquiryList(customerId);
         return ResponseEntity.ok(response);
