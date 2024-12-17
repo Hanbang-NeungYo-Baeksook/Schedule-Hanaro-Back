@@ -1,7 +1,11 @@
 package com.hanaro.schedule_hanaro.admin.controller;
 
+import java.security.Principal;
+
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInfoResponse;
 import com.hanaro.schedule_hanaro.admin.service.AdminInfoService;
+import com.hanaro.schedule_hanaro.global.auth.info.CustomUserDetails;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,9 +22,9 @@ public class AdminInfoController {
 
 
 
-    @GetMapping("/{admin-id}/stats")
-    public ResponseEntity<AdminInfoResponse> getAdminStats(@PathVariable("admin-id") Long adminId) {
-        return ResponseEntity.ok(adminService.getAdminStats(adminId));
+    @GetMapping("/stats")
+    public ResponseEntity<AdminInfoResponse> getAdminStats(Principal principal) {
+        return ResponseEntity.ok(adminService.getAdminStats(principal));
     }
 }
 

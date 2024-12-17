@@ -1,10 +1,13 @@
 package com.hanaro.schedule_hanaro.customer.service;
 
+import java.security.Principal;
+
 import org.springframework.stereotype.Service;
 
 import com.hanaro.schedule_hanaro.customer.dto.response.CustomerInfoResponse;
 import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
+import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
 
 @Service
 public class CustomerService {
@@ -14,8 +17,9 @@ public class CustomerService {
 		this.customerRepository = customerRepository;
 	}
 	
-	public CustomerInfoResponse findCustomerById(Long id) {
-		Customer customer = customerRepository.findById(id).orElseThrow();
+	public CustomerInfoResponse findCustomer(Principal principal) {
+		String authId = PrincipalUtils.getAuthId(principal);
+		Customer customer = customerRepository.findByAuthId(authId).orElseThrow();
 		return CustomerInfoResponse.of(customer.getName(), customer.getPhoneNum());
 	}
 }

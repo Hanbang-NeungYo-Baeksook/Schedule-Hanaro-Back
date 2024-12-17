@@ -19,11 +19,10 @@ import lombok.RequiredArgsConstructor;
 public class CustomerController {
 	private final CustomerService customerService;
 
-	@GetMapping("/{customer-id}")
-	public ResponseEntity<CustomerInfoResponse> getCustomerInfo(@PathVariable("customer-id") Long customerId, Principal principal) {
-		System.out.println("get customer controller 진입" + customerId);
+	@GetMapping("")
+	public ResponseEntity<CustomerInfoResponse> getCustomerInfo(Principal principal) {
 		ResponseEntity<CustomerInfoResponse> response = ResponseEntity.ok()
-			.body(customerService.findCustomerById(customerId));
+			.body(customerService.findCustomer(principal));
 		System.out.println("response 완료" + response);
 		return response;
 	}
