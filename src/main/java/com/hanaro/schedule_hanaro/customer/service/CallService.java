@@ -1,6 +1,6 @@
 package com.hanaro.schedule_hanaro.customer.service;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.PageRequest;
@@ -10,8 +10,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallInfoResponse;
-import com.hanaro.schedule_hanaro.admin.service.AdminCallService;
 import com.hanaro.schedule_hanaro.customer.dto.request.CallRequest;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallListResponse;
@@ -25,7 +23,6 @@ import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
-import com.hanaro.schedule_hanaro.global.websocket.handler.WebsocketHandler;
 
 import lombok.RequiredArgsConstructor;
 
@@ -35,8 +32,6 @@ public class CallService {
 
 	private final CallRepository callRepository;
 	private final CustomerRepository customerRepository;
-	private final WebsocketHandler websocketHandler;
-	private final AdminCallService adminCallService;
 
 	@Transactional
 	public CallResponse createCall(Authentication authentication, CallRequest request) {
@@ -44,15 +39,18 @@ public class CallService {
 		Customer customer = customerRepository.findById(PrincipalUtils.getId(authentication))
 			.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 회원 id입니다."));
 
-		boolean isDuplicate = callRepository.existsByCallDate(request.callDate());
+		LocalDateTime[] timeSlotRange = getTimeSlotRange(request.callDate());
+		LocalDateTime startTime = timeSlotRange[0];
+		LocalDateTime endTime = timeSlotRange[1];
 
-		if (isDuplicate) {
-			throw new IllegalStateException("이미 예약된 시간대입니다.");
+		int baseNum = calculateNum(request.callDate());
+
+		int maxCallNumInSlot = callRepository.findMaxCallNumByTimeSlot(startTime, endTime);
+		int newCallNum = (maxCallNumInSlot == 0) ? baseNum : maxCallNumInSlot + 1;
+
+		if (newCallNum > baseNum + 99) {
+			throw new IllegalStateException("해당 시간대의 예약이 모두 찼습니다.");
 		}
-
-		LocalDate requestDate = request.callDate().toLocalDate();
-
-		int newCallNum = callRepository.findMaxCallNumByDate(requestDate) + 1;
 
 		Call call = Call.builder()
 			.customer(customer)
@@ -65,13 +63,35 @@ public class CallService {
 
 		Call savedCall = callRepository.save(call);
 
-		AdminCallInfoResponse adminCallInfoResponse = adminCallService.getCallInfo(savedCall);
-		websocketHandler.notifySubscribers(1L, "새로운 Call 등록: " + adminCallInfoResponse);
-
 		return CallResponse.builder()
 			.callId(savedCall.getId())
 			.build();
 	}
+
+	private LocalDateTime[] getTimeSlotRange(LocalDateTime callDateTime) {
+		int hour = callDateTime.getHour();
+		LocalDateTime startTime = callDateTime.withHour(hour).withMinute(0).withSecond(0).withNano(0);
+		LocalDateTime endTime = startTime.plusHours(1).minusSeconds(1);
+		return new LocalDateTime[]{startTime, endTime};
+	}
+
+
+	private int calculateNum(LocalDateTime callDateTime) {
+		int hour = callDateTime.getHour();
+		return switch (hour) {
+			case 9 -> 1;
+			case 10 -> 101;
+			case 11 -> 201;
+			case 12 -> 301;
+			case 13 -> 401;
+			case 14 -> 501;
+			case 15 -> 601;
+			case 16 -> 701;
+			case 17 -> 801;
+			default -> throw new IllegalArgumentException("운영 시간 외에는 예약할 수 없습니다.");
+		};
+	}
+
 
 	@Transactional
 	public void cancelCall(Long callId) {
