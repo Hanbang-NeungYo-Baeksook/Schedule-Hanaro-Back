@@ -4,10 +4,16 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
-@RequiredArgsConstructor
 public class GlobalException extends RuntimeException{
 	private final ErrorCode errorCode;
-	public String getMessage(){
-		return this.errorCode.getMessage();
+	private final String message;
+
+	public GlobalException(ErrorCode errorCode) {
+		this.errorCode = errorCode;
+		this.message = errorCode.getMessage();
+	}
+	public GlobalException(ErrorCode errorCode, String message) {
+		this.errorCode = errorCode;
+		this.message = message;
 	}
 }
