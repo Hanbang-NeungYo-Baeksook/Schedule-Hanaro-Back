@@ -1,10 +1,8 @@
 package com.hanaro.schedule_hanaro.admin.service;
 
-import java.security.Principal;
 
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInfoResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryStatsDto;
-import com.hanaro.schedule_hanaro.global.auth.info.CustomUserDetails;
 import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
 import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 import com.hanaro.schedule_hanaro.global.repository.AdminRepository;
