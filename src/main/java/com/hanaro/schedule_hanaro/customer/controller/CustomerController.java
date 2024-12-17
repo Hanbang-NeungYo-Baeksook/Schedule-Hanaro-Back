@@ -4,7 +4,6 @@ import java.security.Principal;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,9 +20,7 @@ public class CustomerController {
 
 	@GetMapping("")
 	public ResponseEntity<CustomerInfoResponse> getCustomerInfo(Principal principal) {
-		ResponseEntity<CustomerInfoResponse> response = ResponseEntity.ok()
+		return ResponseEntity.ok()
 			.body(customerService.findCustomer(principal));
-		System.out.println("response 완료" + response);
-		return response;
 	}
 }
