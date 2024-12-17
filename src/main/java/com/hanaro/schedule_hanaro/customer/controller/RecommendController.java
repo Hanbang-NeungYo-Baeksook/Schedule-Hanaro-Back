@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hanaro.schedule_hanaro.customer.dto.request.RecommendCreateRequest;
 import com.hanaro.schedule_hanaro.customer.dto.response.RecommendListResponse;
-import com.hanaro.schedule_hanaro.customer.service.RecommendService;
+import com.hanaro.schedule_hanaro.global.service.RecommendService;
 
 @RestController
 @RequestMapping("/api/recommends")

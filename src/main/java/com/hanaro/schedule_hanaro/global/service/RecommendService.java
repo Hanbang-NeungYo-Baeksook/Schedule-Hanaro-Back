@@ -1,4 +1,4 @@
-package com.hanaro.schedule_hanaro.customer.service;
+package com.hanaro.schedule_hanaro.global.service;
 
 import java.util.ArrayList;
 import java.util.List;

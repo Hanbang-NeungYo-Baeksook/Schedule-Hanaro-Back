@@ -1,4 +1,4 @@
-package com.hanaro.schedule_hanaro.customer.controller;
+package com.hanaro.schedule_hanaro.global.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 
-import jakarta.security.auth.message.AuthException;
 
 @RestControllerAdvice
 public class ErrorController {
