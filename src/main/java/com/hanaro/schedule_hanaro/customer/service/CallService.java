@@ -16,6 +16,8 @@ import com.hanaro.schedule_hanaro.customer.dto.request.CallRequest;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallListResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallResponse;
+import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
+import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 import com.hanaro.schedule_hanaro.global.repository.CallRepository;
 import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
 import com.hanaro.schedule_hanaro.global.domain.Call;
@@ -73,10 +75,10 @@ public class CallService {
 	@Transactional
 	public void cancelCall(Long callId) {
 		Call call = callRepository.findById(callId)
-			.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 상담 id입니다."));
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CALL));
 
 		if (call.getStatus() != Status.PENDING) {
-			throw new IllegalStateException("진행 중이거나 완료된 상담은 취소할 수 없습니다.");
+			throw new GlobalException(ErrorCode.WRONG_CALL_STATUS, "진행 중이거나 완료된 상담은 취소할 수 없습니다.");
 		}
 
 		callRepository.delete(call);

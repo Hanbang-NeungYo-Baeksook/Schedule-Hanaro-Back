@@ -16,6 +16,8 @@ import com.hanaro.schedule_hanaro.admin.dto.request.AdminInquiryResponseRequest;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryDetailResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryListResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryResponse;
+import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
+import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 import com.hanaro.schedule_hanaro.global.repository.InquiryResponseRepository;
 import com.hanaro.schedule_hanaro.global.repository.AdminRepository;
 import com.hanaro.schedule_hanaro.global.domain.Admin;
@@ -62,9 +64,10 @@ public class AdminInquiryService {
 
 	public AdminInquiryDetailResponse findInquiryDetail(Long inquiryId) {
 		Inquiry inquiry = inquiryRepository.findInquiryDetailById(inquiryId)
-			.orElseThrow(() -> new IllegalArgumentException("해당 문의를 찾을 수 없습니다. ID: " + inquiryId));
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_INQUIRY));
 
 		Customer customer = inquiry.getCustomer();
+		// 이 부분 반드시 리팩토링
 		Optional<InquiryResponse> inquiryResponse = inquiryResponseRepository.findByInquiryId(inquiryId);
 
 		return AdminInquiryDetailResponse.of(
@@ -83,10 +86,10 @@ public class AdminInquiryService {
 	@Transactional
 	public AdminInquiryResponse registerInquiryResponse(Long inquiryId, AdminInquiryResponseRequest request){
 		Inquiry inquiry = inquiryRepository.findById(inquiryId)
-			.orElseThrow(() -> new IllegalArgumentException("해당 문의를 찾을 수 없습니다. ID: " + inquiryId));
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_INQUIRY));
 
 		Admin admin = adminRepository.findById(request.adminId())
-			.orElseThrow(() -> new IllegalArgumentException("해당 관리자를 찾을 수 없습니다. ID: " + request.adminId()));
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_ADMIN));
 
 		InquiryResponse inquiryResponse = InquiryResponse.builder()
 			.inquiry(inquiry)

@@ -11,6 +11,8 @@ import com.hanaro.schedule_hanaro.customer.dto.response.AtmInfoDto;
 import com.hanaro.schedule_hanaro.customer.dto.response.BankInfoDto;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchListResponse;
+import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
+import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 import com.hanaro.schedule_hanaro.global.repository.BranchRepository;
 import com.hanaro.schedule_hanaro.global.repository.CsVisitRepository;
 import com.hanaro.schedule_hanaro.global.domain.Branch;
@@ -26,9 +28,10 @@ public class BranchService {
 	private final CsVisitRepository csVisitRepository;
 
 	public BranchDetailResponse findBranchById(Long id){
-		Branch branch = branchRepository.findById(id).orElseThrow();
+		Branch branch = branchRepository.findById(id).orElseThrow(()->new GlobalException(ErrorCode.NOT_FOUND_BRANCH));
 		System.out.println(LocalDate.now());
-		CsVisit csVisit = csVisitRepository.findCsVisitByBranchIdAndDate(id, LocalDate.now()).orElseThrow();
+		CsVisit csVisit = csVisitRepository.findCsVisitByBranchIdAndDate(id, LocalDate.now())
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_DATA));
 		System.out.println(csVisit);
 		return BranchDetailResponse.of(branch.getId(), branch.getName(), branch.getAddress(), branch.getTel(),
 			branch.getBusinessTime(), branch.getBranchType().toString(), csVisit.getCurrentNum(), csVisit.getTotalNum(),
