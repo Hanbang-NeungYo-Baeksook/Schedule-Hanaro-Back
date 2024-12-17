@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.hanaro.schedule_hanaro.customer.dto.response.RecommendDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.RecommendListResponse;
-import com.hanaro.schedule_hanaro.customer.repository.RecommendRepository;
+import com.hanaro.schedule_hanaro.global.repository.RecommendRepository;
 import com.hanaro.schedule_hanaro.global.domain.Recommend;
 
 @Service

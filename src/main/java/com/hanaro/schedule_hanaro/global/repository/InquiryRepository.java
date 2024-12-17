@@ -1,4 +1,4 @@
-package com.hanaro.schedule_hanaro.customer.repository;
+package com.hanaro.schedule_hanaro.global.repository;
 
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryDto;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryStatsDto;
@@ -16,6 +16,7 @@ import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryStatsDto;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryResponse;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
@@ -42,4 +43,23 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
     WHERE ir.admin_id = :adminId 
 """, nativeQuery = true)
 	AdminInquiryStatsDto findStatsByAdminId(@Param("adminId") Long adminId);
+
+	@Query("SELECT i FROM Inquiry i " +
+		"LEFT JOIN Customer c ON i.customer.id = c.id " +
+		"WHERE (i.inquiryStatus = :status) " +
+		"AND (i.category = :category) " +
+		"AND (:searchContent IS NULL OR " +
+		"     i.tags LIKE %:searchContent% OR " +
+		"     i.content LIKE %:searchContent% OR " +
+		"     c.name LIKE %:searchContent%)" +
+		"ORDER BY i.createdAt DESC")
+	Page<Inquiry> findFilteredInquiries(
+		@Param("status") String status,
+		@Param("category") String category,
+		@Param("searchContent") String searchContent,
+		Pageable pageable
+	);
+
+	@Query("SELECT i FROM Inquiry i LEFT JOIN InquiryResponse r ON i.id = r.inquiry.id LEFT JOIN Customer c ON i.customer.id = c.id WHERE i.id = :inquiryId")
+	Optional<Inquiry> findInquiryDetailById(@Param("inquiryId") Long inquiryId);
 }

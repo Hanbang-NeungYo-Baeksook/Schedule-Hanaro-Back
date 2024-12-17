@@ -1,10 +1,9 @@
 package com.hanaro.schedule_hanaro.admin.service;
 
-import com.hanaro.schedule_hanaro.admin.dto.response.AdminInfoDto;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInfoResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryStatsDto;
-import com.hanaro.schedule_hanaro.admin.repository.AdminRepository;
-import com.hanaro.schedule_hanaro.customer.repository.InquiryRepository;
+import com.hanaro.schedule_hanaro.global.repository.AdminRepository;
+import com.hanaro.schedule_hanaro.global.repository.InquiryRepository;
 import com.hanaro.schedule_hanaro.global.domain.Admin;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

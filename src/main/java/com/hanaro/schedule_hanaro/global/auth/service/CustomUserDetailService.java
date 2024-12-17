@@ -4,10 +4,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.hanaro.schedule_hanaro.admin.repository.AdminRepository;
-import com.hanaro.schedule_hanaro.customer.repository.CustomerRepository;
+import com.hanaro.schedule_hanaro.global.repository.AdminRepository;
+import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
 import com.hanaro.schedule_hanaro.global.auth.info.CustomUserDetails;
-import com.hanaro.schedule_hanaro.global.domain.Customer;
 
 import lombok.RequiredArgsConstructor;
 

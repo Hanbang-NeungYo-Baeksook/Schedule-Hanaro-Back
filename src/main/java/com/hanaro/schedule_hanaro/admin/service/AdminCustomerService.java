@@ -1,8 +1,8 @@
 package com.hanaro.schedule_hanaro.admin.service;
 
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCustomerListResponse;
-import com.hanaro.schedule_hanaro.customer.repository.CallRepository;
-import com.hanaro.schedule_hanaro.customer.repository.InquiryRepository;
+import com.hanaro.schedule_hanaro.global.repository.CallRepository;
+import com.hanaro.schedule_hanaro.global.repository.InquiryRepository;
 import com.hanaro.schedule_hanaro.global.domain.Call;
 import com.hanaro.schedule_hanaro.global.domain.Inquiry;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallDto;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCustomerInfoResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCustomerInquiryListResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryDto;
-import com.hanaro.schedule_hanaro.customer.repository.CustomerRepository;
+import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
 
 import java.util.List;

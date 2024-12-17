@@ -11,10 +11,9 @@ import com.hanaro.schedule_hanaro.customer.dto.response.AtmInfoDto;
 import com.hanaro.schedule_hanaro.customer.dto.response.BankInfoDto;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchListResponse;
-import com.hanaro.schedule_hanaro.customer.repository.BranchRepository;
-import com.hanaro.schedule_hanaro.customer.repository.CsVisitRepository;
+import com.hanaro.schedule_hanaro.global.repository.BranchRepository;
+import com.hanaro.schedule_hanaro.global.repository.CsVisitRepository;
 import com.hanaro.schedule_hanaro.global.domain.Branch;
-import com.hanaro.schedule_hanaro.customer.repository.BranchRepository;
 import com.hanaro.schedule_hanaro.global.domain.CsVisit;
 import com.hanaro.schedule_hanaro.global.domain.enums.BranchType;
 

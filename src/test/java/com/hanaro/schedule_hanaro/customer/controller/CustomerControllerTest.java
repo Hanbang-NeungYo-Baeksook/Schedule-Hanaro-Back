@@ -21,7 +21,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hanaro.schedule_hanaro.customer.dto.response.CustomerInfoResponse;
-import com.hanaro.schedule_hanaro.customer.repository.CustomerRepository;
+import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.enums.Gender;
 

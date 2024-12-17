@@ -5,8 +5,8 @@ import com.hanaro.schedule_hanaro.customer.dto.response.InquiryCreateResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryListResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryReplyDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryResponse;
-import com.hanaro.schedule_hanaro.customer.repository.InquiryRepository;
-import com.hanaro.schedule_hanaro.customer.repository.CustomerRepository;
+import com.hanaro.schedule_hanaro.global.repository.InquiryRepository;
+import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.Inquiry;
 import com.hanaro.schedule_hanaro.global.domain.enums.InquiryStatus;
@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service

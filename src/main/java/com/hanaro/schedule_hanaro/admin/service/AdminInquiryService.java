@@ -16,13 +16,13 @@ import com.hanaro.schedule_hanaro.admin.dto.request.AdminInquiryResponseRequest;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryDetailResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryListResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryResponse;
-import com.hanaro.schedule_hanaro.admin.repository.AdminInquiryRepository;
-import com.hanaro.schedule_hanaro.admin.repository.AdminInquiryResponseRepository;
-import com.hanaro.schedule_hanaro.admin.repository.AdminRepository;
+import com.hanaro.schedule_hanaro.global.repository.InquiryResponseRepository;
+import com.hanaro.schedule_hanaro.global.repository.AdminRepository;
 import com.hanaro.schedule_hanaro.global.domain.Admin;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.Inquiry;
 import com.hanaro.schedule_hanaro.global.domain.InquiryResponse;
+import com.hanaro.schedule_hanaro.global.repository.InquiryRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,14 +30,14 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AdminInquiryService {
 
-	private final AdminInquiryRepository adminInquiryRepository;
-	private final AdminInquiryResponseRepository adminInquiryResponseRepository;
+	private final InquiryResponseRepository inquiryResponseRepository;
 	private final AdminRepository adminRepository;
+	private final InquiryRepository inquiryRepository;
 
 	public AdminInquiryListResponse findInquiryList(AdminInquiryListRequest request) {
 		Pageable pageable = PageRequest.of(request.page(), request.size());
 
-		Page<Inquiry> inquiries = adminInquiryRepository.findFilteredInquiries(
+		Page<Inquiry> inquiries = inquiryRepository.findFilteredInquiries(
 			request.status(),
 			request.category().toString(),
 			request.searchContent(),
@@ -61,11 +61,11 @@ public class AdminInquiryService {
 	}
 
 	public AdminInquiryDetailResponse findInquiryDetail(Long inquiryId) {
-		Inquiry inquiry = adminInquiryRepository.findInquiryDetailById(inquiryId)
+		Inquiry inquiry = inquiryRepository.findInquiryDetailById(inquiryId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 문의를 찾을 수 없습니다. ID: " + inquiryId));
 
 		Customer customer = inquiry.getCustomer();
-		Optional<InquiryResponse> inquiryResponse = adminInquiryResponseRepository.findByInquiryId(inquiryId);
+		Optional<InquiryResponse> inquiryResponse = inquiryResponseRepository.findByInquiryId(inquiryId);
 
 		return AdminInquiryDetailResponse.of(
 			inquiry.getId(),
@@ -82,7 +82,7 @@ public class AdminInquiryService {
 
 	@Transactional
 	public AdminInquiryResponse registerInquiryResponse(Long inquiryId, AdminInquiryResponseRequest request){
-		Inquiry inquiry = adminInquiryRepository.findById(inquiryId)
+		Inquiry inquiry = inquiryRepository.findById(inquiryId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 문의를 찾을 수 없습니다. ID: " + inquiryId));
 
 		Admin admin = adminRepository.findById(request.adminId())
@@ -95,7 +95,7 @@ public class AdminInquiryService {
 			.createdAt(LocalDateTime.now())
 			.build();
 
-		InquiryResponse savedResponse = adminInquiryResponseRepository.save(inquiryResponse);
+		InquiryResponse savedResponse = inquiryResponseRepository.save(inquiryResponse);
 
 		return AdminInquiryResponse.of(
 			savedResponse.getInquiry().getId(),

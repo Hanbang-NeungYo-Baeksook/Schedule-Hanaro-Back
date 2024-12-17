@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hanaro.schedule_hanaro.customer.dto.request.RecommendCreateRequest;
-import com.hanaro.schedule_hanaro.customer.repository.RecommendRepository;
+import com.hanaro.schedule_hanaro.global.repository.RecommendRepository;
 import com.hanaro.schedule_hanaro.global.domain.Recommend;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 

@@ -1,4 +1,4 @@
-package com.hanaro.schedule_hanaro.admin.repository;
+package com.hanaro.schedule_hanaro.global.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

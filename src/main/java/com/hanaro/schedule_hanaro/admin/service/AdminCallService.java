@@ -2,9 +2,7 @@ package com.hanaro.schedule_hanaro.admin.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.function.Function;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -17,18 +15,17 @@ import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallHistoryResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallInfoResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallWaitResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryHistoryResponse;
-import com.hanaro.schedule_hanaro.admin.repository.AdminRepository;
-import com.hanaro.schedule_hanaro.admin.repository.CallMemoRepository;
-import com.hanaro.schedule_hanaro.customer.repository.CallRepository;
-import com.hanaro.schedule_hanaro.customer.repository.CustomerRepository;
-import com.hanaro.schedule_hanaro.customer.repository.InquiryRepository;
+import com.hanaro.schedule_hanaro.global.repository.AdminRepository;
+import com.hanaro.schedule_hanaro.global.repository.CallMemoRepository;
+import com.hanaro.schedule_hanaro.global.repository.CallRepository;
+import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
+import com.hanaro.schedule_hanaro.global.repository.InquiryRepository;
 import com.hanaro.schedule_hanaro.global.domain.Admin;
 import com.hanaro.schedule_hanaro.global.domain.Call;
 import com.hanaro.schedule_hanaro.global.domain.CallMemo;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
-import com.hanaro.schedule_hanaro.global.websocket.handler.WebsocketHandler;
 
 import lombok.RequiredArgsConstructor;
 

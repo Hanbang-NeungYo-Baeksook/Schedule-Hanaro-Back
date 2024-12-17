@@ -16,10 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.hanaro.schedule_hanaro.customer.dto.request.VisitCreateRequest;
-import com.hanaro.schedule_hanaro.customer.repository.BranchRepository;
-import com.hanaro.schedule_hanaro.customer.repository.CsVisitRepository;
-import com.hanaro.schedule_hanaro.customer.repository.CustomerRepository;
-import com.hanaro.schedule_hanaro.customer.repository.VisitRepository;
+import com.hanaro.schedule_hanaro.global.repository.BranchRepository;
+import com.hanaro.schedule_hanaro.global.repository.CsVisitRepository;
+import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
+import com.hanaro.schedule_hanaro.global.repository.VisitRepository;
 import com.hanaro.schedule_hanaro.global.domain.Branch;
 import com.hanaro.schedule_hanaro.global.domain.CsVisit;
 import com.hanaro.schedule_hanaro.global.domain.Customer;

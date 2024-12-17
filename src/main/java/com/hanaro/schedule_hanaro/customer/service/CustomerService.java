@@ -3,7 +3,7 @@ package com.hanaro.schedule_hanaro.customer.service;
 import org.springframework.stereotype.Service;
 
 import com.hanaro.schedule_hanaro.customer.dto.response.CustomerInfoResponse;
-import com.hanaro.schedule_hanaro.customer.repository.CustomerRepository;
+import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
 
 @Service
