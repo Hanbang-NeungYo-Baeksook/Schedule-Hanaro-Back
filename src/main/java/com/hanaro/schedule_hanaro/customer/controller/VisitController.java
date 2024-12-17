@@ -1,6 +1,9 @@
 package com.hanaro.schedule_hanaro.customer.controller;
 
+import java.security.Principal;
+
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,11 +28,11 @@ public class VisitController {
 
 	@GetMapping
 	public ResponseEntity<VisitListResponse> getVisitList(
-		@RequestParam(value = "customerId") Long customerId,
+		Authentication authentication,
 		@RequestParam(value = "page", defaultValue = "1") int page,
 		@RequestParam(value = "size", defaultValue = "10") int size
 	) {
-		return ResponseEntity.ok(visitService.getVisitList(customerId, page, size));
+		return ResponseEntity.ok(visitService.getVisitList(authentication, page, size));
 	}
 
 	@GetMapping("/{visit-id}")

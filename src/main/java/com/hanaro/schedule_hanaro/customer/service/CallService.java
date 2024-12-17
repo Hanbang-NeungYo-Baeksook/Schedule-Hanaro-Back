@@ -3,29 +3,28 @@ package com.hanaro.schedule_hanaro.customer.service;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallHistoryResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallInfoResponse;
-import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryHistoryResponse;
 import com.hanaro.schedule_hanaro.admin.service.AdminCallService;
 import com.hanaro.schedule_hanaro.customer.dto.request.CallRequest;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallListResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallResponse;
-import com.hanaro.schedule_hanaro.customer.repository.CallRepository;
-import com.hanaro.schedule_hanaro.customer.repository.CustomerRepository;
-import com.hanaro.schedule_hanaro.customer.repository.InquiryRepository;
+import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
+import com.hanaro.schedule_hanaro.global.exception.GlobalException;
+import com.hanaro.schedule_hanaro.global.repository.CallRepository;
+import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
 import com.hanaro.schedule_hanaro.global.domain.Call;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
-import com.hanaro.schedule_hanaro.global.domain.Inquiry;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
+import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
 import com.hanaro.schedule_hanaro.global.websocket.handler.WebsocketHandler;
 
 import lombok.RequiredArgsConstructor;
@@ -40,8 +39,9 @@ public class CallService {
 	private final AdminCallService adminCallService;
 
 	@Transactional
-	public CallResponse createCall(String customerId, CallRequest request) {
-		Customer customer = customerRepository.findByAuthId(customerId)
+	public CallResponse createCall(Authentication authentication, CallRequest request) {
+
+		Customer customer = customerRepository.findById(PrincipalUtils.getId(authentication))
 			.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 회원 id입니다."));
 
 		boolean isDuplicate = callRepository.existsByCallDate(request.callDate());
@@ -76,10 +76,10 @@ public class CallService {
 	@Transactional
 	public void cancelCall(Long callId) {
 		Call call = callRepository.findById(callId)
-			.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 상담 id입니다."));
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CALL));
 
 		if (call.getStatus() != Status.PENDING) {
-			throw new IllegalStateException("진행 중이거나 완료된 상담은 취소할 수 없습니다.");
+			throw new GlobalException(ErrorCode.WRONG_CALL_STATUS, "진행 중이거나 완료된 상담은 취소할 수 없습니다.");
 		}
 
 		callRepository.delete(call);

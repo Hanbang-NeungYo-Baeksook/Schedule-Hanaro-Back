@@ -3,8 +3,8 @@ package com.hanaro.schedule_hanaro.customer.controller;
 import java.security.Principal;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,12 +19,9 @@ import lombok.RequiredArgsConstructor;
 public class CustomerController {
 	private final CustomerService customerService;
 
-	@GetMapping("/{customer-id}")
-	public ResponseEntity<CustomerInfoResponse> getCustomerInfo(@PathVariable("customer-id") Long customerId, Principal principal) {
-		System.out.println("get customer controller 진입" + customerId);
-		ResponseEntity<CustomerInfoResponse> response = ResponseEntity.ok()
-			.body(customerService.findCustomerById(customerId));
-		System.out.println("response 완료" + response);
-		return response;
+	@GetMapping("")
+	public ResponseEntity<CustomerInfoResponse> getCustomerInfo(Authentication authentication) {
+		return ResponseEntity.ok()
+			.body(customerService.findCustomer(authentication));
 	}
 }

@@ -1,12 +1,8 @@
 package com.hanaro.schedule_hanaro.customer.controller;
 
-import java.security.Principal;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 
@@ -16,33 +12,30 @@ import com.hanaro.schedule_hanaro.customer.dto.response.CallListResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.ErrorResponse;
 import com.hanaro.schedule_hanaro.customer.service.CallService;
-import com.hanaro.schedule_hanaro.global.auth.info.CustomUserDetails;
-import com.hanaro.schedule_hanaro.global.auth.info.UserInfo;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/calls")
+@RequiredArgsConstructor
 public class CallController {
 
-	@Autowired
-	private CallService callService;
+	private final CallService callService;
 
 	@PostMapping
 	public ResponseEntity<?> createCall(
-		@RequestBody CallRequest request, Principal principal
+		Authentication authentication,
+		@RequestBody CallRequest request
 	) {
 		try {
-			String customerAuthId = principal.getName();
-
-			CallResponse response = callService.createCall(customerAuthId, request);
+			CallResponse response = callService.createCall(authentication, request);
 			return ResponseEntity.status(HttpStatus.CREATED).body(response);
-
-		} catch (RuntimeException e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("401", e.getMessage()));
+		} catch (IllegalStateException e) {
+			return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse("2020102", e.getMessage()));
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("2010203", e.getMessage()));
 		}
 	}
-
-
 
 	@DeleteMapping("/{call-id}")
 	public ResponseEntity<?> cancelCall(@PathVariable("call-id") Long callId) {
@@ -60,6 +53,7 @@ public class CallController {
 
 	@GetMapping
 	public ResponseEntity<CallListResponse> getCallList(
+		@RequestHeader(value = "Authorization", required = false) String authorization,
 		@RequestParam(value = "status", defaultValue = "pending") String status,
 		@RequestParam(value = "page", defaultValue = "1") int page,
 		@RequestParam(value = "size", defaultValue = "10") int size
@@ -68,10 +62,9 @@ public class CallController {
 		return ResponseEntity.ok(response);
 	}
 
-	@GetMapping("/{call_id}")
+	@GetMapping("/{call-id}")
 	public ResponseEntity<?> getCallDetail(
-		@RequestHeader(value = "Authorization", required = false) String authorization,
-		@PathVariable("call_id") Long callId
+		@PathVariable("call-id") Long callId
 	) {
 		try {
 			CallDetailResponse response = callService.getCallDetail(callId);
@@ -81,5 +74,4 @@ public class CallController {
 				.body(new ErrorResponse("2010201", "존재하지 않는 상담 데이터입니다."));
 		}
 	}
-
 }
