@@ -8,6 +8,7 @@ import com.hanaro.schedule_hanaro.global.auth.info.CustomUserDetails;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,8 +24,8 @@ public class AdminInfoController {
 
 
     @GetMapping("/stats")
-    public ResponseEntity<AdminInfoResponse> getAdminStats(Principal principal) {
-        return ResponseEntity.ok(adminService.getAdminStats(principal));
+    public ResponseEntity<AdminInfoResponse> getAdminStats(Authentication authentication) {
+        return ResponseEntity.ok(adminService.getAdminStats(authentication));
     }
 }
 

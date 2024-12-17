@@ -12,6 +12,8 @@ import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,10 +23,9 @@ public class AdminInfoService {
     private final AdminRepository adminRepository;
     private final InquiryRepository inquiryRepository;
 
-    public AdminInfoResponse getAdminStats(Principal principal) {
-
-        String authId = PrincipalUtils.getAuthId(principal);
-        Admin admin = adminRepository.findByAuthId(authId)
+    public AdminInfoResponse getAdminStats(Authentication authentication) {
+        Long id = PrincipalUtils.getId(authentication);
+        Admin admin = adminRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("관리자를 찾을 수 없습니다."));
 
         AdminInquiryStatsDto phoneInquiryStats = inquiryRepository.findStatsByAdminId(admin.getId());

@@ -1,5 +1,6 @@
 package com.hanaro.schedule_hanaro.customer.service;
 
+import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import com.hanaro.schedule_hanaro.customer.dto.request.VisitCreateRequest;
@@ -21,6 +23,7 @@ import com.hanaro.schedule_hanaro.global.domain.CsVisit;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.Visit;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
+import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
 
 import jakarta.persistence.OptimisticLockException;
 import jakarta.transaction.Transactional;
@@ -174,8 +177,9 @@ public class VisitService {
 		return visits.size() * 5;
 	}
 
-	public VisitListResponse getVisitList(Long customerId, int page, int size) {
+	public VisitListResponse getVisitList(Authentication authentication, int page, int size) {
 		Pageable pageable = PageRequest.of(page - 1, size);
+		Long customerId = PrincipalUtils.getId(authentication);
 
 		Slice<Visit> visitSlice = visitRepository.findByCustomerIdAndStatus(customerId, Status.PENDING, pageable);
 
