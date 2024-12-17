@@ -49,11 +49,10 @@ public class Inquiry {
 	@Column(name = "tags", nullable = false)
 	private String tags;
 
-	@Column(name = "created_at", updatable = false)
-	@CreationTimestamp
+	@Column(name = "created_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT")
 	private LocalDateTime createdAt;
 
-	@Column(name = "updated_at", updatable = false)
+	@Column(name = "updated_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	@UpdateTimestamp
 	private LocalDateTime updatedAt;
 
