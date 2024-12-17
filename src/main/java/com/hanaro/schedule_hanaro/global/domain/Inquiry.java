@@ -3,6 +3,8 @@ package com.hanaro.schedule_hanaro.global.domain;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
@@ -47,21 +49,21 @@ public class Inquiry {
 	@Column(name = "tags", nullable = false)
 	private String tags;
 
-	@Column(name = "created_at")
+	@Column(name = "created_at", updatable = false)
+	@CreationTimestamp
 	private LocalDateTime createdAt;
 
-	@Column(name = "updated_at")
+	@Column(name = "updated_at", updatable = false)
+	@UpdateTimestamp
 	private LocalDateTime updatedAt;
 
 	@Builder
-	public Inquiry(Customer customer, String content, int inquiryNum, Category category, InquiryStatus status, String tags, LocalDateTime createdAt, LocalDateTime updatedAt) {
+	public Inquiry(Customer customer, String content, int inquiryNum, Category category, InquiryStatus status, String tags) {
 		this.customer = customer;
 		this.content = content;
 		this.inquiryNum = inquiryNum;
 		this.category = category;
 		this.inquiryStatus = status;
 		this.tags = tags;
-		this.createdAt = createdAt;
-		this.updatedAt = updatedAt;
 	}
 }

@@ -1,7 +1,10 @@
 package com.hanaro.schedule_hanaro.customer.controller;
 
+import java.security.Principal;
+
 import com.hanaro.schedule_hanaro.customer.dto.request.InquiryCreateRequest;
 import com.hanaro.schedule_hanaro.customer.dto.request.InquiryListRequest;
+import com.hanaro.schedule_hanaro.customer.dto.response.ErrorResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryCreateResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryListResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryReplyDetailResponse;
@@ -9,6 +12,8 @@ import com.hanaro.schedule_hanaro.customer.dto.response.InquiryResponse;
 import com.hanaro.schedule_hanaro.customer.service.InquiryService;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,10 +25,24 @@ public class InquiryController {
 
 	// 1:1 상담 예약
 	@PostMapping
-	public ResponseEntity<InquiryCreateResponse> createInquiry(
-		@RequestParam Long customerId, @RequestBody InquiryCreateRequest request) {
-		InquiryCreateResponse response = inquiryService.createInquiry(customerId, request);
-		return ResponseEntity.status(201).body(response);
+	public ResponseEntity<?> createInquiry(
+		@RequestBody InquiryCreateRequest request,
+		Principal principal
+	) {
+		try {
+			String customerAuthId = principal.getName();
+			Long customerId = Long.parseLong(customerAuthId);
+			InquiryCreateResponse response = inquiryService.createInquiry(customerId, request);
+			return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
+		} catch (NumberFormatException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+				.body(new ErrorResponse("400", "Invalid customer ID format."));
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+				.body(new ErrorResponse("401", e.getMessage()));
+		}
 	}
 
 	// 1:1 상담 목록
@@ -32,6 +51,7 @@ public class InquiryController {
 		@RequestParam(defaultValue = "pending") String status,
 		@RequestParam(defaultValue = "1") int page,
 		@RequestParam(defaultValue = "5") int size) {
+		status = status.toUpperCase();
 		InquiryListResponse response = inquiryService.getInquiryList(status, page, size);
 		return ResponseEntity.ok(response);
 	}
