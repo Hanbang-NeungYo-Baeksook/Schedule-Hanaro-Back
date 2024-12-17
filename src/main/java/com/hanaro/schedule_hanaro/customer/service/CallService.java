@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,8 +36,9 @@ public class CallService {
 	private final AdminCallService adminCallService;
 
 	@Transactional
-	public CallResponse createCall(String customerId, CallRequest request) {
-		Customer customer = customerRepository.findByAuthId(customerId)
+	public CallResponse createCall(Authentication authentication, CallRequest request) {
+
+		Customer customer = customerRepository.findById(PrincipalUtils.getId(authentication))
 			.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 회원 id입니다."));
 
 		boolean isDuplicate = callRepository.existsByCallDate(request.callDate());
