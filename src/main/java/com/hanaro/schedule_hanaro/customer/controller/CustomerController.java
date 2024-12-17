@@ -20,7 +20,7 @@ public class CustomerController {
 	private final CustomerService customerService;
 
 	@GetMapping("/{customer-id}")
-	public ResponseEntity<CustomerInfoResponse> getCustomerInfo(@PathVariable("customer-id") Long customerId) {
+	public ResponseEntity<CustomerInfoResponse> getCustomerInfo(@PathVariable("customer-id") Long customerId, Principal principal) {
 		System.out.println("get customer controller 진입" + customerId);
 		ResponseEntity<CustomerInfoResponse> response = ResponseEntity.ok()
 			.body(customerService.findCustomerById(customerId));
