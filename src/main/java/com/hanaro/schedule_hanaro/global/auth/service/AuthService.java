@@ -12,7 +12,10 @@ import com.hanaro.schedule_hanaro.global.auth.dto.request.AuthAdminSignUpRequest
 import com.hanaro.schedule_hanaro.global.auth.dto.request.AuthSignUpRequest;
 import com.hanaro.schedule_hanaro.global.auth.dto.request.SignInRequest;
 import com.hanaro.schedule_hanaro.global.auth.dto.response.JwtTokenDto;
+import com.hanaro.schedule_hanaro.global.auth.exception.AuthException;
 import com.hanaro.schedule_hanaro.global.auth.info.CustomUserDetails;
+import com.hanaro.schedule_hanaro.global.auth.info.UserInfo;
+import com.hanaro.schedule_hanaro.global.auth.message.ErrorCode;
 import com.hanaro.schedule_hanaro.global.auth.provider.JwtAuthenticationProvider;
 import com.hanaro.schedule_hanaro.global.auth.provider.JwtTokenProvider;
 import com.hanaro.schedule_hanaro.global.domain.Admin;
@@ -21,6 +24,8 @@ import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.enums.Gender;
 import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
 
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @Service
