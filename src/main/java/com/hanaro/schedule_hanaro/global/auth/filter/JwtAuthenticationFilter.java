@@ -10,8 +10,10 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.hanaro.schedule_hanaro.global.auth.exception.AuthException;
 import com.hanaro.schedule_hanaro.global.auth.info.CustomUserDetails;
 import com.hanaro.schedule_hanaro.global.auth.info.UserInfo;
+import com.hanaro.schedule_hanaro.global.auth.message.ErrorCode;
 import com.hanaro.schedule_hanaro.global.auth.provider.JwtAuthenticationProvider;
 import com.hanaro.schedule_hanaro.global.auth.provider.JwtTokenProvider;
 import com.hanaro.schedule_hanaro.global.domain.enums.Role;
@@ -36,14 +38,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		System.out.println("jwtauthenticationfilter 진입");
 		if (request.getRequestURI().equals("/api/auth/sign-in") || request.getRequestURI().equals("/api/auth/sign-up")
 			|| request.getRequestURI().equals("/api/auth/admin/sign-up") || request.getRequestURI()
-			.equals("/api/auth/admin/sign-in")) {
+			.equals("/api/auth/admin/sign-in") || request.getRequestURI().equals("/api/auth/reissue")) {
 			filterChain.doFilter(request, response);
 			return;
 		}
 
 		String header = request.getHeader("Authorization");
 		if (header == null || !header.startsWith("Bearer "))
-			throw new RuntimeException("올바르지 않은 토큰입니다.");
+			throw new AuthException(ErrorCode.INVALID_JWT_TOKEN);
+
 		String token = header.substring(7);
 
 		Claims claims = jwtTokenProvider.validateToken(token);

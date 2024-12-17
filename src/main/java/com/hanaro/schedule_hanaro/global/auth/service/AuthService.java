@@ -44,17 +44,6 @@ public class AuthService {
 		return jwtTokenProvider.generateTokens(customUserDetails.getUsername(), customUserDetails.getRole());
 	}
 
-	public JwtTokenDto adminSignIn(SignInRequest signInRequest) {
-		String username = signInRequest.authId();
-		String password = signInRequest.password();
-		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username,
-			password);
-		Authentication authentication = authenticationProvider.authenticate(authenticationToken);
-		CustomUserDetails customUserDetails = (CustomUserDetails)authentication.getPrincipal();
-		return jwtTokenProvider.generateTokens(customUserDetails.getUsername(), customUserDetails.getRole());
-
-	}
-
 	public void signUp(AuthSignUpRequest authSignUpRequest){
 		customerRepository.save(Customer.builder()
 			.authId(authSignUpRequest.authId())
@@ -77,5 +66,19 @@ public class AuthService {
 		);
 
 		return "Success";
+	}
+
+	public JwtTokenDto reissueToken(HttpServletRequest request) {
+		String refreshToken = request.getHeader("Authorization");
+		isTokenPresent(refreshToken);
+		String token = refreshToken.substring(7);
+		UserInfo userInfo = jwtTokenProvider.getUsernameFromToken(token);
+		return jwtTokenProvider.generateTokens(userInfo.id(), userInfo.role());
+	}
+
+	private void isTokenPresent(String token) {
+		if (token.isEmpty()) {
+			throw new AuthException(ErrorCode.EMPTY_JWT);
+		}
 	}
 }

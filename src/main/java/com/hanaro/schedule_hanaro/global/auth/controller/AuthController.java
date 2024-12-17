@@ -1,5 +1,7 @@
 package com.hanaro.schedule_hanaro.global.auth.controller;
 
+import java.security.Principal;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,6 +14,7 @@ import com.hanaro.schedule_hanaro.global.auth.dto.request.SignInRequest;
 import com.hanaro.schedule_hanaro.global.auth.dto.response.JwtTokenDto;
 import com.hanaro.schedule_hanaro.global.auth.service.AuthService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,8 +46,13 @@ public class AuthController {
 
 	@PostMapping("/admin/sign-in")
 	public ResponseEntity<JwtTokenDto> signInAdmin(@RequestBody SignInRequest signInRequest) {
-		JwtTokenDto response = authService.adminSignIn(signInRequest);
+		JwtTokenDto response = authService.signIn(signInRequest);
 		return ResponseEntity.ok().body(response);
+	}
+
+	@PostMapping("/reissue")
+	public ResponseEntity<JwtTokenDto> reissueToken(HttpServletRequest reissueRequest) {
+		return ResponseEntity.ok().body(authService.reissueToken(reissueRequest));
 	}
 
 }
