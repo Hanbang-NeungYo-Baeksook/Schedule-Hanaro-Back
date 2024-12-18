@@ -18,3 +18,10 @@ logging:
     org:
       springframework:
         security: DEBUG
+# Swagger 설정
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs

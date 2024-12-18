@@ -11,12 +11,14 @@ import com.hanaro.schedule_hanaro.customer.dto.response.InquiryReplyDetailRespon
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryResponse;
 import com.hanaro.schedule_hanaro.customer.service.InquiryService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Inquiry", description = "1:1 상담 API")
 @RestController
 @RequestMapping("/api/inquiries")
 @RequiredArgsConstructor

@@ -20,8 +20,10 @@ import com.hanaro.schedule_hanaro.admin.service.AdminCallService;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
+@Tag(name = "Admin-Call", description = "관리자 전화 상담 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/api/calls")

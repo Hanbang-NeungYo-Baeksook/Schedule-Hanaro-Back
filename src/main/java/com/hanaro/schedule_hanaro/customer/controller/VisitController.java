@@ -17,6 +17,9 @@ import com.hanaro.schedule_hanaro.customer.dto.response.VisitDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.VisitListResponse;
 import com.hanaro.schedule_hanaro.customer.service.VisitService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+@Tag(name = "Visit", description = "방문 상담 API")
 @RestController
 @RequestMapping("/api/visits")
 public class VisitController {

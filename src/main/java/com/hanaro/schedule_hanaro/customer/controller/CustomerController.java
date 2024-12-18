@@ -11,8 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.hanaro.schedule_hanaro.customer.dto.response.CustomerInfoResponse;
 import com.hanaro.schedule_hanaro.customer.service.CustomerService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
+@Tag(name = "Customer", description = "고객 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/customers")

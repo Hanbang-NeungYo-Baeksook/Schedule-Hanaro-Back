@@ -10,6 +10,9 @@ import com.hanaro.schedule_hanaro.customer.dto.request.RecommendCreateRequest;
 import com.hanaro.schedule_hanaro.customer.dto.response.RecommendListResponse;
 import com.hanaro.schedule_hanaro.global.service.RecommendService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+@Tag(name = "Recommend", description = "추천 API")
 @RestController
 @RequestMapping("/api/recommends")
 public class RecommendController {

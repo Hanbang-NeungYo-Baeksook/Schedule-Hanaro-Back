@@ -17,7 +17,10 @@ import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryResponse;
 import com.hanaro.schedule_hanaro.admin.service.AdminInquiryService;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+
+@Tag(name = "Admin-Inquiry", description = "관리자 1:1 상담 API")
 @RestController
 @RequestMapping("/admin/api/inquiries")
 @RequiredArgsConstructor

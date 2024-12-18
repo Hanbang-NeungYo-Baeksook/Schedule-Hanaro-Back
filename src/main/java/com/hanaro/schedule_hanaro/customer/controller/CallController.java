@@ -1,6 +1,5 @@
 package com.hanaro.schedule_hanaro.customer.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -13,8 +12,11 @@ import com.hanaro.schedule_hanaro.customer.dto.response.CallResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.ErrorResponse;
 import com.hanaro.schedule_hanaro.customer.service.CallService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
+@Tag(name = "Call", description = "전화 상담 API")
 @RestController
 @RequestMapping("/api/calls")
 @RequiredArgsConstructor
@@ -22,6 +24,7 @@ public class CallController {
 
 	private final CallService callService;
 
+	@Operation(summary = "전화 상담 생성", description = "새로운 상담을 생성합니다.")
 	@PostMapping
 	public ResponseEntity<?> createCall(
 		Authentication authentication,

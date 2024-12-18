@@ -13,8 +13,10 @@ import com.hanaro.schedule_hanaro.customer.dto.response.BranchDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchListResponse;
 import com.hanaro.schedule_hanaro.customer.service.BranchService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
+@Tag(name = "Branch", description = "영업점 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/branches")

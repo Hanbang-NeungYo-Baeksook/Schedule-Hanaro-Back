@@ -34,6 +34,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 		FilterChain filterChain) throws ServletException, IOException {
 		System.out.println("jwtauthenticationfilter 진입");
+
+		// Swagger 및 OpenAPI 경로에 대해 필터 적용 제외
+		String requestURI = request.getRequestURI();
+		if (requestURI.startsWith("/swagger-ui") || requestURI.startsWith("/v3/api-docs")) {
+			filterChain.doFilter(request, response);
+			return;
+		}
+
 		if (request.getRequestURI().equals("/api/auth/sign-in") || request.getRequestURI().equals("/api/auth/sign-up")
 			|| request.getRequestURI().equals("/api/auth/admin/sign-up") || request.getRequestURI()
 			.equals("/api/auth/admin/sign-in")) {
