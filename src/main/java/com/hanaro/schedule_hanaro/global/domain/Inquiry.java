@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Table(name = "Inquiry")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Inquiry {
+public class Inquiry extends BaseEntity{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,13 +48,6 @@ public class Inquiry {
 
 	@Column(name = "tags", nullable = false)
 	private String tags;
-
-	@Column(name = "created_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT")
-	private LocalDateTime createdAt;
-
-	@Column(name = "updated_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-	@UpdateTimestamp
-	private LocalDateTime updatedAt;
 
 	@Builder
 	public Inquiry(Customer customer, String content, int inquiryNum, Category category, InquiryStatus status, String tags) {

@@ -39,8 +39,8 @@ public class Visit {
 	private Customer customer;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "branch_id", nullable = false)
-	private Branch branch;
+	@JoinColumn(name = "section_id", nullable = false)
+	private Section section;
 
 	@Column(name = "visit_date", nullable = false)
 	private LocalDate visitDate;
@@ -68,7 +68,7 @@ public class Visit {
 	@Builder
 	public Visit(
 		Customer customer,
-		Branch branch,
+		Section section,
 		LocalDate visitDate,
 		int num,
 		LocalDateTime startedAt,
@@ -77,7 +77,7 @@ public class Visit {
 		String tags
 	) {
 		this.customer = customer;
-		this.branch = branch;
+		this.section = section;
 		this.visitDate = visitDate;
 		this.num = num;
 		this.startedAt = startedAt;

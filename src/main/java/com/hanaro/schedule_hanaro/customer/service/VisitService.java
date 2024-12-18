@@ -1,6 +1,5 @@
 package com.hanaro.schedule_hanaro.customer.service;
 
-import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,9 +13,11 @@ import org.springframework.stereotype.Service;
 import com.hanaro.schedule_hanaro.customer.dto.request.VisitCreateRequest;
 import com.hanaro.schedule_hanaro.customer.dto.response.VisitDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.VisitListResponse;
+import com.hanaro.schedule_hanaro.global.domain.Section;
 import com.hanaro.schedule_hanaro.global.repository.BranchRepository;
 import com.hanaro.schedule_hanaro.global.repository.CsVisitRepository;
 import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
+import com.hanaro.schedule_hanaro.global.repository.SectionRepository;
 import com.hanaro.schedule_hanaro.global.repository.VisitRepository;
 import com.hanaro.schedule_hanaro.global.domain.Branch;
 import com.hanaro.schedule_hanaro.global.domain.CsVisit;
@@ -28,6 +29,7 @@ import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
 import jakarta.persistence.OptimisticLockException;
 import jakarta.transaction.Transactional;
 
+// 여긴 수정 주루룩 해야함!
 @Service
 public class VisitService {
 	private final int LIMIT = 3;
@@ -40,12 +42,16 @@ public class VisitService {
 
 	private final CsVisitRepository csVisitRepository;
 
+	private final SectionRepository sectionRepository;
+
 	public VisitService(VisitRepository visitRepository, BranchRepository branchRepository,
-		CustomerRepository customerRepository, CsVisitRepository csVisitRepository) {
+		CustomerRepository customerRepository, CsVisitRepository csVisitRepository,
+		SectionRepository sectionRepository) {
 		this.visitRepository = visitRepository;
 		this.branchRepository = branchRepository;
 		this.customerRepository = customerRepository;
 		this.csVisitRepository = csVisitRepository;
+		this.sectionRepository = sectionRepository;
 	}
 
 	@Transactional
@@ -58,9 +64,11 @@ public class VisitService {
 		Branch branch = branchRepository.findById(
 			visitReservationCreateRequest.branchId()
 		).orElseThrow();
+		Section section = sectionRepository.findByBranchAndSectionType(branch,
+			visitReservationCreateRequest.sectionType()).orElseThrow();
 		LocalDateTime now = LocalDateTime.now();
 
-		if (isReserved(customer, branch, now)) {
+		if (isReserved(customer, section, now)) {
 			throw new RuntimeException("Branch Reserved");
 		}
 
@@ -95,7 +103,7 @@ public class VisitService {
 				Visit savedVisit = visitRepository.save(
 					Visit.builder()
 						.customer(customer)
-						.branch(branch)
+						.section(section)
 						.visitDate(now.toLocalDate())
 						.num(totalNum)
 						.content(content)
@@ -111,9 +119,9 @@ public class VisitService {
 		}
 	}
 
-	private boolean isReserved(Customer customer, Branch branch, LocalDateTime now) {
-		if (visitRepository.existsByCustomerAndBranchAndVisitDateAndStatus(
-			customer, branch, now.toLocalDate(), Status.PENDING)
+	private boolean isReserved(Customer customer, Section section, LocalDateTime now) {
+		if (visitRepository.existsByCustomerAndSectionAndVisitDateAndStatus(
+			customer, section, now.toLocalDate(), Status.PENDING)
 		) {
 			return true;
 		}
@@ -147,7 +155,7 @@ public class VisitService {
 		Visit visit = visitRepository.findById(visitId).orElseThrow();
 
 		int currentNum = csVisitRepository.findByBranchIdAndDate(
-				visit.getBranch().getId(),
+				visit.getSection().getBranch().getId(),
 				LocalDate.now()
 			)
 			.orElseThrow()
@@ -155,8 +163,8 @@ public class VisitService {
 
 		// TODO: * Calculate Waiting Time *
 		// TODO: 1. Find All Visit with BranchId Less than Num And Status
-		List<Visit> visits = visitRepository.findAllByBranchIdAndNumLessThanAndStatus(
-			visit.getBranch().getId(), visit.getNum(), Status.PENDING
+		List<Visit> visits = visitRepository.findAllBySectionIdAndNumLessThanAndStatus(
+			visit.getSection().getId(), visit.getNum(), Status.PENDING
 		);
 		// TODO: 2. Calculate Waiting Amount
 		int waitingAmount = visits.size();
@@ -165,7 +173,7 @@ public class VisitService {
 
 		return VisitDetailResponse.of(
 			visit.getId(),
-			visit.getBranch().getName(),
+			visit.getSection().getBranch().getName(),
 			visit.getNum(),
 			currentNum,
 			waitingAmount,
@@ -186,15 +194,15 @@ public class VisitService {
 		List<VisitListResponse.VisitData> visitDataList = visitSlice.getContent().stream()
 			.map(visit -> {
 				CsVisit csVisit = csVisitRepository.findByBranchIdAndDate(
-					visit.getBranch().getId(), LocalDate.now()
+					visit.getSection().getBranch().getId(), LocalDate.now()
 				).orElseThrow();
-				List<Visit> visits = visitRepository.findAllByBranchId(
-					visit.getBranch().getId()
+				List<Visit> visits = visitRepository.findAllBySection_Id(
+					visit.getSection().getId()
 				);
 				return VisitListResponse.VisitData.builder()
 					.visitId(visit.getId())
 					.visitNum(visit.getNum())
-					.branchName(visit.getBranch().getName())
+					.branchName(visit.getSection().getBranch().getName())
 					.waitingAmount(csVisit.getWaitAmount())
 					.waitingTime(calculateWaitingTime(visits))
 					.build();
