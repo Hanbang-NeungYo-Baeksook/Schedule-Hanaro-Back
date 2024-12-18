@@ -33,9 +33,6 @@ public class CsVisit {
 	@JoinColumn(name = "branch_id", nullable = false, unique = true)  // 외래키 연결
 	private Branch branch;
 
-	@Column(name = "current_num", nullable = false, columnDefinition = "int default 0")
-	private int currentNum;
-
 	@Column(name = "total_num", nullable = false, columnDefinition = "int default 0")
 	private int totalNum;
 
@@ -51,20 +48,14 @@ public class CsVisit {
 	@Builder
 	public CsVisit(
 		Branch branch,
-		int currentNum,
-		int totalNum,
-		LocalDate date,
-		int waitAmount
+		// int totalNum,
+		LocalDate date
+		// int waitAmount
 	) {
 		this.branch = branch;
-		this.currentNum = currentNum;
-		this.totalNum = totalNum;
+		// this.totalNum = totalNum;
 		this.date = date;
-		this.waitAmount = waitAmount;
-	}
-
-	public void incrementCurrentNum() {
-		this.currentNum++;
+		// this.waitAmount = waitAmount;
 	}
 
 	public void decrementWaitAmount() {

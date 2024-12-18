@@ -74,10 +74,9 @@ public class VisitServiceTest {
 
 		CsVisit csVisit = CsVisit
 			.builder()
-			.currentNum(0)
 			.date(LocalDate.now())
-			.totalNum(0)
-			.waitAmount(0)
+			// .totalNum(0)
+			// .waitAmount(0)
 			.branch(branch)
 			.build();
 		csVisitRepository.save(csVisit);
@@ -87,7 +86,7 @@ public class VisitServiceTest {
 	public void afterAll() {
 		Branch branch = branchRepository.findByName("NormalTestBranch").orElseThrow();
 		CsVisit csVisit = csVisitRepository.findByBranchId(branch.getId()).orElseThrow();
-		List<Visit> visits = visitRepository.findAllByBranchId(branch.getId());
+		List<Visit> visits = visitRepository.findAllBySection_Id(branch.getId());
 		csVisitRepository.delete(csVisit);
 		visitRepository.deleteAll(visits);
 
