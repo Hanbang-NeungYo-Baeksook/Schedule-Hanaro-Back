@@ -11,6 +11,7 @@ import com.hanaro.schedule_hanaro.customer.dto.response.InquiryReplyDetailRespon
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryResponse;
 import com.hanaro.schedule_hanaro.customer.service.InquiryService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +27,7 @@ public class InquiryController {
 	private final InquiryService inquiryService;
 
 	// 1:1 상담 예약
+	@Operation(summary = "1:1 상담 예약 생성", description = "새로운 1:1 상담 예약을 생성합니다.")
 	@PostMapping
 	public ResponseEntity<?> createInquiry(
 		@RequestBody InquiryCreateRequest request,
@@ -48,6 +50,7 @@ public class InquiryController {
 	}
 
 	// 1:1 상담 목록
+	@Operation(summary = "1:1 상담 목록 조회", description = "1:1 상담 목록을 조회합니다.")
 	@GetMapping
 	public ResponseEntity<InquiryListResponse> getInquiries(
 		@RequestParam(defaultValue = "pending") String status,
@@ -59,6 +62,7 @@ public class InquiryController {
 	}
 
 	// 1:1 상담 상세
+	@Operation(summary = "1:1 상담 상세 조회", description = "특정 1:1 상담 상세 정보를 조회합니다.")
 	@GetMapping("/{inquiry-id}")
 	public ResponseEntity<InquiryResponse> getInquiryDetail(@PathVariable("inquiry-id") Long inquiryId) {
 		InquiryResponse response = inquiryService.getInquiryDetail(inquiryId);
@@ -66,6 +70,7 @@ public class InquiryController {
 	}
 
 	// 1:1 상담 답변 상세
+	@Operation(summary = "1:1 상담 답변 상세", description = "특정 1:1 상담의 답변 상세 내용을 조회합니다.")
 	@GetMapping("/{inquiry-id}/reply")
 	public ResponseEntity<InquiryReplyDetailResponse> getInquiryReplyDetail(@PathVariable("inquiry-id") Long inquiryId) {
 		InquiryReplyDetailResponse response = inquiryService.getInquiryReplyDetail(inquiryId);
@@ -73,6 +78,7 @@ public class InquiryController {
 	}
 
 	// 1:1 상담 취소
+	@Operation(summary = "1:1 상담 예약 취소", description = "특정 1:1 상담 예약을 취소합니다.")
 	@DeleteMapping("/{inquiry-id}")
 	public ResponseEntity<String> cancelInquiry(@PathVariable("inquiry-id") Long inquiryId) {
 		inquiryService.cancelInquiry(inquiryId);
