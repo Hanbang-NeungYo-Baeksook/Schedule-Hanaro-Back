@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
@@ -28,7 +29,7 @@ public class CsVisit {
 	@Column(name = "cs_visit_id")
 	private Long id;
 
-	@OneToOne(fetch = FetchType.LAZY)  // 1:1 관계 설정
+	@ManyToOne(fetch = FetchType.LAZY)  // N:1 관계 설정
 	@JoinColumn(name = "branch_id", nullable = false, unique = true)  // 외래키 연결
 	private Branch branch;
 

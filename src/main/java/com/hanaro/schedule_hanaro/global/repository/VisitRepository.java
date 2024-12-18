@@ -9,13 +9,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.hanaro.schedule_hanaro.global.domain.Branch;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
+import com.hanaro.schedule_hanaro.global.domain.Section;
 import com.hanaro.schedule_hanaro.global.domain.Visit;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 
 public interface VisitRepository extends JpaRepository<Visit, Long> {
-	Boolean existsByCustomerAndBranchAndVisitDateAndStatus(
+	Boolean existsByCustomerAndSectionAndVisitDateAndStatus(
 		Customer customer,
-		Branch branch,
+		Section section,
 		LocalDate localDate,
 		Status status
 	);
@@ -26,9 +27,9 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
 		Status status
 	);
 
-	List<Visit> findAllByBranchIdAndNumLessThanAndStatus(Long branchId, int num, Status status);
+	List<Visit> findAllBySectionIdAndNumLessThanAndStatus(Long sectionId, int num, Status status);
 
-	List<Visit> findAllByBranchId(Long id);
+	List<Visit> findAllBySection_Id(Long id);
 
 	Slice<Visit> findByCustomerIdAndStatus(Long customerId, Status status, Pageable pageable);
 }
