@@ -34,7 +34,7 @@ public class BranchService {
 			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_DATA));
 		System.out.println(csVisit);
 		return BranchDetailResponse.of(branch.getId(), branch.getName(), branch.getAddress(), branch.getTel(),
-			branch.getBusinessTime(), branch.getBranchType().toString(), csVisit.getCurrentNum(), csVisit.getTotalNum(),
+			branch.getBusinessTime(), branch.getBranchType().toString(), csVisit.getTotalNum(), csVisit.getTotalNum(),
 			csVisit.getWaitAmount());
 	}
 
@@ -51,7 +51,7 @@ public class BranchService {
 				csVisit.getBranch().getYPosition(),
 				csVisit.getBranch().getAddress(),
 				csVisit.getBranch().getBranchType().toString(),
-				csVisit.getCurrentNum(),
+				csVisit.getTotalNum(),
 				csVisit.getTotalNum()
 			))
 			.toList();

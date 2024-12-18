@@ -31,7 +31,7 @@ public class AdminVisitService {
         CsVisit visit = csVisitRepository.findById(visitId)
                 .orElseThrow();
 
-        visit.incrementCurrentNum();
+        visit.increase();
 
         List<Integer> numbers = getUpdatedCarouselNumbers(visit);
 
@@ -65,7 +65,7 @@ public class AdminVisitService {
 
         if (numbers.stream().allMatch(num -> num == 0)) {
             for (int i = 0; i < numbers.size(); i++) {
-                numbers.set(i, visit.getCurrentNum() + i);
+                numbers.set(i, visit.getTotalNum() + i);
             }
         } else {
             int lastNumber = numbers.remove(numbers.size() - 1);

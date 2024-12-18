@@ -117,10 +117,9 @@ public class VisitControllerTest {
 		for (int i = 1; i <= 6; i++) {
 			CsVisit normalCsVisit = CsVisit
 				.builder()
-				.currentNum(0)
 				.date(LocalDate.now())
-				.totalNum(0)
-				.waitAmount(0)
+				// .totalNum(0)
+				// .waitAmount(0)
 				.branch(branchRepository.findByName("NormalTestBranch" + i).orElseThrow())
 				.build();
 			csVisitRepository.save(normalCsVisit);
@@ -128,10 +127,9 @@ public class VisitControllerTest {
 
 		CsVisit abnormalCsVisit = CsVisit
 			.builder()
-			.currentNum(0)
 			.date(LocalDate.now())
-			.totalNum(0)
-			.waitAmount(0)
+			// .totalNum(0)
+			// .waitAmount(0)
 			.branch(abnormalBranch)
 			.build();
 		csVisitRepository.save(abnormalCsVisit);
@@ -142,14 +140,14 @@ public class VisitControllerTest {
 		for (int i = 1; i <= 6; i++) {
 			Branch branch = branchRepository.findByName("NormalTestBranch" + i).orElseThrow();
 			CsVisit csVisit = csVisitRepository.findByBranchId(branch.getId()).orElseThrow();
-			List<Visit> visits = visitRepository.findAllByBranchId(branch.getId());
+			List<Visit> visits = visitRepository.findAllBySection_Id(branch.getId());
 			csVisitRepository.delete(csVisit);
 			visitRepository.deleteAll(visits);
 			branchRepository.delete(branch);
 		}
 		Branch branch = branchRepository.findByName("AbnormalTestBranch").orElseThrow();
 		CsVisit csVisit = csVisitRepository.findByBranchId(branch.getId()).orElseThrow();
-		List<Visit> visits = visitRepository.findAllByBranchId(branch.getId());
+		List<Visit> visits = visitRepository.findAllBySection_Id(branch.getId());
 		csVisitRepository.delete(csVisit);
 		visitRepository.deleteAll(visits);
 		branchRepository.delete(branch);

@@ -159,7 +159,7 @@ public class VisitService {
 				LocalDate.now()
 			)
 			.orElseThrow()
-			.getCurrentNum();
+			.getTotalNum();
 
 		// TODO: * Calculate Waiting Time *
 		// TODO: 1. Find All Visit with BranchId Less than Num And Status
