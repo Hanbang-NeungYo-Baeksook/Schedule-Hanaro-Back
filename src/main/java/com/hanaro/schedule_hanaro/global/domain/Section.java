@@ -38,13 +38,13 @@ public class Section {
 	private SectionType sectionType;
 
 	@Column(name = "current_num", nullable = false, columnDefinition = "int unsigned default 0")
-	private Long currentNum;
+	private Integer currentNum;
 
 	@Column(name = "wait_amount", nullable = false, columnDefinition = "int unsigned default 0")
-	private Long waitAmount;
+	private Integer waitAmount;
 
 	@Column(name = "wait_time", nullable = false, columnDefinition = "int unsigned default 0")
-	private Long waitTime;
+	private Integer waitTime;
 
 	@Builder
 	public Section(
