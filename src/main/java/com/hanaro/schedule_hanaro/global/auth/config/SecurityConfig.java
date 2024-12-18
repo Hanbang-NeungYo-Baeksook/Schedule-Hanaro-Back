@@ -35,6 +35,12 @@ public class SecurityConfig {
 			)
 			.authorizeHttpRequests(request ->
 				request
+					// Swagger 경로에 대한 접근 허용
+					.requestMatchers(
+						"/swagger-ui/**",
+						"/v3/api-docs/**",
+						"/swagger-ui.html"
+					).permitAll()
 					.requestMatchers("/api/auth/**", "/api/auth/admin/**").permitAll()
 					.requestMatchers("/api/**").hasAuthority("CUSTOMER")
 					.requestMatchers("/admin/api/**").hasAuthority("ADMIN")
@@ -54,7 +60,8 @@ public class SecurityConfig {
 			CorsConfiguration configuration = new CorsConfiguration();
 			configuration.setAllowedHeaders(Collections.singletonList("*"));
 			configuration.setAllowedMethods(Collections.singletonList("*"));
-			configuration.setAllowedOriginPatterns(Collections.singletonList("http://localhost:5173"));
+			// configuration.setAllowedOriginPatterns(Collections.singletonList("http://localhost:5173"));
+			configuration.setAllowedOriginPatterns(Collections.singletonList("*"));
 			configuration.setAllowCredentials(true);
 			return configuration;
 		};

@@ -13,6 +13,9 @@ import com.hanaro.schedule_hanaro.admin.dto.response.AdminCustomerInfoResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCustomerListResponse;
 import com.hanaro.schedule_hanaro.admin.service.AdminCustomerService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+@Tag(name = "Admin-Customer", description = "관리자 고객 관리 API")
 @RestController
 @RequestMapping("/admin/api/customers")
 public class AdminCustomerController {

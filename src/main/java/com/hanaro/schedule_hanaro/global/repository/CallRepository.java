@@ -23,6 +23,9 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 	@Query("SELECT COALESCE(MAX(c.callNum), 0) FROM Call c WHERE FUNCTION('DATE', c.callDate) = :callDate")
 	int findMaxCallNumByDate(@Param("callDate") LocalDate callDate);
 
+	@Query("SELECT COALESCE(MAX(c.callNum), 0) FROM Call c WHERE c.callDate BETWEEN :startTime AND :endTime")
+	int findMaxCallNumByTimeSlot(LocalDateTime startTime, LocalDateTime endTime);
+
 	boolean existsByCallDate(LocalDateTime callDate);
 
 	Slice<Call> findByStatus(Status status, Pageable pageable);
