@@ -17,6 +17,7 @@ import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryResponse;
 import com.hanaro.schedule_hanaro.admin.service.AdminInquiryService;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class AdminInquiryController {
 	private final AdminInquiryService adminInquiryService;
 
+	@Operation(summary = "1:1 상담 목록 조회", description = "1:1 상담 목록을 조회합니다.")
 	@GetMapping
 	public ResponseEntity<AdminInquiryListResponse> getInquiryList(
 		@RequestParam(required = false) String status,
@@ -40,6 +42,7 @@ public class AdminInquiryController {
 		return ResponseEntity.ok().body(response);
 	}
 
+	@Operation(summary = "1:1 상담 상세 조회", description = "특정 1:1 상담의 상세 정보를 조회합니다.")
 	@GetMapping("/{inquiry-id}")
 	public ResponseEntity<AdminInquiryDetailResponse> getInquiryDetail(
 		@PathVariable("inquiry-id") Long inquiryId
@@ -48,6 +51,7 @@ public class AdminInquiryController {
 		return ResponseEntity.ok().body(response);
 	}
 
+	@Operation(summary = "1:1 상담 답변 등록", description = "특정 1:1 상담에 대해 답변을 등록합니다.")
 	@PostMapping("/register/{inquiry-id}")
 	public ResponseEntity<AdminInquiryResponse> registerInquiryResponse(
 		@PathVariable("inquiry-id") Long inquiryId,
@@ -56,5 +60,4 @@ public class AdminInquiryController {
 		AdminInquiryResponse response = adminInquiryService.registerInquiryResponse(inquiryId, request);
 		return ResponseEntity.status(201).body(response);
 	}
-
 }

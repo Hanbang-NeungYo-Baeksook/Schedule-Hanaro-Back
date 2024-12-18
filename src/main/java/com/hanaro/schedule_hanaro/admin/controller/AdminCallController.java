@@ -20,6 +20,7 @@ import com.hanaro.schedule_hanaro.admin.service.AdminCallService;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
@@ -30,12 +31,14 @@ import lombok.RequiredArgsConstructor;
 public class AdminCallController {
 	private final AdminCallService callService;
 
+	@Operation(summary = "전화 상담 대기 목록 조회", description = "전화 상담을 대기 중인 목록을 조회합니다.")
 	@GetMapping("/wait")
 	public ResponseEntity<AdminCallWaitResponse> getCallWaitList() {
 		// 전화 상담 대기 목록
 		return ResponseEntity.ok(callService.findWaitList());
 	}
 
+	@Operation(summary = "전화 상담 대기 목록 조회", description = "특정 전화 상담 항목의 상태를 변경합니다. (전화 상담 대기/전화 상담 완료)")
 	@PatchMapping("/{call-id}")
 	public ResponseEntity<String> patchCallStatus(@PathVariable("call-id") Long callId) {
 		// 전화 상담 상태 변경
@@ -48,12 +51,14 @@ public class AdminCallController {
 		}
 	}
 
+	@Operation(summary = "전화 상담 메모 등록", description = "특정 전화 상담의 메모를 작성 후 등록합니다.")
 	@PostMapping("/{call-id}")
 	public ResponseEntity<String> postCallMemo(@PathVariable("call-id") Long callId, @RequestBody AdminCallMemoRequest request) {
 		// 전화 상담 메모 등록
 		return ResponseEntity.ok(callService.saveCallMemo(callId, request.content()));
 	}
 
+	@Operation(summary = "전화 상담 목록 조회", description = "전화 상담 목록을 내용, 카테고리, 날짜 등으로 필터링해 조회합니다.")
 	@GetMapping()
 	public ResponseEntity<AdminCallHistoryListResponse> getCallList(
 		@RequestParam(value = "status", defaultValue = "pending") Status status,
@@ -68,6 +73,7 @@ public class AdminCallController {
 		return ResponseEntity.ok(callService.findFilteredCalls(page, size, status, startedAt, endedAt, category, keyword));
 	}
 
+	@Operation(summary = "전화 상담 상세 조회", description = "특정 전화 상담 항목의 상세 정보를 조회합니다.")
 	@GetMapping("/{call-id}")
 	public ResponseEntity<?> getCallDetail(
 		@PathVariable("call-id") Long callId

@@ -13,6 +13,7 @@ import com.hanaro.schedule_hanaro.admin.dto.response.AdminCustomerInfoResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCustomerListResponse;
 import com.hanaro.schedule_hanaro.admin.service.AdminCustomerService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Tag(name = "Admin-Customer", description = "관리자 고객 관리 API")
@@ -23,6 +24,7 @@ public class AdminCustomerController {
     @Autowired
     private AdminCustomerService adminCustomerService;
 
+    @Operation(summary = "고객 목록 조회", description = "전체 고객 목록을 조회합니다.")
     @GetMapping
     public ResponseEntity<AdminCustomerListResponse> getCustomerList(
         @RequestParam(defaultValue = "1") int page,
@@ -32,11 +34,13 @@ public class AdminCustomerController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "고객 상세 정보 조회", description = "특정 고객의 상세 정보를 조회합니다.")
     @GetMapping("/{customer-id}")
     public ResponseEntity<AdminCustomerInfoResponse> getCustomerInfo(@PathVariable("customer-id") Long customerId) {
         return ResponseEntity.ok().body(adminCustomerService.findCustomerInfoById(customerId));
     }
 
+    @Operation(summary = "고객 문의 이력 조회", description = "특정 고객의 문의 이력을 조회합니다.")
     @GetMapping("/customers/{customer-id}/content")
     public ResponseEntity<AdminCustomerInquiryListResponse> getCustomerInquiries(@PathVariable("customer-id") Long customerId) {
         AdminCustomerInquiryListResponse response = adminCustomerService.findCustomerInquiryList(customerId);

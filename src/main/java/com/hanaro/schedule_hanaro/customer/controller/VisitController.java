@@ -17,6 +17,7 @@ import com.hanaro.schedule_hanaro.customer.dto.response.VisitDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.VisitListResponse;
 import com.hanaro.schedule_hanaro.customer.service.VisitService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Tag(name = "Visit", description = "방문 상담 API")
@@ -29,6 +30,7 @@ public class VisitController {
 		this.visitService = visitService;
 	}
 
+	@Operation(summary = "방문 상담 목록 조회", description = "방문 상담 목록을 조회합니다.")
 	@GetMapping
 	public ResponseEntity<VisitListResponse> getVisitList(
 		Authentication authentication,
@@ -38,11 +40,13 @@ public class VisitController {
 		return ResponseEntity.ok(visitService.getVisitList(authentication, page, size));
 	}
 
+	@Operation(summary = "방문 상담 상세 조회", description = "특정 방문 상담의 정보를 조회합니다.")
 	@GetMapping("/{visit-id}")
 	public ResponseEntity<VisitDetailResponse> getVisit(@PathVariable("visit-id") Long visitId) {
 		return ResponseEntity.ok(visitService.getVisitDetail(visitId));
 	}
 
+	@Operation(summary = "방문 상담 예약 생성", description = "새로운 방문 상담 예약을 생성합니다.")
 	@PostMapping
 	public ResponseEntity<Long> addVisit(
 		@RequestBody VisitCreateRequest visitReservationCreateRequest
@@ -50,5 +54,4 @@ public class VisitController {
 		System.out.println("visitReservationCreateRequest = " + visitReservationCreateRequest);
 		return ResponseEntity.ok(visitService.addVisitReservation(visitReservationCreateRequest));
 	}
-
 }

@@ -24,7 +24,7 @@ public class CallController {
 
 	private final CallService callService;
 
-	@Operation(summary = "전화 상담 생성", description = "새로운 상담을 생성합니다.")
+	@Operation(summary = "전화 상담 예약 생성", description = "새로운 전화 상담 예약을 생성합니다.")
 	@PostMapping
 	public ResponseEntity<?> createCall(
 		Authentication authentication,
@@ -40,6 +40,7 @@ public class CallController {
 		}
 	}
 
+	@Operation(summary = "전화 상담 예약 취소", description = "특정 전화 상담 예약을 취소합니다.")
 	@DeleteMapping("/{call-id}")
 	public ResponseEntity<?> cancelCall(@PathVariable("call-id") Long callId) {
 		try {
@@ -54,6 +55,7 @@ public class CallController {
 		}
 	}
 
+	@Operation(summary = "전화 상담 목록 조회", description = "전화 상담 목록을 조회합니다.")
 	@GetMapping
 	public ResponseEntity<CallListResponse> getCallList(
 		@RequestHeader(value = "Authorization", required = false) String authorization,
@@ -65,6 +67,7 @@ public class CallController {
 		return ResponseEntity.ok(response);
 	}
 
+	@Operation(summary = "전화 상담 정보 상세", description = "특정 전화 상담의 상세 정보를 조회합니다.")
 	@GetMapping("/{call-id}")
 	public ResponseEntity<?> getCallDetail(
 		@PathVariable("call-id") Long callId
