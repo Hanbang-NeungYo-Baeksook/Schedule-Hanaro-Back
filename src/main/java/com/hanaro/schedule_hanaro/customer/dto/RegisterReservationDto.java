@@ -1,9 +1,7 @@
 package com.hanaro.schedule_hanaro.customer.dto;
 
 import lombok.Builder;
-import lombok.Getter;
 
-@Getter
 @Builder
 public record RegisterReservationDto(
 	Long csVisitId,
