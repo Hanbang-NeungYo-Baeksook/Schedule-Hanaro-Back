@@ -6,7 +6,6 @@ public record BranchListCreateRequest(
 	List<BranchDto> branches
 ) {
 	public record BranchDto(
-		String id,
 		String name,
 		String type,
 		String position_x,

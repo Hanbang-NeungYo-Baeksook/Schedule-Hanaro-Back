@@ -83,7 +83,7 @@ public class BranchService {
 					.xPosition(branchDto.position_x())
 					.yPosition(branchDto.position_y())
 					.address(branchDto.address())
-					.tel(branchDto.tel())
+					.tel(branchDto.tel().replace("-", ""))
 					.businessTime(branchDto.business_hours())
 					.build()));
 
