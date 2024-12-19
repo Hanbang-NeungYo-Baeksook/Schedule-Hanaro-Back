@@ -9,6 +9,6 @@ public enum Status {
 	PENDING("대기중"),
 	PROGRESS("진행중"),
 	COMPLETE("완료"),
-	CANCELLED("취소");
+	CANCELED("취소");
 	private final String status;
 }

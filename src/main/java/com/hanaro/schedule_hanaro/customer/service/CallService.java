@@ -1,5 +1,6 @@
 package com.hanaro.schedule_hanaro.customer.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -34,8 +35,7 @@ public class CallService {
 	private final CallRepository callRepository;
 	private final CustomerRepository customerRepository;
 
-	private static final int MAX_RESERVATION_PERSON = 50;
-	private static final int MAX_RESERVATION_TICKET = 70;
+	private static final int MAX_RESERVATION = 60;
 	private static final int CONSULTANTS = 25;
 	private static final int CONSULTATION_TIME_MINUTE = 15;
 
@@ -50,14 +50,15 @@ public class CallService {
 		LocalDateTime startTime = timeSlotRange[0];
 		LocalDateTime endTime = timeSlotRange[1];
 
-		// 해당 시간대의 예약 수 조회
-		int pendingCalls = callRepository.countByTimeSlotAndStatus(startTime, endTime, Status.PENDING);
+		// 해당 날짜와 시간대의 모든 예약 수 조회
+		LocalDate date = request.callDate().toLocalDate();
+		int totalCalls = callRepository.countByDateAndTimeSlot(date, startTime, endTime);
 
-		if (pendingCalls >= MAX_RESERVATION_TICKET) {
+		if (totalCalls >= MAX_RESERVATION) {
 			throw new IllegalStateException("해당 시간대의 예약이 모두 찼습니다.");
 		}
 
-		int newCallNum = pendingCalls + 1;
+		int newCallNum = totalCalls + 1;
 
 		Call call = Call.builder()
 			.customer(customer)
@@ -85,7 +86,7 @@ public class CallService {
 			throw new GlobalException(ErrorCode.WRONG_CALL_STATUS, "진행 중이거나 완료된 상담은 취소할 수 없습니다.");
 		}
 
-		call.setStatus(Status.CANCELLED);
+		call.setStatus(Status.CANCELED);
 		callRepository.save(call);
 	}
 
