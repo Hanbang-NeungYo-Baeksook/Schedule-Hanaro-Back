@@ -2,6 +2,7 @@ package com.hanaro.schedule_hanaro.admin.controller;
 
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminVisitInquiryInfoResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminVisitNumResponse;
+import com.hanaro.schedule_hanaro.admin.dto.response.AdminVisitStatusUpdateResponse;
 import com.hanaro.schedule_hanaro.admin.service.AdminVisitService;
 import com.hanaro.schedule_hanaro.global.domain.Visit;
 
@@ -30,9 +31,12 @@ public class AdminVisitController {
         return ResponseEntity.ok().body(response);
     }
 
-    @Operation(summary = "방문 상담 상세 조회", description = "영업점의 현재 방문 상담에 관한 정보들(대기 인원, 번호표 등)을 조회 및 갱신합니다.")
-    @PatchMapping("{visit-id}")
-    public AdminVisitNumResponse getVisitPageData(@PathVariable("visit-id") Long visitId) {
-        return adminVisitService.getVisitPageData(visitId);
+    @Operation(summary = "방문 상담 상태 변경", description = "특정 방문 상담의 상태를 진행중으로 변경하고, 창구의 대기 상태를 갱신합니다.")
+    @PatchMapping("/{visit-id}/status")
+    public ResponseEntity<AdminVisitStatusUpdateResponse> updateVisitStatus(
+            @PathVariable("visit-id") Long visitId
+    ) {
+        AdminVisitStatusUpdateResponse response = adminVisitService.updateVisitStatus(visitId);
+        return ResponseEntity.ok(response);
     }
 }

@@ -3,13 +3,21 @@ package com.hanaro.schedule_hanaro.admin.service;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminVisitCarouselDto;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminVisitNumResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminVisitStatisticsDto;
+import com.hanaro.schedule_hanaro.admin.dto.response.AdminVisitStatusUpdateResponse;
+import com.hanaro.schedule_hanaro.global.domain.Section;
+import com.hanaro.schedule_hanaro.global.domain.enums.Status;
+import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
+import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 import com.hanaro.schedule_hanaro.global.repository.CsVisitRepository;
+import com.hanaro.schedule_hanaro.global.repository.SectionRepository;
 import com.hanaro.schedule_hanaro.global.repository.VisitRepository;
 import com.hanaro.schedule_hanaro.global.domain.CsVisit;
 import com.hanaro.schedule_hanaro.global.domain.Visit;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +27,7 @@ public class AdminVisitService {
 
     private int angle = 0;
     private final VisitRepository visitRepository;
+    private final SectionRepository sectionRepository;
 
     public Visit findVisitById(Long visitId) {
         return visitRepository.findById(visitId)
@@ -82,5 +91,54 @@ public class AdminVisitService {
             displayNum.add(i % size);
         }
         return displayNum;
+    }
+
+    @Transactional
+    public AdminVisitStatusUpdateResponse updateVisitStatus(Long visitId) {
+        // Visit 조회 및 상태 변경
+        Visit currentVisit = visitRepository.findById(visitId)
+                .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_VISIT));
+
+        if (currentVisit.getStatus() != Status.PENDING) {
+            throw new GlobalException(ErrorCode.ALREADY_PROGRESS);
+        }
+
+        int previousNum = currentVisit.getNum();
+        currentVisit.changeStatusToProgress();
+
+        //Section 조회 및 현재 상태 업데이트
+        Section section = currentVisit.getSection();
+        section.updateStatusPendingToProgress(currentVisit.getNum(), 10);
+        sectionRepository.save(section);
+
+        //다음 대기 번호 설정
+        Visit nextVisit = visitRepository.findNextPendingVisit(section.getId(), Status.PENDING)
+                .orElse(null);
+
+        int nextNum = (nextVisit != null) ? nextVisit.getNum() : -1;
+
+        //CsVisit 업데이트
+        CsVisit csVisit = csVisitRepository.findByBranchIdAndDate(section.getBranch().getId(), LocalDate.now())
+                .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_DATA));
+
+        csVisit.increaseTotalNum();
+        csVisitRepository.save(csVisit);
+
+        //Response 반환
+        AdminVisitStatusUpdateResponse.SectionInfo sectionInfo = AdminVisitStatusUpdateResponse.SectionInfo.builder()
+                .sectionId(section.getId())
+                .sectionType(section.getSectionType().toString())
+                .currentNum(section.getCurrentNum())
+                .waitAmount(section.getWaitAmount())
+                .waitTime(section.getWaitTime())
+                .todayVisitors(csVisit.getTotalNum())
+                .build();
+
+        return AdminVisitStatusUpdateResponse.builder()
+                .previousNum(previousNum)
+                .currentNum(currentVisit.getNum())
+                .nextNum(nextNum)
+                .sectionInfo(sectionInfo)
+                .build();
     }
 }
