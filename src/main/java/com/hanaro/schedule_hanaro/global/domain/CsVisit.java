@@ -66,4 +66,8 @@ public class CsVisit {
 		totalNum += 1;
 		waitAmount += 1;
 	}
+
+	public void increaseTotalNum(){
+		totalNum += 1;
+	}
 }

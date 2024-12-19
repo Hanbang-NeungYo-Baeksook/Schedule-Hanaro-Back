@@ -93,4 +93,9 @@ public class Visit {
 		this.tags = tags;
 		this.category = category;
 	}
+
+	public void changeStatusToProgress() {
+		this.status = Status.PROGRESS;
+		this.startedAt = LocalDateTime.now();
+	}
 }
