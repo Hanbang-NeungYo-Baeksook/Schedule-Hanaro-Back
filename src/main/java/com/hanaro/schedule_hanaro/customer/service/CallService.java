@@ -43,7 +43,7 @@ public class CallService {
 	public CallResponse createCall(Authentication authentication, CallRequest request) {
 
 		Customer customer = customerRepository.findById(PrincipalUtils.getId(authentication))
-			.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 회원 id입니다."));
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CUSTOMER));
 
 		// 시간대 범위 설정 (30분 간격)
 		LocalDateTime[] timeSlotRange = getTimeSlotRange(request.callDate());
@@ -55,7 +55,7 @@ public class CallService {
 		int totalCalls = callRepository.countByDateAndTimeSlot(date, startTime, endTime);
 
 		if (totalCalls >= MAX_RESERVATION) {
-			throw new IllegalStateException("해당 시간대의 예약이 모두 찼습니다.");
+			throw new GlobalException(ErrorCode.FULL_CALL_RESERVATION);
 		}
 
 		int newCallNum = totalCalls + 1;
@@ -134,7 +134,7 @@ public class CallService {
 
 	public CallDetailResponse getCallDetail(Long callId) {
 		Call call = callRepository.findById(callId)
-			.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 상담 id입니다."));
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CALL));
 
 		Map<String, Integer> waitInfo = calculateWaitInfo(call);
 
