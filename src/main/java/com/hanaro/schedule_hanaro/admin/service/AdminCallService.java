@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +27,7 @@ import com.hanaro.schedule_hanaro.global.domain.CallMemo;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
+import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -77,12 +79,12 @@ public class AdminCallService {
 	}
 
 	@Transactional
-	public String saveCallMemo(Long callId, String content) {
+	public String saveCallMemo(Authentication authentication, Long callId, String content) {
 		Call call = callRepository.findById(callId).orElseThrow(
 			() -> new IllegalArgumentException("존재하지 않는 문의입니다.")
 		);
 		// TODO: admin id 변경 -> security 연결
-		Admin admin = adminRepository.findById(3L).orElseThrow(
+		Admin admin = adminRepository.findById(PrincipalUtils.getId(authentication)).orElseThrow(
 			() -> new IllegalArgumentException("존재하지 않는 관리자입니다.")
 		);
 
