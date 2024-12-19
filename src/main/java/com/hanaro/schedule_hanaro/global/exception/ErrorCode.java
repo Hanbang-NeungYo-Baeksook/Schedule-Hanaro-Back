@@ -13,7 +13,10 @@ public enum ErrorCode {
 	WRONG_REQUEST_PARAMETER(40002, HttpStatus.BAD_REQUEST, "잘못된 파라미터입니다."),
 	FULL_CALL_RESERVATION(40003, HttpStatus.BAD_REQUEST, "예약이 가득찬 시간대입니다."),
 	WRONG_CALL_STATUS(40004, HttpStatus.BAD_REQUEST, "잘못된 전화 상담 상태입니다."),
-	WRONG_INQUIRY_STATUS(40003, HttpStatus.BAD_REQUEST, "잘못된 1:1 문의 상태입니다."),
+	WRONG_INQUIRY_STATUS(40005, HttpStatus.BAD_REQUEST, "잘못된 1:1 문의 상태입니다."),
+	ALREADY_RESERVED(40006, HttpStatus.BAD_REQUEST, "이미 예약되었습니다."),
+	VISIT_LIMIT_OVER(40007, HttpStatus.BAD_REQUEST, "중복예약 횟수 초과"),
+	BRANCH_CLOSED(40008, HttpStatus.BAD_REQUEST, "영업시간이 아닙니다."),
 
 	// 403
 	FORBIDDEN_REQUEST(40300, HttpStatus.FORBIDDEN, "권한이 존재하지 않습니다."),

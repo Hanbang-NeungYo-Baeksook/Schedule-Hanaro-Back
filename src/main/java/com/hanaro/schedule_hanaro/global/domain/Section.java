@@ -36,7 +36,7 @@ public class Section {
 	@JoinColumn(name = "branch_id", nullable = false)
 	private Branch branch;
 
-	@Column(name = "type", nullable = false)
+	@Column(name = "section_type", nullable = false)
 	@Enumerated(EnumType.STRING)
 	private SectionType sectionType;
 
@@ -56,5 +56,16 @@ public class Section {
 	) {
 		this.branch = branch;
 		this.sectionType = sectionType;
+	}
+
+	public void increase(Integer amount) {
+		this.currentNum += 1;
+		this.waitAmount += 1;
+		this.waitTime += amount;
+	}
+
+	public void decrease(Integer amount) {
+		this.waitAmount -= 1;
+		this.waitTime -= amount;
 	}
 }

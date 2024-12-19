@@ -10,10 +10,15 @@ import org.springframework.data.domain.Slice;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import com.hanaro.schedule_hanaro.customer.dto.RegisterReservationDto;
 import com.hanaro.schedule_hanaro.customer.dto.request.VisitCreateRequest;
 import com.hanaro.schedule_hanaro.customer.dto.response.VisitDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.VisitListResponse;
 import com.hanaro.schedule_hanaro.global.domain.Section;
+import com.hanaro.schedule_hanaro.global.domain.enums.Category;
+import com.hanaro.schedule_hanaro.global.domain.enums.SectionType;
+import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
+import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 import com.hanaro.schedule_hanaro.global.repository.BranchRepository;
 import com.hanaro.schedule_hanaro.global.repository.CsVisitRepository;
 import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
@@ -44,103 +49,107 @@ public class VisitService {
 
 	private final SectionRepository sectionRepository;
 
+	private final CsVisitService csVisitService;
+
 	public VisitService(VisitRepository visitRepository, BranchRepository branchRepository,
 		CustomerRepository customerRepository, CsVisitRepository csVisitRepository,
-		SectionRepository sectionRepository) {
+		SectionRepository sectionRepository, CsVisitService csVisitService) {
 		this.visitRepository = visitRepository;
 		this.branchRepository = branchRepository;
 		this.customerRepository = customerRepository;
 		this.csVisitRepository = csVisitRepository;
 		this.sectionRepository = sectionRepository;
+		this.csVisitService = csVisitService;
 	}
 
-	@Transactional
 	public Long addVisitReservation(
-		VisitCreateRequest visitReservationCreateRequest
+		VisitCreateRequest visitReservationCreateRequest,
+		Authentication authentication
 	) throws RuntimeException, InterruptedException {
-		Customer customer = customerRepository.findById(
-			visitReservationCreateRequest.customerId()
-		).orElseThrow();
+		Customer customer = customerRepository.findById(PrincipalUtils.getId(authentication))
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CUSTOMER));
+
 		Branch branch = branchRepository.findById(
-			visitReservationCreateRequest.branchId()
-		).orElseThrow();
+				visitReservationCreateRequest.branchId())
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_BRANCH));
+
 		Section section = sectionRepository.findByBranchAndSectionType(branch,
-			visitReservationCreateRequest.sectionType()).orElseThrow();
+				getSectionByCategory(visitReservationCreateRequest.category()))
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_DATA));
+
 		LocalDateTime now = LocalDateTime.now();
 
-		if (isReserved(customer, section, now)) {
-			throw new RuntimeException("Branch Reserved");
-		}
-
-		if (isLimitOver(customer, now)) {
-			throw new RuntimeException("Limit Over");
-		}
-
-		if (isClosed(branch, now)) {
-			throw new RuntimeException("Branch Closed");
-		}
+		isReserved(customer, section, now);
+		isLimitOver(customer, now);
+		isClosed(branch, now);
 
 		String content = visitReservationCreateRequest.content();
-
 		String tags = getTags(content);
 
 		Long csVisitId = csVisitRepository.findByBranchIdAndDate(
 				branch.getId(),
 				now.toLocalDate()
 			)
-			.orElseThrow()
-			.getId();
-		System.out.println("csVisitId = " + csVisitId);
+			.orElseThrow().getId();
 
-		while (true) {
-			try {
-				System.out.println("Try Lock");
-				CsVisit optimisticLock = csVisitRepository.findByWithOptimisticLock(csVisitId).orElseThrow();
-				optimisticLock.increase();
-				int totalNum = optimisticLock.getTotalNum();
-				csVisitRepository.saveAndFlush(optimisticLock);
+		int totalNum = csVisitService.increase(RegisterReservationDto.of(csVisitId, section.getId(),
+			visitReservationCreateRequest.category().getWaitTime()));
+		System.out.println(Thread.currentThread().getName() + " : totalNum = " + totalNum);
 
-				Visit savedVisit = visitRepository.save(
-					Visit.builder()
-						.customer(customer)
-						.section(section)
-						.visitDate(now.toLocalDate())
-						.num(totalNum)
-						.content(content)
-						.tags(tags)
-						.build()
-				);
-				System.out.println("savedVisit.getId() = " + savedVisit.getId());
-				return savedVisit.getId();
-			} catch (OptimisticLockException ex) {
-				System.out.println("OptimisticLockException, Sleep");
-				Thread.sleep(50);
+		Visit savedVisit = visitRepository.save(
+			Visit.builder()
+				.customer(customer)
+				.section(section)
+				.visitDate(now.toLocalDate())
+				.num(totalNum)
+				.content(content)
+				.tags(tags)
+				.build()
+		);
+
+		return savedVisit.getId();
+	}
+
+	// TODO: 타입 정의 하고 마무리
+	private SectionType getSectionByCategory(Category category) {
+		switch (category) {
+			case FUND,DEPOSIT -> {
+				return SectionType.TEMP1;
+			}
+			case FOREX -> {
+				return SectionType.TEMP2;
+			}
+			default -> {
+				return SectionType.TEMP3;
 			}
 		}
 	}
 
-	private boolean isReserved(Customer customer, Section section, LocalDateTime now) {
-		if (visitRepository.existsByCustomerAndSectionAndVisitDateAndStatus(
+	private void isReserved(Customer customer, Section section, LocalDateTime now) {
+		if (!visitRepository.existsByCustomerAndSectionAndVisitDateAndStatus(
 			customer, section, now.toLocalDate(), Status.PENDING)
 		) {
-			return true;
+			throw new GlobalException(ErrorCode.ALREADY_RESERVED);
 		}
-		return false;
 	}
 
-	private boolean isLimitOver(Customer customer, LocalDateTime now) {
+	private void isLimitOver(Customer customer, LocalDateTime now) {
 		int count = visitRepository.countByCustomerAndVisitDateAndStatus(
 			customer, now.toLocalDate(), Status.PENDING
 		);
-		return count >= LIMIT;
+		if (count >= LIMIT) {
+			throw new GlobalException(ErrorCode.VISIT_LIMIT_OVER);
+		}
 	}
 
-	private static boolean isClosed(Branch branch, LocalDateTime now) {
+	private void isClosed(Branch branch, LocalDateTime now) {
 		String[] businessTime = branch.getBusinessTime().split("~");
 		String startTime = businessTime[0];
 		String endTime = businessTime[1];
 		String curTime = now.toLocalTime().toString();
-		return curTime.compareTo(startTime) < 0 || curTime.compareTo(endTime) > 0;
+		if (curTime.compareTo(startTime) < 0 || curTime.compareTo(endTime) > 0) {
+			throw new GlobalException(ErrorCode.BRANCH_CLOSED);
+		}
 	}
 
 	private String getTags(String content) {

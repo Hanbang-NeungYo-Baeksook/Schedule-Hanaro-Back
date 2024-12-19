@@ -49,9 +49,10 @@ public class VisitController {
 	@Operation(summary = "방문 상담 예약 생성", description = "새로운 방문 상담 예약을 생성합니다.")
 	@PostMapping
 	public ResponseEntity<Long> addVisit(
-		@RequestBody VisitCreateRequest visitReservationCreateRequest
+		@RequestBody VisitCreateRequest visitReservationCreateRequest,
+		Authentication authentication
 	) throws InterruptedException {
 		System.out.println("visitReservationCreateRequest = " + visitReservationCreateRequest);
-		return ResponseEntity.ok(visitService.addVisitReservation(visitReservationCreateRequest));
+		return ResponseEntity.ok(visitService.addVisitReservation(visitReservationCreateRequest, authentication));
 	}
 }

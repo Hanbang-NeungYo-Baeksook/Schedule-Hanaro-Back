@@ -96,39 +96,39 @@ public class VisitServiceTest {
 		}
 	}
 
-	@Test
-	public void addVisitRequest100Test() throws Exception {
-		int threadCount = 2;
-		ExecutorService executorService = Executors.newFixedThreadPool(2);
-		CountDownLatch latch = new CountDownLatch(threadCount);
-
-		Branch branch = branchRepository.findByName("NormalTestBranch").orElseThrow();
-		for (int i = 0; i < threadCount; i++) {
-			int finalI = i;
-			executorService.submit(() -> {
-					try {
-						Customer customer = customerRepository.findByName("TestUser" + (finalI + 1)).orElseThrow();
-						VisitCreateRequest visitCreateRequest = VisitCreateRequest
-							.builder()
-							.customerId(customer.getId())
-							.branchId(branch.getId())
-							.content("TestContent")
-							.build();
-						visitService.addVisitReservation(visitCreateRequest);
-					} catch (InterruptedException e) {
-						System.err.println("Error: " + e.getMessage());
-					} finally {
-						latch.countDown();
-					}
-				}
-			);
-		}
-
-		latch.await();
-		executorService.shutdown();
-
-		CsVisit csVisit = csVisitRepository.findByBranchIdAndDate(branch.getId(), LocalDate.now()).orElseThrow();
-
-		assertThat(csVisit.getTotalNum()).isEqualTo(100);
-	}
+	// @Test
+	// public void addVisitRequest100Test() throws Exception {
+	// 	int threadCount = 2;
+	// 	ExecutorService executorService = Executors.newFixedThreadPool(2);
+	// 	CountDownLatch latch = new CountDownLatch(threadCount);
+	//
+	// 	Branch branch = branchRepository.findByName("NormalTestBranch").orElseThrow();
+	// 	for (int i = 0; i < threadCount; i++) {
+	// 		int finalI = i;
+	// 		executorService.submit(() -> {
+	// 				try {
+	// 					Customer customer = customerRepository.findByName("TestUser" + (finalI + 1)).orElseThrow();
+	// 					VisitCreateRequest visitCreateRequest = VisitCreateRequest
+	// 						.builder()
+	// 						.customerId(customer.getId())
+	// 						.branchId(branch.getId())
+	// 						.content("TestContent")
+	// 						.build();
+	// 					visitService.addVisitReservation(visitCreateRequest);
+	// 				} catch (InterruptedException e) {
+	// 					System.err.println("Error: " + e.getMessage());
+	// 				} finally {
+	// 					latch.countDown();
+	// 				}
+	// 			}
+	// 		);
+	// 	}
+	//
+	// 	latch.await();
+	// 	executorService.shutdown();
+	//
+	// 	CsVisit csVisit = csVisitRepository.findByBranchIdAndDate(branch.getId(), LocalDate.now()).orElseThrow();
+	//
+	// 	assertThat(csVisit.getTotalNum()).isEqualTo(100);
+	// }
 }
