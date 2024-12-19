@@ -58,7 +58,7 @@ public class CsVisit {
 		// this.waitAmount = waitAmount;
 	}
 
-	public void decrementWaitAmount() {
+	public void decreaseWaitAmount() {
 		this.waitAmount--;
 	}
 
