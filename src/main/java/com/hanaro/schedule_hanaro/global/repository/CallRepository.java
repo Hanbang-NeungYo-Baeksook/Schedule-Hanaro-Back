@@ -19,14 +19,8 @@ import jakarta.persistence.LockModeType;
 
 public interface CallRepository extends JpaRepository<Call, Long> {
 
-	@Lock(LockModeType.PESSIMISTIC_WRITE)
-	@Query("SELECT COALESCE(MAX(c.callNum), 0) FROM Call c WHERE FUNCTION('DATE', c.callDate) = :callDate")
-	int findMaxCallNumByDate(@Param("callDate") LocalDate callDate);
-
-	@Query("SELECT COALESCE(MAX(c.callNum), 0) FROM Call c WHERE c.callDate BETWEEN :startTime AND :endTime")
-	int findMaxCallNumByTimeSlot(LocalDateTime startTime, LocalDateTime endTime);
-
-	boolean existsByCallDate(LocalDateTime callDate);
+	@Query("SELECT COUNT(c) FROM Call c WHERE c.callDate BETWEEN :startTime AND :endTime AND c.status = :status")
+	int countByTimeSlotAndStatus(@Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime, @Param("status") Status status);
 
 	Slice<Call> findByStatus(Status status, Pageable pageable);
 
@@ -55,4 +49,5 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 	);
 
 	List<Call> findByCustomerId(Long customerId);
+
 }

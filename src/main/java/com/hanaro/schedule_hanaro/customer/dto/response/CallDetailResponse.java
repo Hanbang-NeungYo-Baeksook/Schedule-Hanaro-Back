@@ -13,5 +13,7 @@ public record CallDetailResponse(
 	String category,
 	String status,
 	String content,
-	List<String> tags
+	List<String> tags,
+	@JsonProperty("wait_num") int waitNum,
+	@JsonProperty("estimated_wait_time") int estimatedWaitTime
 ) {}
