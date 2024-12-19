@@ -7,7 +7,6 @@ import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,18 +14,11 @@ import com.hanaro.schedule_hanaro.global.domain.Call;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 
-import jakarta.persistence.LockModeType;
 
 public interface CallRepository extends JpaRepository<Call, Long> {
 
-	@Lock(LockModeType.PESSIMISTIC_WRITE)
-	@Query("SELECT COALESCE(MAX(c.callNum), 0) FROM Call c WHERE FUNCTION('DATE', c.callDate) = :callDate")
-	int findMaxCallNumByDate(@Param("callDate") LocalDate callDate);
-
-	@Query("SELECT COALESCE(MAX(c.callNum), 0) FROM Call c WHERE c.callDate BETWEEN :startTime AND :endTime")
-	int findMaxCallNumByTimeSlot(LocalDateTime startTime, LocalDateTime endTime);
-
-	boolean existsByCallDate(LocalDateTime callDate);
+	@Query("SELECT COUNT(c) FROM Call c WHERE DATE(c.callDate) = :date AND c.callDate BETWEEN :startTime AND :endTime")
+	int countByDateAndTimeSlot(@Param("date") LocalDate date, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
 
 	Slice<Call> findByStatus(Status status, Pageable pageable);
 
@@ -55,4 +47,5 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 	);
 
 	List<Call> findByCustomerId(Long customerId);
+
 }

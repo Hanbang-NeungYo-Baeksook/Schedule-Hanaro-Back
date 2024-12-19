@@ -1,7 +1,9 @@
 package com.hanaro.schedule_hanaro.customer.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,24 +35,30 @@ public class CallService {
 	private final CallRepository callRepository;
 	private final CustomerRepository customerRepository;
 
+	private static final int MAX_RESERVATION = 60;
+	private static final int CONSULTANTS = 25;
+	private static final int CONSULTATION_TIME_MINUTE = 15;
+
 	@Transactional
 	public CallResponse createCall(Authentication authentication, CallRequest request) {
 
 		Customer customer = customerRepository.findById(PrincipalUtils.getId(authentication))
 			.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 회원 id입니다."));
 
+		// 시간대 범위 설정 (30분 간격)
 		LocalDateTime[] timeSlotRange = getTimeSlotRange(request.callDate());
 		LocalDateTime startTime = timeSlotRange[0];
 		LocalDateTime endTime = timeSlotRange[1];
 
-		int baseNum = calculateNum(request.callDate());
+		// 해당 날짜와 시간대의 모든 예약 수 조회
+		LocalDate date = request.callDate().toLocalDate();
+		int totalCalls = callRepository.countByDateAndTimeSlot(date, startTime, endTime);
 
-		int maxCallNumInSlot = callRepository.findMaxCallNumByTimeSlot(startTime, endTime);
-		int newCallNum = (maxCallNumInSlot == 0) ? baseNum : maxCallNumInSlot + 1;
-
-		if (newCallNum > baseNum + 99) {
+		if (totalCalls >= MAX_RESERVATION) {
 			throw new IllegalStateException("해당 시간대의 예약이 모두 찼습니다.");
 		}
+
+		int newCallNum = totalCalls + 1;
 
 		Call call = Call.builder()
 			.customer(customer)
@@ -68,30 +76,6 @@ public class CallService {
 			.build();
 	}
 
-	private LocalDateTime[] getTimeSlotRange(LocalDateTime callDateTime) {
-		int hour = callDateTime.getHour();
-		LocalDateTime startTime = callDateTime.withHour(hour).withMinute(0).withSecond(0).withNano(0);
-		LocalDateTime endTime = startTime.plusHours(1).minusSeconds(1);
-		return new LocalDateTime[]{startTime, endTime};
-	}
-
-
-	private int calculateNum(LocalDateTime callDateTime) {
-		int hour = callDateTime.getHour();
-		return switch (hour) {
-			case 9 -> 1;
-			case 10 -> 101;
-			case 11 -> 201;
-			case 12 -> 301;
-			case 13 -> 401;
-			case 14 -> 501;
-			case 15 -> 601;
-			case 16 -> 701;
-			case 17 -> 801;
-			default -> throw new IllegalArgumentException("운영 시간 외에는 예약할 수 없습니다.");
-		};
-	}
-
 
 	@Transactional
 	public void cancelCall(Long callId) {
@@ -102,25 +86,38 @@ public class CallService {
 			throw new GlobalException(ErrorCode.WRONG_CALL_STATUS, "진행 중이거나 완료된 상담은 취소할 수 없습니다.");
 		}
 
-		callRepository.delete(call);
+		call.setStatus(Status.CANCELED);
+		callRepository.save(call);
+	}
+
+	private LocalDateTime[] getTimeSlotRange(LocalDateTime callDateTime) {
+		int minute = callDateTime.getMinute() < 30 ? 0 : 30;
+		LocalDateTime startTime = callDateTime.withMinute(minute).withSecond(0).withNano(0);
+		LocalDateTime endTime = startTime.plusMinutes(30).minusSeconds(1);
+		return new LocalDateTime[]{startTime, endTime};
 	}
 
 	public CallListResponse getCallList(String status, int page, int size) {
 		Status callStatus = Status.valueOf(status.toUpperCase());
-
 		Pageable pageable = PageRequest.of(page - 1, size);
 
 		Slice<Call> callSlice = callRepository.findByStatus(callStatus, pageable);
 
 		List<CallListResponse.CallData> callDataList = callSlice.getContent().stream()
-			.map(call -> CallListResponse.CallData.builder()
-				.callId(call.getId())
-				.callDate(call.getCallDate().toLocalDate().toString())
-				.callTime(call.getCallDate().toLocalTime().toString())
-				.callNum(call.getCallNum())
-				.category(call.getCategory().name())
-				.status(call.getStatus().getStatus())
-				.build())
+			.map(call -> {
+				Map<String, Integer> waitInfo = calculateWaitInfo(call);
+
+				return CallListResponse.CallData.builder()
+					.callId(call.getId())
+					.callDate(call.getCallDate().toLocalDate().toString())
+					.callTime(call.getCallDate().toLocalTime().toString())
+					.callNum(call.getCallNum())
+					.category(call.getCategory().name())
+					.status(call.getStatus().getStatus())
+					.waitNum(waitInfo.get("waitNum"))
+					.estimatedWaitTime(waitInfo.get("estimatedWaitTime"))
+					.build();
+			})
 			.toList();
 
 		CallListResponse.Pagination pagination = CallListResponse.Pagination.builder()
@@ -139,6 +136,8 @@ public class CallService {
 		Call call = callRepository.findById(callId)
 			.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 상담 id입니다."));
 
+		Map<String, Integer> waitInfo = calculateWaitInfo(call);
+
 		return CallDetailResponse.builder()
 			.callId(call.getId())
 			.customerName(call.getCustomer().getName())
@@ -148,9 +147,27 @@ public class CallService {
 			.category(call.getCategory().name())
 			.status(call.getStatus().getStatus())
 			.content(call.getContent())
-			//이 부분 tag 어떤식으로 넘어오는지 모르겠어서 일단 이렇게 구현했습니다..
 			.tags(List.of(call.getTags().split(",")))
+			.waitNum(waitInfo.get("waitNum"))
+			.estimatedWaitTime(waitInfo.get("estimatedWaitTime"))
 			.build();
+	}
+
+	private Map<String, Integer> calculateWaitInfo(Call call) {
+		if (call.getStatus() != Status.PENDING) {
+			return Map.of(
+				"waitNum", 0,
+				"estimatedWaitTime", 0
+			);
+		}
+
+		int waitNum = (call.getCallNum() - 1) / CONSULTANTS;
+		int estimatedWaitTime = waitNum * CONSULTATION_TIME_MINUTE;
+
+		return Map.of(
+			"waitNum", waitNum,
+			"estimatedWaitTime", estimatedWaitTime
+		);
 	}
 
 }

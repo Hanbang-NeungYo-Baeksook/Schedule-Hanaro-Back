@@ -19,7 +19,9 @@ public record CallListResponse(
 		@JsonProperty("call_time") String callTime,
 		@JsonProperty("call_num") int callNum,
 		String category,
-		String status
+		String status,
+		@JsonProperty("wait_num") int waitNum,
+		@JsonProperty("estimated_wait_time") int estimatedWaitTime
 	) {
 	}
 
