@@ -28,30 +28,28 @@ public class CsVisitService {
 	}
 
 	// 트랜잭션 단위를 최소화
-	public int increase(RegisterReservationDto registerReservationDto) throws InterruptedException {
-		int totalNum = -1;
-		while (true) {
-			try {
-				// Tracational Annotation이 오류가 발생하는 가장 작은 단위로 들어가야함!
-				totalNum = increaseWait(registerReservationDto);
-				break;
-			} catch (OptimisticLockingFailureException ex) {
-				String threadName = Thread.currentThread().getName();
-				System.out.println(threadName + " : " + ex.getMessage());
-				Thread.sleep(500);
-			}
-		}
-
-		return totalNum;
-	}
+	// public int increase(RegisterReservationDto registerReservationDto) throws InterruptedException {
+	// 	int totalNum = -1;
+	// 	while (true) {
+	// 		try {
+	// 			// Tracational Annotation이 오류가 발생하는 가장 작은 단위로 들어가야함!
+	// 			totalNum = increaseWait(registerReservationDto);
+	// 			break;
+	// 		} catch (OptimisticLockingFailureException ex) {
+	// 			String threadName = Thread.currentThread().getName();
+	// 			System.out.println(threadName + " : " + ex.getMessage());
+	// 			Thread.sleep(500);
+	// 		}
+	// 	}
+	//
+	// 	return totalNum;
+	// }
 
 	@Transactional // 트랜잭션 단위 분리
-	protected int increaseWait(RegisterReservationDto registerReservationDto) {
+	public int increaseWait(RegisterReservationDto registerReservationDto) {
 		CsVisit optimisticLock = csVisitRepository.findById(registerReservationDto.csVisitId()).orElseThrow();
 		optimisticLock.increase();
 		csVisitRepository.saveAndFlush(optimisticLock);
-
-		sectionService.increase(registerReservationDto);
 
 		return optimisticLock.getTotalNum();
 	}

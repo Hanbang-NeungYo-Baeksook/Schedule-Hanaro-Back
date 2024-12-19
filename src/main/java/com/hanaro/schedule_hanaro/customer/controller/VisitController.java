@@ -4,6 +4,7 @@ import java.security.Principal;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -44,6 +45,12 @@ public class VisitController {
 	@GetMapping("/{visit-id}")
 	public ResponseEntity<VisitDetailResponse> getVisit(@PathVariable("visit-id") Long visitId) {
 		return ResponseEntity.ok(visitService.getVisitDetail(visitId));
+	}
+
+	@Operation
+	@DeleteMapping("/{visit-id}")
+	public ResponseEntity<String> deleteVisit(@PathVariable("visit-id") Long visitId) throws InterruptedException {
+		return ResponseEntity.ok(visitService.deleteVisitReservation(visitId));
 	}
 
 	@Operation(summary = "방문 상담 예약 생성", description = "새로운 방문 상담 예약을 생성합니다.")

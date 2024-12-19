@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.ColumnDefault;
 
+import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 
 import jakarta.persistence.Column;
@@ -65,6 +66,10 @@ public class Visit {
 	@Column(name = "tags", length = 50)
 	private String tags;
 
+	@Enumerated(EnumType.STRING)
+	@Column(name = "category", nullable = false)
+	private Category category;
+
 	@Builder
 	public Visit(
 		Customer customer,
@@ -74,8 +79,10 @@ public class Visit {
 		LocalDateTime startedAt,
 		LocalDateTime endedAt,
 		String content,
-		String tags
+		String tags,
+		Category category
 	) {
+
 		this.customer = customer;
 		this.section = section;
 		this.visitDate = visitDate;
@@ -84,5 +91,6 @@ public class Visit {
 		this.endedAt = endedAt;
 		this.content = content;
 		this.tags = tags;
+		this.category = category;
 	}
 }

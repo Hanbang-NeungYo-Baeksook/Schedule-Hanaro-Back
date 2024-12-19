@@ -2,6 +2,7 @@ package com.hanaro.schedule_hanaro.global.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -14,6 +15,10 @@ import com.hanaro.schedule_hanaro.global.domain.Visit;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 
 public interface VisitRepository extends JpaRepository<Visit, Long> {
+
+	@Override
+	Optional<Visit> findById(Long aLong);
+
 	Boolean existsByCustomerAndSectionAndVisitDateAndStatus(
 		Customer customer,
 		Section section,

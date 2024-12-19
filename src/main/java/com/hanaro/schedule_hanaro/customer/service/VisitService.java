@@ -4,12 +4,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import com.hanaro.schedule_hanaro.customer.dto.CancelReservationDto;
 import com.hanaro.schedule_hanaro.customer.dto.RegisterReservationDto;
 import com.hanaro.schedule_hanaro.customer.dto.request.VisitCreateRequest;
 import com.hanaro.schedule_hanaro.customer.dto.response.VisitDetailResponse;
@@ -50,16 +52,18 @@ public class VisitService {
 	private final SectionRepository sectionRepository;
 
 	private final CsVisitService csVisitService;
+	private final SectionService sectionService;
 
 	public VisitService(VisitRepository visitRepository, BranchRepository branchRepository,
 		CustomerRepository customerRepository, CsVisitRepository csVisitRepository,
-		SectionRepository sectionRepository, CsVisitService csVisitService) {
+		SectionRepository sectionRepository, CsVisitService csVisitService, SectionService sectionService) {
 		this.visitRepository = visitRepository;
 		this.branchRepository = branchRepository;
 		this.customerRepository = customerRepository;
 		this.csVisitRepository = csVisitRepository;
 		this.sectionRepository = sectionRepository;
 		this.csVisitService = csVisitService;
+		this.sectionService = sectionService;
 	}
 
 	public Long addVisitReservation(
@@ -79,7 +83,9 @@ public class VisitService {
 
 		LocalDateTime now = LocalDateTime.now();
 
-		isReserved(customer, section, now);
+		if (isReserved(customer, section, now)) {
+			throw new GlobalException(ErrorCode.ALREADY_RESERVED);
+		}
 		isLimitOver(customer, now);
 		isClosed(branch, now);
 
@@ -92,8 +98,20 @@ public class VisitService {
 			)
 			.orElseThrow().getId();
 
-		int totalNum = csVisitService.increase(RegisterReservationDto.of(csVisitId, section.getId(),
-			visitReservationCreateRequest.category().getWaitTime()));
+		int totalNum;
+		while (true) {
+			try {
+				RegisterReservationDto registerReservationDto = RegisterReservationDto.of(csVisitId, section.getId(),
+					visitReservationCreateRequest.category().getWaitTime());
+				totalNum = csVisitService.increaseWait(registerReservationDto);
+				sectionService.increaseWait(registerReservationDto);
+				break;
+			} catch (OptimisticLockingFailureException ex) {
+				String threadName = Thread.currentThread().getName();
+				System.out.println(threadName + " : " + ex.getMessage());
+				Thread.sleep(500);
+			}
+		}
 		System.out.println(Thread.currentThread().getName() + " : totalNum = " + totalNum);
 
 		Visit savedVisit = visitRepository.save(
@@ -104,9 +122,9 @@ public class VisitService {
 				.num(totalNum)
 				.content(content)
 				.tags(tags)
+				.category(visitReservationCreateRequest.category())
 				.build()
 		);
-
 		return savedVisit.getId();
 	}
 
@@ -125,12 +143,13 @@ public class VisitService {
 		}
 	}
 
-	private void isReserved(Customer customer, Section section, LocalDateTime now) {
-		if (!visitRepository.existsByCustomerAndSectionAndVisitDateAndStatus(
+	private boolean isReserved(Customer customer, Section section, LocalDateTime now) {
+		if (visitRepository.existsByCustomerAndSectionAndVisitDateAndStatus(
 			customer, section, now.toLocalDate(), Status.PENDING)
 		) {
-			throw new GlobalException(ErrorCode.ALREADY_RESERVED);
+			return true;
 		}
+		return false;
 	}
 
 	private void isLimitOver(Customer customer, LocalDateTime now) {
@@ -228,5 +247,26 @@ public class VisitService {
 			.data(visitDataList)
 			.pagination(pagination)
 			.build();
+	}
+
+	public String deleteVisitReservation(Long visitId) throws InterruptedException {
+		Visit visit = visitRepository.findById(visitId)
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_VISIT));
+		if (visit.getStatus().equals(Status.COMPLETE)) {
+			throw new GlobalException(ErrorCode.ALREADY_RESERVED);
+		}
+		while (true) {
+			try {
+				// 창구에 대기 현황 반영
+				sectionService.decreaseWait(
+					CancelReservationDto.of(visit.getSection().getId(), visit.getCategory().getWaitTime()));
+				break;
+			} catch (OptimisticLockingFailureException ex) {
+				String threadName = Thread.currentThread().getName();
+				System.out.println(threadName + " : " + ex.getMessage());
+				Thread.sleep(500);
+			}
+		}
+		return "Success";
 	}
 }
