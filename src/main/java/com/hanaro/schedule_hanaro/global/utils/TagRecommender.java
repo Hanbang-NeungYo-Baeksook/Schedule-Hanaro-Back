@@ -20,7 +20,7 @@ public class TagRecommender {
             "신청", "등록", "조회", "결과", "예금", "적금", "고객", "개인", "회원", "비밀번호",
             "보안", "소득", "증명서", "증빙", "서류", "자료", "거래", "입금", "금리", "계약",
             "약정", "투자", "자금", "문의", "상담", "우대", "포인트", "지점", "전화", "모바일",
-            "기간", "조건", "업무", "조치", "제출", "화면", "입력", "상태", "서비스", "비대면"
+            "기간", "조건", "업무", "조치", "제출", "화면", "입력", "상태", "서비스", "비대면","미성년자"
     );
 
     // Static initializer to load Word2Vec model
@@ -50,6 +50,7 @@ public class TagRecommender {
     public static List<String> recommendTagsForQuery(String query) {
         // 1. 질문 토큰화
         List<String> questionTokens = FAQTokenizer.tokenizeNewQuestion(query);
+        System.out.println("질문 토큰화 결과: " + questionTokens);
 
         // 2. 토큰 벡터화 및 유사도 계산
         Map<String, Double> tagSimilarities = calculateTagSimilarities(questionTokens);
