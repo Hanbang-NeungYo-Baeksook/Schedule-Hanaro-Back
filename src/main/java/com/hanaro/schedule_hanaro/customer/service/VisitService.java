@@ -257,6 +257,7 @@ public class VisitService {
 		}
 		while (true) {
 			try {
+				// 창구에 대기 현황 반영
 				sectionService.decreaseWait(
 					CancelReservationDto.of(visit.getSection().getId(), visit.getCategory().getWaitTime()));
 				break;

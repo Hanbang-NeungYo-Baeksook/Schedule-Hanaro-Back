@@ -26,6 +26,7 @@ public class SectionService {
 		sectionRepository.saveAndFlush(section);
 	}
 
+	// 창구 대기 인원 -1 && 대기 시간 -amount
 	@Transactional
 	public void decreaseWait(CancelReservationDto cancelReservationDto) {
 		Section section = sectionRepository.findByIdWithOptimisticLock(cancelReservationDto.sectionId())
