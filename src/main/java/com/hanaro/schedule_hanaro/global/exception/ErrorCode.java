@@ -17,6 +17,7 @@ public enum ErrorCode {
 	ALREADY_RESERVED(40006, HttpStatus.BAD_REQUEST, "이미 예약되었습니다."),
 	VISIT_LIMIT_OVER(40007, HttpStatus.BAD_REQUEST, "중복예약 횟수 초과"),
 	BRANCH_CLOSED(40008, HttpStatus.BAD_REQUEST, "영업시간이 아닙니다."),
+	ALREADY_PROGRESS(40009, HttpStatus.BAD_REQUEST, "해당 방문은 이미 진행 중입니다."),
 
 	// 403
 	FORBIDDEN_REQUEST(40300, HttpStatus.FORBIDDEN, "권한이 존재하지 않습니다."),

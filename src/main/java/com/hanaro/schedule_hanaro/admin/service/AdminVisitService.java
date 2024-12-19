@@ -6,6 +6,8 @@ import com.hanaro.schedule_hanaro.admin.dto.response.AdminVisitStatisticsDto;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminVisitStatusUpdateResponse;
 import com.hanaro.schedule_hanaro.global.domain.Section;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
+import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
+import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 import com.hanaro.schedule_hanaro.global.repository.CsVisitRepository;
 import com.hanaro.schedule_hanaro.global.repository.SectionRepository;
 import com.hanaro.schedule_hanaro.global.repository.VisitRepository;
@@ -95,10 +97,10 @@ public class AdminVisitService {
     public AdminVisitStatusUpdateResponse updateVisitStatus(Long visitId) {
         // Visit 조회 및 상태 변경
         Visit currentVisit = visitRepository.findById(visitId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 방문 정보가 존재하지 않습니다. ID: " + visitId));
+                .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_VISIT));
 
         if (currentVisit.getStatus() != Status.PENDING) {
-            throw new IllegalStateException("해당 방문은 이미 진행 중입니다.");
+            throw new GlobalException(ErrorCode.ALREADY_PROGRESS);
         }
 
         int previousNum = currentVisit.getNum();
@@ -106,7 +108,7 @@ public class AdminVisitService {
 
         //Section 조회 및 현재 상태 업데이트
         Section section = currentVisit.getSection();
-        section.StatusUpdatePendingToProgress(currentVisit,10);
+        section.updateStatusPendingToProgress(currentVisit.getNum(), 10);
         sectionRepository.save(section);
 
         //다음 대기 번호 설정
@@ -117,7 +119,7 @@ public class AdminVisitService {
 
         //CsVisit 업데이트
         CsVisit csVisit = csVisitRepository.findByBranchIdAndDate(section.getBranch().getId(), LocalDate.now())
-                .orElseThrow(() -> new IllegalArgumentException("해당 CS 방문 통계가 존재하지 않습니다."));
+                .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_DATA));
 
         csVisit.increaseTotalNum();
         csVisitRepository.save(csVisit);

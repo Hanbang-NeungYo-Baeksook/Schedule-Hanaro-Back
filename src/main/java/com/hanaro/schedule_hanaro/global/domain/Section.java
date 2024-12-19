@@ -69,8 +69,8 @@ public class Section {
 		this.waitTime -= amount;
 	}
 
-	public void StatusUpdatePendingToProgress(Visit visit, Integer amount){
-		this.currentNum  = visit.getNum();
+	public void updateStatusPendingToProgress(int num, Integer amount){
+		this.currentNum  = num;
 		this.waitAmount -= 1;
 		this.waitTime = Math.max(this.waitTime - amount, 0);
 	}
