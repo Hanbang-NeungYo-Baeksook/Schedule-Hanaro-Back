@@ -16,16 +16,9 @@ import jakarta.persistence.LockModeType;
 
 @Repository
 public interface CsVisitRepository extends JpaRepository<CsVisit, Long> {
+	Optional<CsVisit> findById(final Long id);
 
 	Optional<CsVisit> findByBranchIdAndDate(Long branchId, LocalDate date);
-
-	@Lock(value = LockModeType.OPTIMISTIC)
-	@Query("select c from CsVisit c where c.id = :id")
-	Optional<CsVisit> findByWithOptimisticLock(final Long id);
-
-	@Lock(value = LockModeType.OPTIMISTIC)
-	@Query("select c from CsVisit c where c.branch = :branch and c.date = :date")
-	Optional<CsVisit> findByBranchAndDateWithOptimisticLock(Branch branch, LocalDate date);
 
 	Optional<CsVisit> findByBranchId(Long id);
 

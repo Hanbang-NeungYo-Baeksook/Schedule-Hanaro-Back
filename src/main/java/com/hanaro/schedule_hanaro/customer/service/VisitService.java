@@ -10,6 +10,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import com.hanaro.schedule_hanaro.customer.dto.RegisterReservationDto;
 import com.hanaro.schedule_hanaro.customer.dto.request.VisitCreateRequest;
 import com.hanaro.schedule_hanaro.customer.dto.response.VisitDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.VisitListResponse;
@@ -48,17 +49,19 @@ public class VisitService {
 
 	private final SectionRepository sectionRepository;
 
+	private final CsVisitService csVisitService;
+
 	public VisitService(VisitRepository visitRepository, BranchRepository branchRepository,
 		CustomerRepository customerRepository, CsVisitRepository csVisitRepository,
-		SectionRepository sectionRepository) {
+		SectionRepository sectionRepository, CsVisitService csVisitService) {
 		this.visitRepository = visitRepository;
 		this.branchRepository = branchRepository;
 		this.customerRepository = customerRepository;
 		this.csVisitRepository = csVisitRepository;
 		this.sectionRepository = sectionRepository;
+		this.csVisitService = csVisitService;
 	}
 
-	@Transactional
 	public Long addVisitReservation(
 		VisitCreateRequest visitReservationCreateRequest,
 		Authentication authentication
@@ -83,39 +86,28 @@ public class VisitService {
 		String content = visitReservationCreateRequest.content();
 		String tags = getTags(content);
 
-		while (true) {
-			try {
-				System.out.println("Try Lock");
-				CsVisit optimisticLock = csVisitRepository.findByBranchAndDateWithOptimisticLock(branch,
-						now.toLocalDate())
-					.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_DATA));
-				optimisticLock.increase();
-				int totalNum = optimisticLock.getTotalNum();
-				csVisitRepository.saveAndFlush(optimisticLock);
+		Long csVisitId = csVisitRepository.findByBranchIdAndDate(
+				branch.getId(),
+				now.toLocalDate()
+			)
+			.orElseThrow().getId();
 
-				Section section1 = sectionRepository.findByIdWithOptimisticLock(section.getId())
-					.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_DATA));
-				int amount = visitReservationCreateRequest.category().getWaitTime();
-				section1.increase(amount);
-				sectionRepository.saveAndFlush(section1);
+		int totalNum = csVisitService.increase(RegisterReservationDto.of(csVisitId, section.getId(),
+			visitReservationCreateRequest.category().getWaitTime()));
+		System.out.println(Thread.currentThread().getName() + " : totalNum = " + totalNum);
 
-				Visit savedVisit = visitRepository.save(
-					Visit.builder()
-						.customer(customer)
-						.section(section)
-						.visitDate(now.toLocalDate())
-						.num(totalNum)
-						.content(content)
-						.tags(tags)
-						.build()
-				);
-				System.out.println("savedVisit.getId() = " + savedVisit.getId());
-				return savedVisit.getId();
-			} catch (OptimisticLockException ex) {
-				System.out.println("OptimisticLockException, Sleep");
-				Thread.sleep(50);
-			}
-		}
+		Visit savedVisit = visitRepository.save(
+			Visit.builder()
+				.customer(customer)
+				.section(section)
+				.visitDate(now.toLocalDate())
+				.num(totalNum)
+				.content(content)
+				.tags(tags)
+				.build()
+		);
+
+		return savedVisit.getId();
 	}
 
 	// TODO: 타입 정의 하고 마무리
