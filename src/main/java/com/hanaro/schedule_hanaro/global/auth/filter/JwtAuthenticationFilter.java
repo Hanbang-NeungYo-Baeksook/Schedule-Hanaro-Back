@@ -42,16 +42,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			return;
 		}
 
-		if (request.getRequestURI().equals("/api/auth/sign-in") || request.getRequestURI().equals("/api/auth/sign-up")
-			|| request.getRequestURI().equals("/api/auth/admin/sign-up") || request.getRequestURI()
-			.equals("/api/auth/admin/sign-in")) {
-			filterChain.doFilter(request, response);
+		String header = request.getHeader("Authorization");
+		if (header == null || !header.startsWith("Bearer ")) {
+			filterChain.doFilter(request,response);
 			return;
 		}
-
-		String header = request.getHeader("Authorization");
-		if (header == null || !header.startsWith("Bearer "))
-			throw new RuntimeException("올바르지 않은 토큰입니다.");
 		String token = header.substring(7);
 
 		Claims claims = jwtTokenProvider.validateToken(token);
