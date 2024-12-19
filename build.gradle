@@ -47,6 +47,20 @@ dependencies {
     implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'
     runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'
     runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'
+
+    // Okt 한국어 토크나이징 라이브러리
+    implementation 'org.openkoreantext:open-korean-text:2.1.0'
+
+    // Apache Commons Math
+    implementation 'org.apache.commons:commons-math3:3.6.1'
+
+    // 딥러닝 및 기계 학습 라이브러리
+    implementation 'org.deeplearning4j:deeplearning4j-nlp:1.0.0-beta7'
+    implementation 'org.nd4j:nd4j-native-platform:1.0.0-beta7'
+
+    // DeepLearning4J 핵심 의존성
+    implementation 'nz.ac.waikato.cms.weka:weka-stable:3.8.5'
+    implementation 'org.encog:encog-core:3.4'
 }
 
 tasks.named('test') {
