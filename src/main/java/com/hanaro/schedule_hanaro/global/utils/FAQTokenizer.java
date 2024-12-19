@@ -14,35 +14,6 @@ public class FAQTokenizer {
     private static final List<String> PRESERVE_TOKENS = List.of("하나은행", "홈페이지","영업점","해지","중도","하나원큐"); // 나누지 않고 포함할 단어
     private static final List<String> COMPOSITE_TOKENS = List.of("하나원큐","납입금"); // 합성어 리스트
 
-    public static Map<String, Map<String, Object>> tokenizeFAQ(List<Map<String, String>> faqData) {
-        Map<String, Map<String, Object>> tokenizedData = new HashMap<>();
-        List<String> customNouns = Arrays.asList("비대면","하나원큐","납입금","해지","중도","홈페이지","다가구","미사용","감면","비과세","타행","전세금","전세","내역","OTP" ,"공인인증서");
-        OpenKoreanTextProcessorJava.addNounsToDictionary(customNouns);
-
-        for (Map<String, String> faq : faqData) {
-            String question = faq.get("question");
-            String answer = faq.get("answer");
-
-            // Extract nouns from question and answer
-            List<String> questionTokens = filterTokens(KoreanTokenizerUtil.extractNouns(question));
-            List<String> answerTokens = filterTokens(KoreanTokenizerUtil.extractNouns(answer));
-
-            // Debugging
-            System.out.println("Question Tokens (Before Filtering): " + questionTokens);
-            System.out.println("Answer Tokens (Before Filtering): " + answerTokens);
-
-            // Store tokens and full answer text
-            Map<String, Object> entry = new HashMap<>();
-            entry.put("questionTokens", questionTokens);
-            entry.put("answerTokens", answerTokens);
-            entry.put("fullAnswer", answer);
-
-            tokenizedData.put(question, entry);
-        }
-
-        return tokenizedData;
-    }
-
     // Filters tokens to remove unwanted words like "질문" and preserve specific words
     public static List<String> filterTokens(List<String> tokens) {
         // Map tokens by combining composite words first
