@@ -1,11 +1,15 @@
 package com.hanaro.schedule_hanaro.global.auth.service;
 
 
+import java.security.Principal;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.hanaro.schedule_hanaro.global.auth.info.UserInfo;
+import com.hanaro.schedule_hanaro.global.domain.enums.Role;
 import com.hanaro.schedule_hanaro.global.repository.AdminRepository;
 import com.hanaro.schedule_hanaro.global.repository.BranchRepository;
 import com.hanaro.schedule_hanaro.global.auth.dto.request.AuthAdminSignUpRequest;
@@ -37,8 +41,8 @@ public class AuthService {
 	public JwtTokenDto signIn(SignInRequest signInRequest) {
 		String username = signInRequest.authId();
 		String password = signInRequest.password();
-		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username,
-			password);
+		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+			(new UserInfo(username, Role.CUSTOMER)), password);
 		Authentication authentication = authenticationProvider.authenticate(authenticationToken);
 		CustomUserDetails customUserDetails = (CustomUserDetails)authentication.getPrincipal();
 		return jwtTokenProvider.generateTokens(customUserDetails.getUsername(), customUserDetails.getRole());
@@ -47,8 +51,8 @@ public class AuthService {
 	public JwtTokenDto adminSignIn(SignInRequest signInRequest) {
 		String username = signInRequest.authId();
 		String password = signInRequest.password();
-		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username,
-			password);
+		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+			(new UserInfo(username, Role.ADMIN)), password);
 		Authentication authentication = authenticationProvider.authenticate(authenticationToken);
 		CustomUserDetails customUserDetails = (CustomUserDetails)authentication.getPrincipal();
 		return jwtTokenProvider.generateTokens(customUserDetails.getUsername(), customUserDetails.getRole());

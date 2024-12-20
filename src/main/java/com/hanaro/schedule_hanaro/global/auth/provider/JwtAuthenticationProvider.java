@@ -24,6 +24,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 		System.out.println("Authenticate Provider 진입 성공 ");
+		System.out.println("authentication:"+ authentication);
 		System.out.println(authentication.getPrincipal().toString());
 		if (authentication.getPrincipal().getClass().equals(String.class)) {
 			System.out.println("로그인 시작");
@@ -34,8 +35,8 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
 	}
 
 	private Authentication authOfLogin(Authentication authentication) {
-		CustomUserDetails customUserDetails = customUserDetailService.loadUserByUsername(
-			authentication.getPrincipal().toString());
+		CustomUserDetails customUserDetails = customUserDetailService.loadUserByUsernameAndRole(
+			(UserInfo)authentication.getPrincipal());
 
 		System.out.println(customUserDetails.getUsername());
 		if (!bCryptPasswordEncoder.matches(authentication.getCredentials().toString(), customUserDetails.getPassword()))
@@ -48,8 +49,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
 
 	private Authentication authAfterLogin(UserInfo userInfo) {
 		System.out.println(userInfo.id()+userInfo.role());
-		CustomUserDetails customUserDetails = customUserDetailService.loadUserByUsername(
-			userInfo.id());
+		CustomUserDetails customUserDetails = customUserDetailService.loadUserByUsernameAndRole(userInfo);
 		return new UsernamePasswordAuthenticationToken(customUserDetails, customUserDetails.getPassword(),
 			customUserDetails.getAuthorities());
 	}
