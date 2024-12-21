@@ -42,10 +42,11 @@ public class BranchService {
 
 		branches.forEach(objects -> {
 
-				dtoMap.computeIfAbsent(objects.branchId(), id -> new BranchDetailResponse(
-					objects.branchId(), objects.name(), objects.xPosition(), objects.yPosition(), objects.address(),
-					objects.branchType().getBranchType(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),0
-				));
+			dtoMap.computeIfAbsent(objects.branchId(), id -> new BranchDetailResponse(
+				objects.branchId(), objects.name(), objects.xPosition(), objects.yPosition(), objects.address(),
+				objects.tel(), objects.branchType().getBranchType(), new ArrayList<>(), new ArrayList<>(),
+				new ArrayList<>(), 0
+			));
 
 				BranchDetailResponse dto = dtoMap.get(objects.branchId());
 				dto.sectionTypes().add(objects.sectionType().getType());
@@ -67,7 +68,8 @@ public class BranchService {
 
 			dtoMap.computeIfAbsent(objects.branchId(), id -> new BranchDetailResponse(
 				objects.branchId(), objects.name(), objects.xPosition(), objects.yPosition(), objects.address(),
-				objects.branchType().getBranchType(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
+				objects.tel(), objects.branchType().getBranchType(), new ArrayList<>(), new ArrayList<>(),
+				new ArrayList<>(),
 				Math.round(DistanceUtils.calculateDistance(userLat, userLon, Double.parseDouble(objects.yPosition()),
 					Double.parseDouble(objects.xPosition())) * 1000)
 			));

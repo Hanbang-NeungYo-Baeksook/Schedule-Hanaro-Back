@@ -20,8 +20,6 @@ public interface SectionRepository extends JpaRepository<Section, Long> {
 	@Override
 	Optional<Section> findById(Long aLong);
 
-	List<Section> findSectionsByBranchId(Long branchId);
-
 	@Lock(value = LockModeType.OPTIMISTIC)
 	@Query("select s from Section s where s.id = :id")
 	Optional<Section> findByIdWithOptimisticLock(final Long id);

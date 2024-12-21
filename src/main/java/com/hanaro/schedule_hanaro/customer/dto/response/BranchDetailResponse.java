@@ -17,6 +17,7 @@ public record BranchDetailResponse(
 	@JsonProperty("y_position")
 	String yPosition,
 	String address,
+	String tel,
 	@JsonProperty("branch_type")
 	String branchType,
 

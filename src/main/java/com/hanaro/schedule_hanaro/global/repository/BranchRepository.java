@@ -22,7 +22,7 @@ public interface BranchRepository extends JpaRepository<Branch, Long> {
 
 	@Query("""
 		select new com.hanaro.schedule_hanaro.customer.vo.BankVO(
-		b.id, b.name,b.xPosition,b.yPosition,b.address,
+		b.id, b.name,b.xPosition,b.yPosition,b.address, b.tel,
 		b.branchType,s.sectionType, s.waitTime,s.waitAmount)
 		from Branch b
 		left join Section s on s.branch.id=b.id
@@ -33,7 +33,7 @@ public interface BranchRepository extends JpaRepository<Branch, Long> {
 
 	@Query("""
 		select new com.hanaro.schedule_hanaro.customer.vo.BankVO(
-		b.id, b.name,b.xPosition,b.yPosition,b.address,
+		b.id, b.name,b.xPosition,b.yPosition,b.address, b.tel,
 		b.branchType,s.sectionType, s.waitTime,s.waitAmount)
 		from Branch b
 		left join Section s on s.branch.id=b.id
