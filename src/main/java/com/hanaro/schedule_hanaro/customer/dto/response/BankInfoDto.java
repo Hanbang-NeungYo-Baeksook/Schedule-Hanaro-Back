@@ -25,7 +25,10 @@ public record BankInfoDto(
 	List<Integer> waitAmount,
 
 	@JsonProperty("wait_time")
-	List<Integer> waitTime
+	List<Integer> waitTime,
+
+	@JsonProperty("distance")
+	long distance
 	) {
 	public static BankInfoDto of(Long id, String branchName, String xPosition, String yPosition, String address) {
 

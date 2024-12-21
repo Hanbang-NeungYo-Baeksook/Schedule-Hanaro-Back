@@ -53,7 +53,7 @@ public class BranchService {
 			csVisit.getWaitAmount());
 	}
 
-	public BranchListResponse listBranch() {
+	public BranchListResponse listBranch(double userLat, double userLon) {
 
 		Map<Long,BankInfoDto>dtoMap=new LinkedHashMap<>();
 		List<Branch> atmList = branchRepository.findAllByBranchTypeOrderByIdAsc(BranchType.ATM);
@@ -63,8 +63,11 @@ public class BranchService {
 
 			dtoMap.computeIfAbsent(objects.branchId(), id -> new BankInfoDto(
 				objects.branchId(), objects.name(), objects.xPosition(), objects.yPosition(), objects.address(),
-				objects.branchType().getBranchType(), new ArrayList<>(), new ArrayList<>()
+				objects.branchType().getBranchType(), new ArrayList<>(), new ArrayList<>(),
+				Math.round(DistanceUtils.calculateDistance(userLat, userLon, Double.parseDouble(objects.yPosition()),
+					Double.parseDouble(objects.xPosition()))*1000)
 			));
+
 			BankInfoDto dto = dtoMap.get(objects.branchId());
 			dto.waitAmount().add(objects.waitAmount());
 			dto.waitTime().add(objects.waitTime());

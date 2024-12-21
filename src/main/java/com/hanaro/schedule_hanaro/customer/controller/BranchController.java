@@ -38,8 +38,9 @@ public class BranchController {
 
 	@Operation(summary = "영업점 정보 목록 조회", description = "영업점의 목록을 조회합니다.")
 	@GetMapping("/list")
-	public ResponseEntity<BranchListResponse> getBranchList() {
-		return ResponseEntity.ok().body(branchService.listBranch());
+	public ResponseEntity<BranchListResponse> getBranchList(@RequestParam("latitude") double latitude,        // 사용자 위도
+		@RequestParam("longitude") double longitude) {
+		return ResponseEntity.ok().body(branchService.listBranch(latitude, longitude));
 	}
 
 	// 형석이 테스트용...
