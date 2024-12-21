@@ -10,6 +10,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryStatsDto;
 import com.hanaro.schedule_hanaro.global.domain.Call;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
@@ -46,6 +49,31 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 		@Param("keyword") String keyword
 	);
 
+	
+
 	List<Call> findByCustomerId(Long customerId);
+
+	@Query(nativeQuery = true, value = """ 
+		SELECT 
+			CAST(COUNT(CASE WHEN DATE(c.call_date) = CURRENT_DATE THEN 1 END) AS SIGNED) as today, 
+			CAST(COUNT(CASE WHEN c.call_date >= DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY) THEN 1 END) AS SIGNED) as weekly, 
+			CAST(COUNT(CASE WHEN c.call_date >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) THEN 1 END) AS SIGNED) as monthly, 
+			CAST(COUNT(*) AS SIGNED) as total 
+		FROM `Call` c
+		JOIN `Call_Memo` cm ON c.call_id = cm.call_id 
+		WHERE cm.admin_id = :adminId 
+		AND c.status = 'COMPLETE'
+	""")
+	List<Object[]> findStatsByAdminId(@Param("adminId") Long adminId);
+
+	default AdminInquiryStatsDto getStatsByAdminId(Long adminId) {
+		Object[] result = findStatsByAdminId(adminId).get(0);
+		return AdminInquiryStatsDto.of(
+			((Number) result[0]).intValue(),
+			((Number) result[1]).intValue(),
+			((Number) result[2]).intValue(),
+			((Number) result[3]).intValue()
+		);
+	}
 
 }

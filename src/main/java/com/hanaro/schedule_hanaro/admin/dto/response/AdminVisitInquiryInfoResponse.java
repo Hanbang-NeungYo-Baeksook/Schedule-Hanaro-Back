@@ -22,7 +22,7 @@ public record AdminVisitInquiryInfoResponse(
     public static  AdminVisitInquiryInfoResponse from(Visit visit) {
         return  AdminVisitInquiryInfoResponse.builder()
                 .visitId(visit.getId())
-//                .category(visit.getCategory())
+                .category(visit.getCategory() != null ? visit.getCategory().getCategory() : null)
                 .content(visit.getContent())
                 .tags(Collections.singletonList(visit.getTags()))
                 .build();

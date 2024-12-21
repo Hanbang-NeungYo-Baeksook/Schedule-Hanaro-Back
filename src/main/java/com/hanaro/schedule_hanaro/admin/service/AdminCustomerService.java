@@ -18,6 +18,8 @@ import com.hanaro.schedule_hanaro.admin.dto.response.AdminCustomerInquiryListRes
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryDto;
 import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
+import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
+import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,45 +34,85 @@ public class AdminCustomerService {
 
 
     public AdminCustomerInfoResponse findCustomerInfoById(Long customerId) {
-        Customer customer = customerRepository.findById(customerId).orElseThrow();
+        if (customerId == null) {
+            throw new GlobalException(ErrorCode.WRONG_REQUEST_PARAMETER, "고객 ID가 필요합니다.");
+        }
+
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CUSTOMER));
+        
         return AdminCustomerInfoResponse.from(customer);
     }
 
     public AdminCustomerInquiryListResponse findCustomerInquiryList(Long customerId) {
-        List<Call> callList = callRepository.findByCustomerId(customerId);
+        if (customerId == null) {
+            throw new GlobalException(ErrorCode.WRONG_REQUEST_PARAMETER, "고객 ID가 필요합니다.");
+        }
 
+        // 고객 존재 여부 확인
+        if (!customerRepository.existsById(customerId)) {
+            throw new GlobalException(ErrorCode.NOT_FOUND_CUSTOMER);
+        }
+
+        List<Call> callList = callRepository.findByCustomerId(customerId);
         List<Inquiry> inquiryList = inquiryRepository.findAllByCustomerId(customerId);
 
         List<AdminCallDto> callDtos = callList.stream()
-                .map(call -> AdminCallDto.of(
-                        call.getId(),
-                        call.getCallDate(),
-                        call.getCallNum(),
-                        call.getCategory().toString(),
-                        call.getStatus().toString(),
-                        call.getContent(),
-                        call.getStartedAt(),
-                        call.getEndedAt()
-                ))
+                .map(call -> {
+                    if (call.getCategory() == null) {
+                        throw new GlobalException(ErrorCode.WRONG_REQUEST_PARAMETER, "전화 상담 카테고리 정보가 없습니다.");
+                    }
+                    if (call.getStatus() == null) {
+                        throw new GlobalException(ErrorCode.WRONG_CALL_STATUS);
+                    }
+                    return AdminCallDto.of(
+                            call.getId(),
+                            call.getCallDate(),
+                            call.getCallNum(),
+                            call.getCategory().toString(),
+                            call.getStatus().toString(),
+                            call.getContent(),
+                            call.getStartedAt(),
+                            call.getEndedAt()
+                    );
+                })
                 .collect(Collectors.toList());
 
         List<AdminInquiryDto> inquiryDtos = inquiryList.stream()
-                .map(inquiry -> AdminInquiryDto.of(
-                        inquiry.getId(),
-                        inquiry.getContent(),
-                        inquiry.getCategory().toString(),
-                        inquiry.getInquiryStatus().toString(),
-                        inquiry.getCreatedAt()
-                ))
+                .map(inquiry -> {
+                    if (inquiry.getCategory() == null) {
+                        throw new GlobalException(ErrorCode.WRONG_REQUEST_PARAMETER, "문의 카테고리 정보가 없습니다.");
+                    }
+                    if (inquiry.getInquiryStatus() == null) {
+                        throw new GlobalException(ErrorCode.WRONG_INQUIRY_STATUS);
+                    }
+                    return AdminInquiryDto.of(
+                            inquiry.getId(),
+                            inquiry.getContent(),
+                            inquiry.getCategory().toString(),
+                            inquiry.getInquiryStatus().toString(),
+                            inquiry.getCreatedAt()
+                    );
+                })
                 .collect(Collectors.toList());
 
         return AdminCustomerInquiryListResponse.of(callDtos, inquiryDtos);
     }
 
     public AdminCustomerListResponse getCustomerList(int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size);
+        if (page < 1) {
+            throw new GlobalException(ErrorCode.WRONG_REQUEST_PARAMETER, "페이지 번호는 1 이상이어야 합니다.");
+        }
+        if (size < 1) {
+            throw new GlobalException(ErrorCode.WRONG_REQUEST_PARAMETER, "페이지 크기는 1 이상이어야 합니다.");
+        }
 
+        Pageable pageable = PageRequest.of(page - 1, size);
         Page<Customer> customers = customerRepository.findAll(pageable);
+
+        if (customers.isEmpty()) {
+            throw new GlobalException(ErrorCode.NOT_FOUND_CUSTOMER, "고객 목록이 비어있습니다.");
+        }
 
         return AdminCustomerListResponse.from(
             customers.getContent().stream()

@@ -6,6 +6,7 @@ import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryStatsDto;
 import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
 import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 import com.hanaro.schedule_hanaro.global.repository.AdminRepository;
+import com.hanaro.schedule_hanaro.global.repository.CallRepository;
 import com.hanaro.schedule_hanaro.global.repository.InquiryRepository;
 import com.hanaro.schedule_hanaro.global.domain.Admin;
 import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
@@ -22,15 +23,31 @@ import org.springframework.stereotype.Service;
 public class AdminInfoService {
     private final AdminRepository adminRepository;
     private final InquiryRepository inquiryRepository;
+    private final CallRepository callRepository;
 
     public AdminInfoResponse getAdminStats(Authentication authentication) {
+        if (authentication == null) {
+            throw new GlobalException(ErrorCode.FORBIDDEN_REQUEST, "인증 정보가 없습니다.");
+        }
+
         Long id = PrincipalUtils.getId(authentication);
+        if (id == null) {
+            throw new GlobalException(ErrorCode.WRONG_REQUEST_PARAMETER, "관리자 ID가 필요합니다.");
+        }
+
         Admin admin = adminRepository.findById(id)
             .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_ADMIN));
 
-        AdminInquiryStatsDto phoneInquiryStats = inquiryRepository.findStatsByAdminId(admin.getId());
-        AdminInquiryStatsDto oneToOneInquiryStats = inquiryRepository.findStatsByAdminId(admin.getId());
+        AdminInquiryStatsDto phoneInquiryStats = callRepository.getStatsByAdminId(admin.getId());
+        if (phoneInquiryStats == null) {
+            throw new GlobalException(ErrorCode.NOT_FOUND_CALL, "전화 상담 통계를 찾을 수 없습니다.");
+        }
 
-        return AdminInfoResponse.from(admin ,phoneInquiryStats, oneToOneInquiryStats);
+        AdminInquiryStatsDto oneToOneInquiryStats = inquiryRepository.getStatsByAdminId(admin.getId());
+        if (oneToOneInquiryStats == null) {
+            throw new GlobalException(ErrorCode.NOT_FOUND_INQUIRY, "1:1 문의 통계를 찾을 수 없습니다.");
+        }
+
+        return AdminInfoResponse.from(admin, phoneInquiryStats, oneToOneInquiryStats);
     }
 }

@@ -18,6 +18,9 @@ public enum ErrorCode {
 	VISIT_LIMIT_OVER(40007, HttpStatus.BAD_REQUEST, "중복예약 횟수 초과"),
 	BRANCH_CLOSED(40008, HttpStatus.BAD_REQUEST, "영업시간이 아닙니다."),
 	ALREADY_PROGRESS(40009, HttpStatus.BAD_REQUEST, "해당 방문은 이미 진행 중입니다."),
+	INVALID_VISIT_NUMBER(40010, HttpStatus.BAD_REQUEST, "잘못된 방문 번호입니다."),
+	INVALID_TOTAL_VISITOR_COUNT(40011, HttpStatus.BAD_REQUEST, "잘못된 방문자 수입니다."),
+	VISIT_TIME_EXPIRED(40012, HttpStatus.BAD_REQUEST, "방문 시간이 만료되었습니다."),
 
 	// 403
 	FORBIDDEN_REQUEST(40300, HttpStatus.FORBIDDEN, "권한이 존재하지 않습니다."),
@@ -32,7 +35,12 @@ public enum ErrorCode {
 	NOT_FOUND_CALL_MEMO(40407, HttpStatus.NOT_FOUND, "존재하지 않는 전화 메모입니다."),
 	NOT_FOUND_INQUIRY_RESPONSE(40408, HttpStatus.NOT_FOUND, "존재하지 않는 1:1 답변입니다."),
 	NOT_FOUND_SECTION(40409, HttpStatus.NOT_FOUND, "해당 카테고리의 섹션 데이터를 찾을 수 없습니다."),
+	NOT_FOUND_CS_VISIT(40410, HttpStatus.NOT_FOUND, "해당 지점의 방문 통계 데이터를 찾을 수 없습니다."),
+	NOT_FOUND_NEXT_VISITOR(40411, HttpStatus.NOT_FOUND, "다음 대기 방문자가 존재하지 않습니다."),
 	NOT_FOUND_DATA(40499, HttpStatus.NOT_FOUND, "존재하지 않는 데이터입니다."),
+	
+	// 409
+	CONCURRENT_VISIT_UPDATE(40900, HttpStatus.CONFLICT, "방문 정보가 동시에 수정되었습니다."),
 	;
 	private final Integer code;
 	private final HttpStatus httpStatus;

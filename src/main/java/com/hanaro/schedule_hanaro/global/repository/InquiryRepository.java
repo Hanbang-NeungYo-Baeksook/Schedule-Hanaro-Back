@@ -4,6 +4,7 @@ import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryDto;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryStatsDto;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryResponse;
 import com.hanaro.schedule_hanaro.global.domain.Inquiry;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -32,17 +33,27 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
 
 	List<Inquiry> findAllByCustomerId(Long customerId);
 
-	@Query(value = """ 
+	@Query(nativeQuery = true, value = """ 
     SELECT 
-        COUNT(CASE WHEN i.created_at >= CURRENT_DATE THEN 1 END) AS today, 
-        COUNT(CASE WHEN i.created_at >= CURRENT_DATE - INTERVAL 7 DAY THEN 1 END) AS weekly, 
-        COUNT(CASE WHEN i.created_at >= CURRENT_DATE - INTERVAL 30 DAY THEN 1 END) AS monthly, 
-        COUNT(*) AS total 
+        CAST(COUNT(CASE WHEN DATE(i.created_at) = CURRENT_DATE THEN 1 END) AS SIGNED) as today, 
+        CAST(COUNT(CASE WHEN i.created_at >= DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY) THEN 1 END) AS SIGNED) as weekly, 
+        CAST(COUNT(CASE WHEN i.created_at >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) THEN 1 END) AS SIGNED) as monthly, 
+        CAST(COUNT(*) AS SIGNED) as total 
     FROM Inquiry i
     JOIN Inquiry_Response ir ON i.inquiry_id = ir.inquiry_id 
-    WHERE ir.admin_id = :adminId 
-""", nativeQuery = true)
-	AdminInquiryStatsDto findStatsByAdminId(@Param("adminId") Long adminId);
+    WHERE ir.admin_id = :adminId
+""")
+	List<Object[]> findStatsByAdminId(@Param("adminId") Long adminId);
+
+	default AdminInquiryStatsDto getStatsByAdminId(Long adminId) {
+		Object[] result = findStatsByAdminId(adminId).get(0);
+		return AdminInquiryStatsDto.of(
+			((Number) result[0]).intValue(),
+			((Number) result[1]).intValue(),
+			((Number) result[2]).intValue(),
+			((Number) result[3]).intValue()
+		);
+	}
 
 	@Query("SELECT i FROM Inquiry i " +
 		"LEFT JOIN Customer c ON i.customer.id = c.id " +

@@ -41,7 +41,7 @@ public class AdminCustomerController {
     }
 
     @Operation(summary = "고객 문의 이력 조회", description = "특정 고객의 문의 이력을 조회합니다.")
-    @GetMapping("/customers/{customer-id}/content")
+    @GetMapping("/{customer-id}/content")
     public ResponseEntity<AdminCustomerInquiryListResponse> getCustomerInquiries(@PathVariable("customer-id") Long customerId) {
         AdminCustomerInquiryListResponse response = adminCustomerService.findCustomerInquiryList(customerId);
         return ResponseEntity.ok(response);
