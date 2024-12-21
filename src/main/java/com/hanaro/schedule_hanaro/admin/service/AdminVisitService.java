@@ -102,6 +102,7 @@ public class AdminVisitService {
         if (currentVisit.getStatus() != Status.PENDING) {
             throw new GlobalException(ErrorCode.ALREADY_PROGRESS);
         }
+        String previousCategory = currentVisit.getCategory().getCategory();
 
         int previousNum = currentVisit.getNum();
         currentVisit.changeStatusToProgress();
@@ -116,7 +117,8 @@ public class AdminVisitService {
                 .orElse(null);
 
         int nextNum = (nextVisit != null) ? nextVisit.getNum() : -1;
-
+        String nextCategory = (nextVisit != null) ? nextVisit.getCategory().getCategory() : "";
+    
         //CsVisit 업데이트
         CsVisit csVisit = csVisitRepository.findByBranchIdAndDate(section.getBranch().getId(), LocalDate.now())
                 .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_DATA));
@@ -134,10 +136,13 @@ public class AdminVisitService {
                 .todayVisitors(csVisit.getTotalNum())
                 .build();
 
-        return AdminVisitStatusUpdateResponse.builder()
+                return AdminVisitStatusUpdateResponse.builder()
                 .previousNum(previousNum)
+                .previousCategory(previousCategory)
                 .currentNum(currentVisit.getNum())
+                .currentCategory(currentVisit.getCategory().getCategory())
                 .nextNum(nextNum)
+                .nextCategory(nextCategory)
                 .sectionInfo(sectionInfo)
                 .build();
     }
