@@ -28,11 +28,4 @@ public interface SectionRepository extends JpaRepository<Section, Long> {
 	Optional<Section> findByIdWithOptimisticLock(final Long id);
 
 	Optional<Section> findByBranchAndSectionType(Branch branch, SectionType sectionType);
-
-	List<Section>findByBranch_IdOrderBySectionTypeAsc(Long branchId);
-
-	@Query("select new com.hanaro.schedule_hanaro.customer.dto.response.BankInfoDto(b.id, b.name, b.xPosition,b.yPosition,b.address,b.branchType,s.waitAmount,s.waitTime) from Section s join s.branch b where s.branch=:branch")
-	List<BankInfoDto>findSectionsByBranch(Branch branch);
-
-	List <Section> findAllOrderByBranch_IdAscAndSectionTypeAsc();
 }
