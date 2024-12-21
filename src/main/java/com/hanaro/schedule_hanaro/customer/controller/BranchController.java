@@ -12,10 +12,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hanaro.schedule_hanaro.customer.dto.request.BranchListCreateRequest;
-import com.hanaro.schedule_hanaro.customer.dto.response.BranchDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchListResponse;
 import com.hanaro.schedule_hanaro.customer.service.BranchService;
-import com.hanaro.schedule_hanaro.customer.dto.response.BankInfoDto;
+import com.hanaro.schedule_hanaro.customer.dto.response.BranchDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchRecommendationResponse;
 import com.hanaro.schedule_hanaro.global.domain.enums.SectionType;
 

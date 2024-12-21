@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import com.hanaro.schedule_hanaro.customer.dto.response.BankInfoDto;
 import com.hanaro.schedule_hanaro.global.domain.Branch;
 import com.hanaro.schedule_hanaro.global.domain.Section;
 import com.hanaro.schedule_hanaro.global.domain.enums.SectionType;
@@ -20,8 +19,6 @@ public interface SectionRepository extends JpaRepository<Section, Long> {
 
 	@Override
 	Optional<Section> findById(Long aLong);
-
-	List<Section> findSectionsByBranchId(Long branchId);
 
 	@Lock(value = LockModeType.OPTIMISTIC)
 	@Query("select s from Section s where s.id = :id")

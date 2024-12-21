@@ -1,6 +1,5 @@
 package com.hanaro.schedule_hanaro.customer.service;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -15,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.hanaro.schedule_hanaro.customer.vo.BankVO;
 import com.hanaro.schedule_hanaro.customer.dto.request.BranchListCreateRequest;
 import com.hanaro.schedule_hanaro.customer.dto.response.AtmInfoDto;
-import com.hanaro.schedule_hanaro.customer.dto.response.BankInfoDto;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchListResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchRecommendationResponse;
@@ -25,9 +23,7 @@ import com.hanaro.schedule_hanaro.global.domain.enums.SectionType;
 import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
 import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 import com.hanaro.schedule_hanaro.global.repository.BranchRepository;
-import com.hanaro.schedule_hanaro.global.repository.CsVisitRepository;
 import com.hanaro.schedule_hanaro.global.domain.Branch;
-import com.hanaro.schedule_hanaro.global.domain.CsVisit;
 import com.hanaro.schedule_hanaro.global.domain.enums.BranchType;
 import com.hanaro.schedule_hanaro.global.repository.SectionRepository;
 import com.hanaro.schedule_hanaro.global.utils.DistanceUtils;
@@ -38,37 +34,48 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class BranchService {
 	private final BranchRepository branchRepository;
-	private final CsVisitRepository csVisitRepository;
 	private final SectionRepository sectionRepository;
-	private final DistanceUtils distanceUtils;
 
-	public BranchDetailResponse findBranchById(Long id){
-		Branch branch = branchRepository.findById(id).orElseThrow(()->new GlobalException(ErrorCode.NOT_FOUND_BRANCH));
-		System.out.println(LocalDate.now());
-		CsVisit csVisit = csVisitRepository.findCsVisitByBranchIdAndDate(id, LocalDate.now())
-			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_DATA));
-		System.out.println(csVisit);
-		return BranchDetailResponse.of(branch.getId(), branch.getName(), branch.getAddress(), branch.getTel(),
-			branch.getBusinessTime(), branch.getBranchType().toString(), csVisit.getTotalNum(), csVisit.getTotalNum(),
-			csVisit.getWaitAmount());
+	public BranchDetailResponse findBranchById(Long branchId){
+		Map<Long, BranchDetailResponse>dtoMap=new LinkedHashMap<>();
+		List<BankVO> branches= branchRepository.findBranchByBranch_Id(branchId);
+
+		branches.forEach(objects -> {
+
+			dtoMap.computeIfAbsent(objects.branchId(), id -> new BranchDetailResponse(
+				objects.branchId(), objects.name(), objects.xPosition(), objects.yPosition(), objects.address(),
+				objects.tel(), objects.branchType().getBranchType(), new ArrayList<>(), new ArrayList<>(),
+				new ArrayList<>(), 0
+			));
+
+				BranchDetailResponse dto = dtoMap.get(objects.branchId());
+				dto.sectionTypes().add(objects.sectionType().getType());
+				dto.waitAmount().add(objects.waitAmount());
+				dto.waitTime().add(objects.waitTime());
+			}
+		);
+
+		return dtoMap.get(branchId);
 	}
 
 	public BranchListResponse listBranch(double userLat, double userLon) {
 
-		Map<Long,BankInfoDto>dtoMap=new LinkedHashMap<>();
+		Map<Long, BranchDetailResponse>dtoMap=new LinkedHashMap<>();
 		List<Branch> atmList = branchRepository.findAllByBranchTypeOrderByIdAsc(BranchType.ATM);
 		List<BankVO> result = branchRepository.findBranchByBranchType(BranchType.BANK);
 
 		result.forEach(objects -> {
 
-			dtoMap.computeIfAbsent(objects.branchId(), id -> new BankInfoDto(
+			dtoMap.computeIfAbsent(objects.branchId(), id -> new BranchDetailResponse(
 				objects.branchId(), objects.name(), objects.xPosition(), objects.yPosition(), objects.address(),
-				objects.branchType().getBranchType(), new ArrayList<>(), new ArrayList<>(),
+				objects.tel(), objects.branchType().getBranchType(), new ArrayList<>(), new ArrayList<>(),
+				new ArrayList<>(),
 				Math.round(DistanceUtils.calculateDistance(userLat, userLon, Double.parseDouble(objects.yPosition()),
-					Double.parseDouble(objects.xPosition()))*1000)
+					Double.parseDouble(objects.xPosition())) * 1000)
 			));
 
-			BankInfoDto dto = dtoMap.get(objects.branchId());
+			BranchDetailResponse dto = dtoMap.get(objects.branchId());
+			dto.sectionTypes().add(objects.sectionType().getType());
 			dto.waitAmount().add(objects.waitAmount());
 			dto.waitTime().add(objects.waitTime());
 			}
