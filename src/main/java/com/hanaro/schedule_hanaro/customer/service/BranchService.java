@@ -1,9 +1,12 @@
 package com.hanaro.schedule_hanaro.customer.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -51,11 +54,34 @@ public class BranchService {
 	}
 
 	public BranchListResponse listBranch() {
+
+		Map<Long,BankInfoDto>dtoMap=new LinkedHashMap<>();
 		List<Branch> atmList = branchRepository.findAllByBranchTypeOrderByIdAsc(BranchType.ATM);
 
-		List<BankInfoDto> bankInfoDtoList = branchRepository.findBankInfoDtoByBranchTypeAndSectionTypes(BranchType.BANK,
-					SectionType.DEPOSIT, SectionType.PERSONAL_LOAN, SectionType.BUSINESS_LOAN);
+		List<Object[]> result = branchRepository.findBranchByBranchType(BranchType.BANK);
 
+		result.forEach(objects -> {
+			Long branchId = (Long) objects[0];
+			String name = (String) objects[1];
+			String xPosition = (String) objects[2];
+			String yPosition = (String) objects[3];
+			String address = (String) objects[4];
+
+			String branchType = objects[5].toString();
+			Integer waitTime = (Integer) objects[6];
+			Integer waitAmount = (Integer) objects[7];
+
+			dtoMap.computeIfAbsent(branchId, id -> new BankInfoDto(
+				branchId, name, xPosition, yPosition, address, branchType, new ArrayList<>(), new ArrayList<>()
+			));
+			BankInfoDto dto = dtoMap.get(branchId);
+			dto.waitAmount().add(waitAmount);
+			dto.waitTime().add(waitTime);
+			}
+		);
+
+		// List<BankInfoDto>bankInfoDtoList=branchRepository.findBankInfoDtoByBranchTypeAndSectionTypes(BranchType.BANK,
+		// 	SectionType.DEPOSIT, SectionType.PERSONAL_LOAN, SectionType.BUSINESS_LOAN);
 		List<AtmInfoDto> atmInfoDtoList = atmList.stream()
 			.map(atm -> AtmInfoDto.of(
 				atm.getId(),
@@ -68,7 +94,7 @@ public class BranchService {
 			))
 			.toList();
 
-		return BranchListResponse.of(bankInfoDtoList, atmInfoDtoList);
+		return BranchListResponse.of(new ArrayList<>(dtoMap.values()), atmInfoDtoList);
 	}
 
 	@Transactional
