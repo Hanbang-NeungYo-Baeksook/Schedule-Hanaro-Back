@@ -5,14 +5,10 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.data.jpa.repository.Query;
 
-import com.hanaro.schedule_hanaro.customer.dto.response.BankInfoDto;
+import com.hanaro.schedule_hanaro.customer.vo.BankVO;
 import com.hanaro.schedule_hanaro.global.domain.Branch;
 import com.hanaro.schedule_hanaro.global.domain.enums.BranchType;
-import com.hanaro.schedule_hanaro.global.domain.Section;
-import com.hanaro.schedule_hanaro.global.domain.enums.SectionType;
 
 public interface BranchRepository extends JpaRepository<Branch, Long> {
 	@Override
@@ -33,5 +29,5 @@ left join Section s on s.branch.id=b.id
 where b.branchType=:branchType
 order by b.id asc, s.sectionType asc
 """)
-	List<Object[]> findBranchByBranchType(BranchType branchType);
+	List<BankVO> findBranchByBranchType(BranchType branchType);
 }

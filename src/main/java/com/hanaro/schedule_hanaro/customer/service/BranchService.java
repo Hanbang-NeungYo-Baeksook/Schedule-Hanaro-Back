@@ -2,7 +2,6 @@ package com.hanaro.schedule_hanaro.customer.service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -13,6 +12,7 @@ import java.util.stream.IntStream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.hanaro.schedule_hanaro.customer.vo.BankVO;
 import com.hanaro.schedule_hanaro.customer.dto.request.BranchListCreateRequest;
 import com.hanaro.schedule_hanaro.customer.dto.response.AtmInfoDto;
 import com.hanaro.schedule_hanaro.customer.dto.response.BankInfoDto;
@@ -57,31 +57,20 @@ public class BranchService {
 
 		Map<Long,BankInfoDto>dtoMap=new LinkedHashMap<>();
 		List<Branch> atmList = branchRepository.findAllByBranchTypeOrderByIdAsc(BranchType.ATM);
-
-		List<Object[]> result = branchRepository.findBranchByBranchType(BranchType.BANK);
+		List<BankVO> result = branchRepository.findBranchByBranchType(BranchType.BANK);
 
 		result.forEach(objects -> {
-			Long branchId = (Long) objects[0];
-			String name = (String) objects[1];
-			String xPosition = (String) objects[2];
-			String yPosition = (String) objects[3];
-			String address = (String) objects[4];
 
-			String branchType = objects[5].toString();
-			Integer waitTime = (Integer) objects[6];
-			Integer waitAmount = (Integer) objects[7];
-
-			dtoMap.computeIfAbsent(branchId, id -> new BankInfoDto(
-				branchId, name, xPosition, yPosition, address, branchType, new ArrayList<>(), new ArrayList<>()
+			dtoMap.computeIfAbsent(objects.branchId(), id -> new BankInfoDto(
+				objects.branchId(), objects.name(), objects.xPosition(), objects.yPosition(), objects.address(),
+				objects.branchType().getBranchType(), new ArrayList<>(), new ArrayList<>()
 			));
-			BankInfoDto dto = dtoMap.get(branchId);
-			dto.waitAmount().add(waitAmount);
-			dto.waitTime().add(waitTime);
+			BankInfoDto dto = dtoMap.get(objects.branchId());
+			dto.waitAmount().add(objects.waitAmount());
+			dto.waitTime().add(objects.waitTime());
 			}
 		);
 
-		// List<BankInfoDto>bankInfoDtoList=branchRepository.findBankInfoDtoByBranchTypeAndSectionTypes(BranchType.BANK,
-		// 	SectionType.DEPOSIT, SectionType.PERSONAL_LOAN, SectionType.BUSINESS_LOAN);
 		List<AtmInfoDto> atmInfoDtoList = atmList.stream()
 			.map(atm -> AtmInfoDto.of(
 				atm.getId(),
