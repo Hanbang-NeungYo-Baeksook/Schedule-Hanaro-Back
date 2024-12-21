@@ -11,4 +11,9 @@ public enum Status {
 	COMPLETE("완료"),
 	CANCELED("취소");
 	private final String status;
+
+	@Override
+	public String toString() {
+		return this.status;
+	}
 }
