@@ -24,6 +24,4 @@ public interface CsVisitRepository extends JpaRepository<CsVisit, Long> {
 
 	Optional<CsVisit> findCsVisitByBranchIdAndDate(Long branchId, LocalDate date);
 
-	List<CsVisit> findAllByDateOrderByBranchAsc(LocalDate date);
-
 }

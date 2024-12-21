@@ -51,22 +51,10 @@ public class BranchService {
 	}
 
 	public BranchListResponse listBranch() {
-
-		List<CsVisit> csVisitList = csVisitRepository.findAllByDateOrderByBranchAsc(LocalDate.now());
 		List<Branch> atmList = branchRepository.findAllByBranchTypeOrderByIdAsc(BranchType.ATM);
 
-		List<BankInfoDto> bankInfoDtoList = csVisitList.stream()
-			.map(csVisit -> BankInfoDto.of(
-				csVisit.getBranch().getId(),
-				csVisit.getBranch().getName(),
-				csVisit.getBranch().getXPosition(),
-				csVisit.getBranch().getYPosition(),
-				csVisit.getBranch().getAddress(),
-				csVisit.getBranch().getBranchType().toString(),
-				csVisit.getTotalNum(),
-				csVisit.getTotalNum()
-			))
-			.toList();
+		List<BankInfoDto> bankInfoDtoList = branchRepository.findBankInfoDtoByBranchTypeAndSectionTypes(BranchType.BANK,
+					SectionType.TEMP1, SectionType.TEMP2, SectionType.TEMP3);
 
 		List<AtmInfoDto> atmInfoDtoList = atmList.stream()
 			.map(atm -> AtmInfoDto.of(
