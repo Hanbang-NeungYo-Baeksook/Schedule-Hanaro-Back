@@ -54,7 +54,7 @@ public class BranchService {
 		List<Branch> atmList = branchRepository.findAllByBranchTypeOrderByIdAsc(BranchType.ATM);
 
 		List<BankInfoDto> bankInfoDtoList = branchRepository.findBankInfoDtoByBranchTypeAndSectionTypes(BranchType.BANK,
-					SectionType.TEMP1, SectionType.TEMP2, SectionType.TEMP3);
+					SectionType.DEPOSIT, SectionType.PERSONAL_LOAN, SectionType.BUSINESS_LOAN);
 
 		List<AtmInfoDto> atmInfoDtoList = atmList.stream()
 			.map(atm -> AtmInfoDto.of(
@@ -152,17 +152,7 @@ public class BranchService {
 					branch.getAddress(),
 					bwm.distance(),
 					section.getWaitTime(),
-					section.getCurrentNum(),
-					BankInfoDto.of(
-						branch.getId(),
-						branch.getName(),
-						branch.getXPosition(),
-						branch.getYPosition(),
-						branch.getAddress(),
-						branch.getBranchType().name(),
-						section.getCurrentNum(), // 현재 대기 인원
-						section.getWaitAmount() // 총 대기 인원
-					)
+					section.getCurrentNum()
 				);
 			})
 			.collect(Collectors.toList());
