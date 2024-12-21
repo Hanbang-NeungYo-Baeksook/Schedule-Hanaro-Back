@@ -1,5 +1,7 @@
 package com.hanaro.schedule_hanaro.customer.dto.response;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Builder;
@@ -10,42 +12,35 @@ public record BranchDetailResponse(
 	Long id,
 	@JsonProperty("branch_name")
 	String branchName,
+	@JsonProperty("x_position")
+	String xPosition,
+	@JsonProperty("y_position")
+	String yPosition,
 	String address,
-	String tel,
-	@JsonProperty("business_hours")
-	String businessHours,
 	@JsonProperty("branch_type")
 	String branchType,
-	@JsonProperty("current_num")
-	int currentNum,
-	@JsonProperty("total_num")
-	int totalNum,
+
+	@JsonProperty("section_types")
+	List<String> sectionTypes,
+
 	@JsonProperty("wait_amount")
-	int waitAmount
+	List<Integer> waitAmount,
 
+	@JsonProperty("wait_time")
+	List<Integer> waitTime,
+
+	@JsonProperty("distance")
+	long distance
 ) {
-	public static BranchDetailResponse of(
-		Long id,
-		String branchName,
-		String address,
-		String tel,
-		String businessHours,
-		String branchType,
-		int currentNum,
-		int totalNum,
-		int waitAmount
+	public static BranchDetailResponse of(Long id, String branchName, String xPosition, String yPosition, String address) {
 
-	) {
 		return BranchDetailResponse.builder()
 			.id(id)
 			.branchName(branchName)
+			.xPosition(xPosition)
+			.yPosition(yPosition)
 			.address(address)
-			.tel(tel)
-			.businessHours(businessHours)
-			.branchType(branchType)
-			.currentNum(currentNum)
-			.totalNum(totalNum)
-			.waitAmount(waitAmount)
+			.branchType("영업점")
 			.build();
 	}
 }

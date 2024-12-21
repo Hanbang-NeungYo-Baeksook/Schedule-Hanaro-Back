@@ -9,12 +9,12 @@ import lombok.Builder;
 @Builder
 public record BranchListResponse(
 	@JsonProperty("bank_list")
-	List<BankInfoDto> bankList,
+	List<BranchDetailResponse> bankList,
 	@JsonProperty("atm_list")
 	List<AtmInfoDto> atmList
 ) {
 	public static BranchListResponse of(
-		@JsonProperty("bank_list") final List<BankInfoDto> bankList,
+		@JsonProperty("bank_list") final List<BranchDetailResponse> bankList,
 		@JsonProperty("atm_list") final List<AtmInfoDto> atmList
 	) {
 		return BranchListResponse.builder()
