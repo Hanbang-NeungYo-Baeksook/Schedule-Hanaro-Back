@@ -14,13 +14,11 @@ import lombok.Getter;
 @MappedSuperclass
 public class BaseEntity {
 
-	@Column(name = "created_at", columnDefinition = "TIMESTAMP", nullable = false)
-	@org.hibernate.annotations.Comment("등록일시")
-	@ColumnDefault("CURRENT_TIMESTAMP")
+	@CreationTimestamp
+	@Column(name = "created_at", nullable = false, updatable = false)
 	private LocalDateTime createdAt;
 
-	@Column(name = "updated_at", columnDefinition = "TIMESTAMP", nullable = false)
-	@org.hibernate.annotations.Comment("수정일시")
-	@ColumnDefault("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	@UpdateTimestamp
+	@Column(name = "updated_at", nullable = false)
 	private LocalDateTime updatedAt;
 }

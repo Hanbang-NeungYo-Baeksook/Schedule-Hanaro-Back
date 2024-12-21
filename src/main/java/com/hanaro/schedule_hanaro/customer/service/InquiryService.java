@@ -28,8 +28,8 @@ public class InquiryService {
 
 	// 1:1 상담 예약
 	@Transactional
-	public InquiryCreateResponse createInquiry(Long customerId, InquiryCreateRequest request) {
-		Customer customer = customerRepository.findById(customerId)
+	public InquiryCreateResponse createInquiry(String authId, InquiryCreateRequest request) {
+		Customer customer = customerRepository.findByAuthId(authId)
 			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 ID입니다."));
 
 		int maxInquiryNum = inquiryRepository.findMaxInquiryNum();
@@ -42,6 +42,7 @@ public class InquiryService {
 			.content(request.content())
 			.inquiryNum(newInquiryNum)
 			.category(request.category())
+			.status(InquiryStatus.PENDING)
 			.tags("default")
 			.build();
 

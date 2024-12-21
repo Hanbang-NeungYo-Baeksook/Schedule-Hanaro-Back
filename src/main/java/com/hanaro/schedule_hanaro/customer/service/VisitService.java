@@ -31,6 +31,7 @@ import com.hanaro.schedule_hanaro.global.domain.CsVisit;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.Visit;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
+import com.hanaro.schedule_hanaro.global.utils.GetSectionByCategory;
 import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
 
 import jakarta.persistence.OptimisticLockException;
@@ -78,7 +79,7 @@ public class VisitService {
 			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_BRANCH));
 
 		Section section = sectionRepository.findByBranchAndSectionType(branch,
-				getSectionByCategory(visitReservationCreateRequest.category()))
+				GetSectionByCategory.getSectionTypeByCategory(visitReservationCreateRequest.category()))
 			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_DATA));
 
 		LocalDateTime now = LocalDateTime.now();
@@ -126,21 +127,6 @@ public class VisitService {
 				.build()
 		);
 		return savedVisit.getId();
-	}
-
-	// TODO: 타입 정의 하고 마무리
-	private SectionType getSectionByCategory(Category category) {
-		switch (category) {
-			case FUND,DEPOSIT -> {
-				return SectionType.TEMP1;
-			}
-			case FOREX -> {
-				return SectionType.TEMP2;
-			}
-			default -> {
-				return SectionType.TEMP3;
-			}
-		}
 	}
 
 	private boolean isReserved(Customer customer, Section section, LocalDateTime now) {

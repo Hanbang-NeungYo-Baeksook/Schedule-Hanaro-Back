@@ -44,7 +44,7 @@ public class Inquiry extends BaseEntity{
 	@Enumerated(EnumType.STRING)
 	@ColumnDefault("'PENDING'")
 	@Column(name = "status", nullable = false)
-	private InquiryStatus inquiryStatus = InquiryStatus.REGISTRATIONCOMPLETE;
+	private InquiryStatus inquiryStatus = InquiryStatus.PENDING;
 
 	@Column(name = "tags", nullable = false)
 	private String tags;
