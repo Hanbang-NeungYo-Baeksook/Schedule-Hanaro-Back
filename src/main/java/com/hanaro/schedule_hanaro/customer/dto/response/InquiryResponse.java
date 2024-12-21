@@ -4,10 +4,13 @@ import lombok.Builder;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @Builder
 public record InquiryResponse(
-	Long inquiryId,
-	int inquiryNum,
+	@JsonProperty("inquiry_id") Long inquiryId,
+	@JsonProperty("inquiry_num") int inquiryNum,
+	@JsonProperty("customer_name") String customerName,
 	String category,
 	String status,
 	String content,
