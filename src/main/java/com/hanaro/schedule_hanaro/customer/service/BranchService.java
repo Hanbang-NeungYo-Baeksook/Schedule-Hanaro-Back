@@ -1,15 +1,18 @@
 package com.hanaro.schedule_hanaro.customer.service;
 
 import java.time.LocalDate;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.hanaro.schedule_hanaro.customer.vo.BankVO;
 import com.hanaro.schedule_hanaro.customer.dto.request.BranchListCreateRequest;
 import com.hanaro.schedule_hanaro.customer.dto.response.AtmInfoDto;
 import com.hanaro.schedule_hanaro.customer.dto.response.BankInfoDto;
@@ -50,23 +53,26 @@ public class BranchService {
 			csVisit.getWaitAmount());
 	}
 
-	public BranchListResponse listBranch() {
+	public BranchListResponse listBranch(double userLat, double userLon) {
 
-		List<CsVisit> csVisitList = csVisitRepository.findAllByDateOrderByBranchAsc(LocalDate.now());
+		Map<Long,BankInfoDto>dtoMap=new LinkedHashMap<>();
 		List<Branch> atmList = branchRepository.findAllByBranchTypeOrderByIdAsc(BranchType.ATM);
+		List<BankVO> result = branchRepository.findBranchByBranchType(BranchType.BANK);
 
-		List<BankInfoDto> bankInfoDtoList = csVisitList.stream()
-			.map(csVisit -> BankInfoDto.of(
-				csVisit.getBranch().getId(),
-				csVisit.getBranch().getName(),
-				csVisit.getBranch().getXPosition(),
-				csVisit.getBranch().getYPosition(),
-				csVisit.getBranch().getAddress(),
-				csVisit.getBranch().getBranchType().toString(),
-				csVisit.getTotalNum(),
-				csVisit.getTotalNum()
-			))
-			.toList();
+		result.forEach(objects -> {
+
+			dtoMap.computeIfAbsent(objects.branchId(), id -> new BankInfoDto(
+				objects.branchId(), objects.name(), objects.xPosition(), objects.yPosition(), objects.address(),
+				objects.branchType().getBranchType(), new ArrayList<>(), new ArrayList<>(),
+				Math.round(DistanceUtils.calculateDistance(userLat, userLon, Double.parseDouble(objects.yPosition()),
+					Double.parseDouble(objects.xPosition()))*1000)
+			));
+
+			BankInfoDto dto = dtoMap.get(objects.branchId());
+			dto.waitAmount().add(objects.waitAmount());
+			dto.waitTime().add(objects.waitTime());
+			}
+		);
 
 		List<AtmInfoDto> atmInfoDtoList = atmList.stream()
 			.map(atm -> AtmInfoDto.of(
@@ -80,7 +86,7 @@ public class BranchService {
 			))
 			.toList();
 
-		return BranchListResponse.of(bankInfoDtoList, atmInfoDtoList);
+		return BranchListResponse.of(new ArrayList<>(dtoMap.values()), atmInfoDtoList);
 	}
 
 	@Transactional
@@ -118,7 +124,7 @@ public class BranchService {
 		List<BranchWithMetrics> branchMetrics = branches.stream()
 			.map(branch -> {
 				// 거리 계산
-				double distance = distanceUtils.calculateDistance(
+				double distance = DistanceUtils.calculateDistance(
 					userLat, userLon,
 					Double.parseDouble(branch.getYPosition()), Double.parseDouble(branch.getXPosition())
 				);
@@ -164,17 +170,7 @@ public class BranchService {
 					branch.getAddress(),
 					bwm.distance(),
 					section.getWaitTime(),
-					section.getCurrentNum(),
-					BankInfoDto.of(
-						branch.getId(),
-						branch.getName(),
-						branch.getXPosition(),
-						branch.getYPosition(),
-						branch.getAddress(),
-						branch.getBranchType().name(),
-						section.getCurrentNum(), // 현재 대기 인원
-						section.getWaitAmount() // 총 대기 인원
-					)
+					section.getCurrentNum()
 				);
 			})
 			.collect(Collectors.toList());

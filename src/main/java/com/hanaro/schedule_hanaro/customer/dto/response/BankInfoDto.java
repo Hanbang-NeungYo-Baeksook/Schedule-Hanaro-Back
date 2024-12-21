@@ -1,6 +1,9 @@
 package com.hanaro.schedule_hanaro.customer.dto.response;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.hanaro.schedule_hanaro.global.domain.enums.BranchType;
 
 import lombok.Builder;
 
@@ -17,22 +20,25 @@ public record BankInfoDto(
 	String address,
 	@JsonProperty("branch_type")
 	String branchType,
-	@JsonProperty("current_num")
-	int currentNum,
-	@JsonProperty("total_num")
-	int totalNum
-) {
-	public static BankInfoDto of(Long id, String branchName, String xPosition, String yPosition, String address,
-		String branchType, int currentNum, int totalNum) {
+
+	@JsonProperty("wait_amount")
+	List<Integer> waitAmount,
+
+	@JsonProperty("wait_time")
+	List<Integer> waitTime,
+
+	@JsonProperty("distance")
+	long distance
+	) {
+	public static BankInfoDto of(Long id, String branchName, String xPosition, String yPosition, String address) {
+
 		return BankInfoDto.builder()
 			.id(id)
 			.branchName(branchName)
 			.xPosition(xPosition)
 			.yPosition(yPosition)
 			.address(address)
-			.branchType(branchType)
-			.currentNum(currentNum)
-			.totalNum(totalNum)
+			.branchType("영업점")
 			.build();
 	}
 }
