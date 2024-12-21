@@ -1,6 +1,7 @@
 package com.hanaro.schedule_hanaro.admin.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.PageRequest;
@@ -16,6 +17,8 @@ import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallHistoryResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallInfoResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallWaitResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryHistoryResponse;
+import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
+import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 import com.hanaro.schedule_hanaro.global.repository.AdminRepository;
 import com.hanaro.schedule_hanaro.global.repository.CallMemoRepository;
 import com.hanaro.schedule_hanaro.global.repository.CallRepository;
@@ -45,6 +48,7 @@ public class AdminCallService {
 
 	public AdminCallWaitResponse findWaitList() {
 
+
 		// 진행 중
 		AdminCallInfoResponse progressCall = callRepository.findByStatus(Status.PROGRESS)
 			.stream()
@@ -62,13 +66,12 @@ public class AdminCallService {
 	}
 
 	@Transactional
-	public String changeCallStatus(Long callId) {
-		Call call = callRepository.findById(callId).orElseThrow(
-			() -> new IllegalArgumentException("존재하지 않는 문의입니다.")
-		);
+	public String changeCallStatus(Authentication authentication, Long callId) {
+		Call call = callRepository.findById(callId)
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CALL));
 
 		if (call.getStatus().equals(Status.PROGRESS)) {
-			callRepository.updateStatus(callId, Status.COMPLETE);
+			callRepository.updateStatusWithEndedAt(callId, Status.COMPLETE, LocalDateTime.now());
 			return "상담 완료 처리되었습니다.";
 		} else if (call.getStatus().equals(Status.PENDING)) {
 			callRepository.updateStatus(callId, Status.PROGRESS);
@@ -76,24 +79,30 @@ public class AdminCallService {
 			String message = "관리자가 새로운 상담을 시작했습니다: 상담 ID " + callId;
 			websocketHandler.notifySubscribers(1L, message);
 
+			callRepository.updateStatusWithStartedAt(callId, Status.PROGRESS, LocalDateTime.now());
+			saveCallMemo(authentication, callId, "");
 			return "상담 진행 처리되었습니다.";
 		} else if (call.getStatus().equals(Status.COMPLETE)){
-			throw new IllegalStateException("이미 완료된 상담입니다.");
+			throw new GlobalException(ErrorCode.ALREADY_COMPLETE);
 		} else {
-			throw new IllegalStateException("올바르지 않은 상담 상태입니다.");
+			throw new GlobalException(ErrorCode.WRONG_CALL_STATUS);
 		}
 
 	}
 
 	@Transactional
 	public String saveCallMemo(Authentication authentication, Long callId, String content) {
-		Call call = callRepository.findById(callId).orElseThrow(
-			() -> new IllegalArgumentException("존재하지 않는 문의입니다.")
-		);
-		// TODO: admin id 변경 -> security 연결
-		Admin admin = adminRepository.findById(PrincipalUtils.getId(authentication)).orElseThrow(
-			() -> new IllegalArgumentException("존재하지 않는 관리자입니다.")
-		);
+		Call call = callRepository.findById(callId)
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CALL));
+
+		CallMemo callMemo = callMemoRepository.findByCallId(callId);
+
+		if (!callMemo.getContent().isEmpty()) {
+			throw new GlobalException(ErrorCode.ALREADY_POST_MEMO);
+		}
+
+		Admin admin = adminRepository.findById(PrincipalUtils.getId(authentication))
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_ADMIN));
 
 		callMemoRepository.save(
 			CallMemo.builder()
@@ -132,13 +141,10 @@ public class AdminCallService {
 	}
 
 	public AdminCallDetailResponse findCall (Long callId) {
-		Call call = callRepository.findById(callId).orElseThrow(
-			() -> new IllegalArgumentException("존재하지 않는 상담입니다.")
-		);
+		Call call = callRepository.findById(callId)
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CALL));
 
-		Customer customer = customerRepository.findById(6L).orElseThrow(
-			() -> new IllegalArgumentException("존재하지 않는 고객입니다.")
-		);
+		Customer customer = customerRepository.findById(6L).orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CUSTOMER));
 
 		return AdminCallDetailResponse.from(call, customer);
 	}

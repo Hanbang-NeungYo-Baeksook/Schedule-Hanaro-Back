@@ -36,8 +36,13 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 	List<Call> findByStatus(Status status);
 
 	@Modifying
-	@Query("UPDATE Call c SET c.status = :status WHERE c.id = :callId")
-	void updateStatus(Long callId, Status status);
+	@Query("UPDATE Call c SET c.status = :status, c.endedAt = :endedAt WHERE c.id = :callId")
+	void updateStatusWithEndedAt(@Param("callId") Long callId, @Param("status") Status status, @Param("endedAt") LocalDateTime endedAt);
+
+	@Modifying
+	@Query("UPDATE Call c SET c.status = :status, c.startedAt = :startedAt WHERE c.id = :callId")
+	void updateStatusWithStartedAt(@Param("callId") Long callId, @Param("status") Status status, @Param("startedAt") LocalDateTime startedAt);
+
 
 	@Query("SELECT c FROM Call c WHERE c.customer.id = :customerId AND c.id != :callId AND c.status = 'COMPLETE'")
 	List<Call> findCallHistoryByCustomerId(Long customerId, Long callId);
