@@ -26,13 +26,28 @@ public class AdminInfoService {
     private final CallRepository callRepository;
 
     public AdminInfoResponse getAdminStats(Authentication authentication) {
+        if (authentication == null) {
+            throw new GlobalException(ErrorCode.FORBIDDEN_REQUEST, "인증 정보가 없습니다.");
+        }
+
         Long id = PrincipalUtils.getId(authentication);
+        if (id == null) {
+            throw new GlobalException(ErrorCode.WRONG_REQUEST_PARAMETER, "관리자 ID가 필요합니다.");
+        }
+
         Admin admin = adminRepository.findById(id)
             .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_ADMIN));
 
         AdminInquiryStatsDto phoneInquiryStats = callRepository.getStatsByAdminId(admin.getId());
-        AdminInquiryStatsDto oneToOneInquiryStats = inquiryRepository.getStatsByAdminId(admin.getId());
+        if (phoneInquiryStats == null) {
+            throw new GlobalException(ErrorCode.NOT_FOUND_CALL, "전화 상담 통계를 찾을 수 없습니다.");
+        }
 
-        return AdminInfoResponse.from(admin ,phoneInquiryStats, oneToOneInquiryStats);
+        AdminInquiryStatsDto oneToOneInquiryStats = inquiryRepository.getStatsByAdminId(admin.getId());
+        if (oneToOneInquiryStats == null) {
+            throw new GlobalException(ErrorCode.NOT_FOUND_INQUIRY, "1:1 문의 통계를 찾을 수 없습니다.");
+        }
+
+        return AdminInfoResponse.from(admin, phoneInquiryStats, oneToOneInquiryStats);
     }
 }
