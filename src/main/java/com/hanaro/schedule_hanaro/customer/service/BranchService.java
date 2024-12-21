@@ -103,7 +103,7 @@ public class BranchService {
 
 	// 추천 영업점 알고리즘
 	public List<BranchRecommendationResponse> recommendBranches(double userLat, double userLon,
-		String transportType, String category) {
+		String transportType, SectionType sectionType) {
 		// 최대 거리 설정
 		double maxDistance = transportType.equals("도보") ? 3.0 : 15.0;
 
@@ -111,11 +111,8 @@ public class BranchService {
 		double distanceWeight = transportType.equals("도보") ? 0.7 : 0.6;
 		double categoryWeight = 1.0 - distanceWeight;
 
-		// 카테고리 문자열을 SectionType으로 변환
-		SectionType sectionType = parseSectionType(category);
-
-		// 모든 Branch 가져오기
-		List<Branch> branches = branchRepository.findAll();
+		// BranchType이 "BANK"인 데이터만 가져오기
+		List<Branch> branches = branchRepository.findAllByBranchType(BranchType.BANK);
 
 		// Branch 데이터를 처리하여 BranchWithMetrics 리스트 생성
 		List<BranchWithMetrics> branchMetrics = branches.stream()
@@ -128,15 +125,12 @@ public class BranchService {
 
 				// Section 데이터 가져오기
 				Section section = sectionRepository.findByBranchAndSectionType(branch, sectionType)
-					.orElseThrow(() -> new IllegalStateException("해당 카테고리의 섹션 데이터가 없습니다."));
+					.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_SECTION));
 
 				int currentNum = section.getCurrentNum();
 				int waitAmount = section.getWaitAmount();
 
-				// 예상 대기 인원 계산 (총 대기 인원 - 현재 대기 인원)
-				int expectedWaitNum = section.getWaitAmount() - section.getCurrentNum();
-
-				return BranchWithMetrics.of(branch, distance, expectedWaitNum, currentNum, waitAmount);
+				return BranchWithMetrics.of(branch, distance, waitAmount);
 			})
 			.filter(bwm -> bwm.distance() <= maxDistance) // 최대 거리 제한 필터링
 			.sorted(Comparator.comparingDouble(BranchWithMetrics::distance)) // 거리 기준 정렬
@@ -152,7 +146,7 @@ public class BranchService {
 			.map(group -> group.stream()
 				.map(branchMetrics::get) // 그룹 내 BranchWithMetrics 가져오기
 				.min(Comparator.comparingDouble(
-					bwm -> calculateWeight(bwm.distance(), bwm.expectedWaitNum(), distanceWeight, categoryWeight)
+					bwm -> calculateWeight(bwm.distance(), bwm.waitAmount(), distanceWeight, categoryWeight)
 				)) // 가중치가 가장 낮은 영업점 선택
 				.orElseThrow(() -> new IllegalStateException("그룹 내에서 최적 영업점을 찾을 수 없습니다."))
 			)
@@ -162,12 +156,15 @@ public class BranchService {
 		return bestBranches.stream()
 			.map(bwm -> {
 				Branch branch = bwm.branch();
+				Section section = sectionRepository.findByBranchAndSectionType(branch, sectionType)
+					.orElseThrow(() -> new IllegalStateException("해당 카테고리의 섹션 데이터가 없습니다."));
 				return BranchRecommendationResponse.of(
 					branch.getId(),
 					branch.getName(),
 					branch.getAddress(),
-					bwm.distance(), // 필드 이름으로 접근
-					bwm.expectedWaitNum(), // 예상 대기 인원
+					bwm.distance(),
+					section.getWaitTime(),
+					section.getCurrentNum(),
 					BankInfoDto.of(
 						branch.getId(),
 						branch.getName(),
@@ -175,8 +172,8 @@ public class BranchService {
 						branch.getYPosition(),
 						branch.getAddress(),
 						branch.getBranchType().name(),
-						bwm.currentNum(), // 현재 대기 인원
-						bwm.waitAmount() // 총 대기 인원
+						section.getCurrentNum(), // 현재 대기 인원
+						section.getWaitAmount() // 총 대기 인원
 					)
 				);
 			})
@@ -186,17 +183,7 @@ public class BranchService {
 	/**
 	 * 거리와 예상 대기 인원에 기반하여 가중치를 계산합니다.
 	 */
-	private double calculateWeight(double distance, int expectedWaitNum, double distanceWeight, double categoryWeight) {
-		return (distance * distanceWeight) + (expectedWaitNum * categoryWeight);
-	}
-
-	/**
-	 * 카테고리 문자열을 SectionType으로 변환합니다.
-	 */
-	private SectionType parseSectionType(String category) {
-		return Arrays.stream(SectionType.values())
-			.filter(type -> type.getType().equals(category))
-			.findFirst()
-			.orElseThrow(() -> new IllegalArgumentException("올바르지 않은 카테고리입니다: " + category));
+	private double calculateWeight(double distance, int waitAmount, double distanceWeight, double categoryWeight) {
+		return (distance * distanceWeight) + (waitAmount * categoryWeight);
 	}
 }

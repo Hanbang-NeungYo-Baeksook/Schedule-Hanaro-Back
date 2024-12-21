@@ -48,18 +48,17 @@ public class BranchController {
 		return ResponseEntity.ok(branchService.saveBranchList(branchList));
 	}
 
-	@Operation(summary = "영업점 정보 목록 조회", description = "영업점의 목록을 조회합니다.")
+	@Operation(summary = "추천 영업점 목록 조회", description = "추천 영업점의 목록을 조회합니다.")
 	@GetMapping("/recommend")
 	public ResponseEntity<List<BranchRecommendationResponse>> recommendBranches(
 		@RequestParam("latitude") double latitude,        // 사용자 위도
 		@RequestParam("longitude") double longitude,      // 사용자 경도
 		@RequestParam("transportType") String transportType, // 이동 방식 (도보/차량)
-		@RequestParam("category") String category         // 카테고리 (예금/개인대출/기업대출)
+		@RequestParam("category") SectionType category         // 카테고리 (예금/개인대출/기업대출)
 	) {
-		// BranchService에 데이터를 전달
+
 		List<BranchRecommendationResponse> response = branchService.recommendBranches(latitude, longitude, transportType, category);
 
-		// 결과 반환
 		return ResponseEntity.ok(response);
 	}
 

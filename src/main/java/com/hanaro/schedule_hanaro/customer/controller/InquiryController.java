@@ -35,8 +35,7 @@ public class InquiryController {
 	) {
 		try {
 			String customerAuthId = principal.getName();
-			Long customerId = Long.parseLong(customerAuthId);
-			InquiryCreateResponse response = inquiryService.createInquiry(customerId, request);
+			InquiryCreateResponse response = inquiryService.createInquiry(customerAuthId, request);
 			return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
 		} catch (NumberFormatException e) {

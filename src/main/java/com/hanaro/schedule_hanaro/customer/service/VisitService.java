@@ -132,13 +132,13 @@ public class VisitService {
 	private SectionType getSectionByCategory(Category category) {
 		switch (category) {
 			case FUND,DEPOSIT -> {
-				return SectionType.TEMP1;
+				return SectionType.DEPOSIT;
 			}
 			case FOREX -> {
-				return SectionType.TEMP2;
+				return SectionType.PERSONAL_LOAN;
 			}
 			default -> {
-				return SectionType.TEMP3;
+				return SectionType.BUSINESS_LOAN;
 			}
 		}
 	}

@@ -18,4 +18,6 @@ public interface BranchRepository extends JpaRepository<Branch, Long> {
 	List<Branch> findAllByBranchTypeOrderByIdAsc(BranchType branchType);
 
 	Optional<Branch> findByName(String name);
+
+	List<Branch> findAllByBranchType(BranchType branchType);
 }

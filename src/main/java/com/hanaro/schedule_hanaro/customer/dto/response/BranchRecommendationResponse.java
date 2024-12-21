@@ -10,15 +10,17 @@ public record BranchRecommendationResponse(
 	@JsonProperty("address") String address,    // 영업점 주소
 	@JsonProperty("distance") String distance,  // 사용자와 영업점 거리
 	@JsonProperty("wait_time") String waitTime, // 예상 대기 시간
+	@JsonProperty("current_num") int currentNum, // 현재 대기 인원
 	@JsonProperty("branch_info") BankInfoDto branchInfo
 ) {
-	public static BranchRecommendationResponse of(Long id, String branchName, String address, double distance, int waitTime, BankInfoDto branchInfo) {
+	public static BranchRecommendationResponse of(Long id, String branchName, String address, double distance, int waitTime, int currentNum, BankInfoDto branchInfo) {
 		return BranchRecommendationResponse.builder()
 			.id(id)
 			.branchName(branchName)
 			.address(address)
 			.distance(String.format("%.0f m", distance * 1000)) // 거리 : m 표기
 			.waitTime(String.format("%d분", waitTime))
+			.currentNum(currentNum)
 			.branchInfo(branchInfo)// 대기 시간 : 분
 			.build();
 	}

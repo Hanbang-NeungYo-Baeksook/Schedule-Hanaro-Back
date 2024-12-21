@@ -31,6 +31,7 @@ public enum ErrorCode {
 	NOT_FOUND_INQUIRY(40406, HttpStatus.NOT_FOUND, "존재하지 않는 1:1 문의입니다."),
 	NOT_FOUND_CALL_MEMO(40407, HttpStatus.NOT_FOUND, "존재하지 않는 전화 메모입니다."),
 	NOT_FOUND_INQUIRY_RESPONSE(40408, HttpStatus.NOT_FOUND, "존재하지 않는 1:1 답변입니다."),
+	NOT_FOUND_SECTION(40409, HttpStatus.NOT_FOUND, "해당 카테고리의 섹션 데이터를 찾을 수 없습니다."),
 	NOT_FOUND_DATA(40499, HttpStatus.NOT_FOUND, "존재하지 않는 데이터입니다."),
 	;
 	private final Integer code;
