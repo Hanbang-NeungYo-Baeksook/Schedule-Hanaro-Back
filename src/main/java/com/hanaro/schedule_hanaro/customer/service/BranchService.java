@@ -106,7 +106,7 @@ public class BranchService {
 		List<BranchWithMetrics> branchMetrics = branches.stream()
 			.map(branch -> {
 				// 거리 계산
-				double distance = distanceUtils.calculateDistance(
+				double distance = DistanceUtils.calculateDistance(
 					userLat, userLon,
 					Double.parseDouble(branch.getYPosition()), Double.parseDouble(branch.getXPosition())
 				);
