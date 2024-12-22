@@ -2,6 +2,7 @@ package com.hanaro.schedule_hanaro.customer.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -16,9 +17,11 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.hanaro.schedule_hanaro.customer.dto.request.CallRequest;
+import com.hanaro.schedule_hanaro.customer.dto.request.TimeSlotAvailabilityRequest;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallListResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallResponse;
+import com.hanaro.schedule_hanaro.customer.dto.response.TimeSlotAvailabilityResponse;
 import com.hanaro.schedule_hanaro.global.auth.info.UserInfo;
 import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
 import com.hanaro.schedule_hanaro.global.exception.GlobalException;
@@ -91,6 +94,34 @@ public class CallService {
 		return (maxCallNum == null ? 0 : maxCallNum) + 1;
 	}
 
+	@Transactional(readOnly = true)
+	public List<TimeSlotAvailabilityResponse> getTimeSlotAvailability(TimeSlotAvailabilityRequest request) {
+		LocalDate date = request.getDate();
+		List<TimeSlotAvailabilityResponse> responses = new ArrayList<>();
+
+		LocalDateTime startOfDay = date.atTime(9, 0);
+		LocalDateTime endOfDay = date.atTime(18, 0);
+
+		while (!startOfDay.isAfter(endOfDay)) {
+			LocalDateTime[] timeSlotRange = getTimeSlotRange(startOfDay);
+			LocalDateTime startTime = timeSlotRange[0];
+			LocalDateTime endTime = timeSlotRange[1];
+
+			int reservedCount = callRepository.countByCallDateBetween(startTime, endTime);
+			int availableSlots = Math.max(0, MAX_RESERVATION - reservedCount);
+
+			responses.add(TimeSlotAvailabilityResponse.builder()
+				.timeSlot(startTime.toLocalTime() + "-" + endTime.toLocalTime())
+				.availableSlots(availableSlots)
+				.build()
+			);
+
+			startOfDay = startOfDay.plusMinutes(30);
+		}
+
+		return responses;
+	}
+
 
 	@Transactional
 	public void cancelCall(Long callId) {
@@ -153,11 +184,14 @@ public class CallService {
 
 		Map<String, Integer> waitInfo = calculateWaitInfo(call);
 
+		LocalDateTime[] timeSlotRange = getTimeSlotRange(call.getCallDate());
+		String timeSlot = timeSlotRange[0].toLocalTime() + "-" +timeSlotRange[1].plusSeconds(1).toLocalTime();
+
 		return CallDetailResponse.builder()
 			.callId(call.getId())
 			.customerName(call.getCustomer().getName())
 			.callDate(call.getCallDate().toLocalDate().toString())
-			.callTime(call.getCallDate().toLocalTime().toString() + "Z")
+			.callTime(timeSlot)
 			.callNum(call.getCallNum())
 			.category(call.getCategory().toString())
 			.status(call.getStatus().toString())

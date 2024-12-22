@@ -1,5 +1,7 @@
 package com.hanaro.schedule_hanaro.customer.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -7,10 +9,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 
 import com.hanaro.schedule_hanaro.customer.dto.request.CallRequest;
+import com.hanaro.schedule_hanaro.customer.dto.request.TimeSlotAvailabilityRequest;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallListResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.ErrorResponse;
+import com.hanaro.schedule_hanaro.customer.dto.response.TimeSlotAvailabilityResponse;
 import com.hanaro.schedule_hanaro.customer.service.CallService;
 import com.hanaro.schedule_hanaro.global.auth.info.UserInfo;
 
@@ -61,6 +65,13 @@ public class CallController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 				.body(new ErrorResponse("2010303", e.getMessage()));
 		}
+	}
+
+	@PostMapping("/availability")
+	public ResponseEntity<List<TimeSlotAvailabilityResponse>> getTimeSlotAvailability(
+		@RequestBody TimeSlotAvailabilityRequest request) {
+		List<TimeSlotAvailabilityResponse> responses = callService.getTimeSlotAvailability(request);
+		return ResponseEntity.ok(responses);
 	}
 
 	@Operation(summary = "전화 상담 목록 조회", description = "전화 상담 목록을 조회합니다.")

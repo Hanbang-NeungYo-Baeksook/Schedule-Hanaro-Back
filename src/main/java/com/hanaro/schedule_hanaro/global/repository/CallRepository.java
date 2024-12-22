@@ -27,10 +27,8 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 	Integer findMaxCallNumByCallDateBetweenForUpdate(@Param("startTime") LocalDateTime startTime,
 		@Param("endTime") LocalDateTime endTime);
 
-
-
-
-
+	@Query("SELECT COUNT(c) FROM Call c WHERE c.callDate BETWEEN :startTime AND :endTime")
+	int countByCallDateBetween(@Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
 
 	Slice<Call> findByStatus(Status status, Pageable pageable);
 
