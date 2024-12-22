@@ -5,15 +5,20 @@ import com.hanaro.schedule_hanaro.customer.dto.response.InquiryCreateResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryListResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryReplyDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryResponse;
+import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
+import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 import com.hanaro.schedule_hanaro.global.repository.InquiryRepository;
 import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.Inquiry;
 import com.hanaro.schedule_hanaro.global.domain.enums.InquiryStatus;
+import com.hanaro.schedule_hanaro.global.repository.InquiryResponseRepository;
+import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,12 +30,13 @@ import java.util.List;
 public class InquiryService {
 	private final InquiryRepository inquiryRepository;
 	private final CustomerRepository customerRepository;
+	private final InquiryResponseRepository inquiryResponseRepository;
 
 	// 1:1 상담 예약
 	@Transactional
-	public InquiryCreateResponse createInquiry(String authId, InquiryCreateRequest request) {
-		Customer customer = customerRepository.findByAuthId(authId)
-			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 ID입니다."));
+	public InquiryCreateResponse createInquiry(Authentication authentication, InquiryCreateRequest request) {
+		Customer customer = customerRepository.findById(PrincipalUtils.getId(authentication))
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CUSTOMER));
 
 		int maxInquiryNum = inquiryRepository.findMaxInquiryNum();
 
@@ -103,8 +109,16 @@ public class InquiryService {
 		Inquiry inquiry = inquiryRepository.findById(inquiryId)
 			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 상담 ID입니다."));
 
+		com.hanaro.schedule_hanaro.global.domain.InquiryResponse inquiryResponse =
+			inquiryResponseRepository.findByInquiry(inquiry).orElse(null);
+
+		String replyContent = inquiryResponse != null ? inquiryResponse.getContent() : "";
+
 		return InquiryReplyDetailResponse.builder()
 			.content(inquiry.getContent())
+			.status(inquiry.getInquiryStatus().name())
+			.reply(replyContent)
+			.tag(List.of(inquiry.getTags().split(",")))
 			.build();
 	}
 
