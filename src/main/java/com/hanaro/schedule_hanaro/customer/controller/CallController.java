@@ -2,6 +2,7 @@ package com.hanaro.schedule_hanaro.customer.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 
@@ -11,11 +12,16 @@ import com.hanaro.schedule_hanaro.customer.dto.response.CallListResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.ErrorResponse;
 import com.hanaro.schedule_hanaro.customer.service.CallService;
+import com.hanaro.schedule_hanaro.global.auth.info.UserInfo;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Nullable;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Tag(name = "Call", description = "전화 상담 API")
 @RestController
 @RequestMapping("/api/calls")
@@ -37,6 +43,8 @@ public class CallController {
 			return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse("2020102", e.getMessage()));
 		} catch (IllegalArgumentException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("2010203", e.getMessage()));
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
 		}
 	}
 

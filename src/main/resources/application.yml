@@ -2,22 +2,33 @@ spring:
   config:
     import: application-secret.yml
   jpa:
+#    properties:
+#      javax.persistence.lock.timeout: 10000
     hibernate:
       ddl-auto: validate
       #      ddl-auto: create
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     show-sql: true
+
   datasource:
     url: ${DATABASE.ENDPOINT_URL}
     username: ${DATABASE.USERNAME}
     password: ${DATABASE.PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
+#    hikari:
+#      connection-init-sql: "SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE"
+
 logging:
   level:
     org:
       springframework:
         security: DEBUG
+#    org.hibernate.SQL: DEBUG
+#    org.hibernate.type.descriptor.sql: TRACE
+#    com.zaxxer.hikari: DEBUG
+#    org.springframework.orm.jpa: DEBUG
+
 # Swagger 설정
 springdoc:
   swagger-ui:

@@ -18,6 +18,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -66,6 +67,10 @@ public class Call {
 
 	@Column(name = "tags", nullable = false)
 	private String tags;
+
+	// 낙관적 락
+	@Version
+	private Long version;
 
 	@Builder
 	public Call(Customer customer, LocalDateTime callDate, int callNum, Category category,
