@@ -6,6 +6,7 @@ import lombok.Builder;
 
 @Builder
 public record AtmInfoDto(
+	@JsonProperty("branch_id")
 	Long id,
 	@JsonProperty("branch_name")
 	String branchName,
