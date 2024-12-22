@@ -3,6 +3,7 @@ package com.hanaro.schedule_hanaro.global.repository;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryDto;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryStatsDto;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryResponse;
+import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.Inquiry;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
@@ -73,4 +74,6 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
 
 	@Query("SELECT i FROM Inquiry i LEFT JOIN InquiryResponse r ON i.id = r.inquiry.id LEFT JOIN Customer c ON i.customer.id = c.id WHERE i.id = :inquiryId")
 	Optional<Inquiry> findInquiryDetailById(@Param("inquiryId") Long inquiryId);
+
+	Integer countInquiryByCustomer(Customer customer);
 }

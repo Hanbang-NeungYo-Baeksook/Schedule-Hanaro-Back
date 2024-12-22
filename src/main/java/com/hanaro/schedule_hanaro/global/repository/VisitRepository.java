@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import javax.swing.text.html.Option;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -35,7 +37,7 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
 		Status status
 	);
 
-	List<Visit> findAllBySectionIdAndNumLessThanAndStatus(Long sectionId, int num, Status status);
+	List<Visit> findByCustomer_IdAndStatus(Long customerId, Status status);
 
 	List<Visit> findAllBySection_Id(Long id);
 
