@@ -60,12 +60,12 @@ public class InquiryService {
 
 		Slice<Inquiry> inquirySlice = inquiryRepository.findByInquiryStatus(inquiryStatus, pageable);
 
-		List<InquiryResponse> inquiryList = inquirySlice.getContent().stream()
-			.map(inquiry -> InquiryResponse.builder()
+		List<InquiryListResponse.InquiryData> inquiryDataList = inquirySlice.getContent().stream()
+			.map(inquiry -> InquiryListResponse.InquiryData.builder()
 				.inquiryId(inquiry.getId())
 				.inquiryNum(inquiry.getInquiryNum())
 				.category(inquiry.getCategory().name())
-				.status(inquiry.getInquiryStatus().getInquiryStatus())
+				.status(inquiry.getInquiryStatus().name().toLowerCase())
 				.content(inquiry.getContent())
 				.tags(List.of(inquiry.getTags().split(",")))
 				.build())
@@ -78,7 +78,7 @@ public class InquiryService {
 			.build();
 
 		return InquiryListResponse.builder()
-			.inquiryList(inquiryList)
+			.data(inquiryDataList)
 			.pagination(pagination)
 			.build();
 	}
