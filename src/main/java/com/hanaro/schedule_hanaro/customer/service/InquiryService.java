@@ -126,7 +126,9 @@ public class InquiryService {
 	@Transactional
 	public void cancelInquiry(Long inquiryId) {
 		Inquiry inquiry = inquiryRepository.findById(inquiryId)
-			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 상담 ID입니다."));
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_INQUIRY));
+		// InquiryResponse 삭제 (답변이 있을 경우)
+		inquiryResponseRepository.findByInquiry(inquiry).ifPresent(inquiryResponseRepository::delete);
 		inquiryRepository.delete(inquiry);
 	}
 }

@@ -78,8 +78,8 @@ public class InquiryController {
 	// 1:1 상담 취소
 	@Operation(summary = "1:1 상담 예약 취소", description = "특정 1:1 상담 예약을 취소합니다.")
 	@DeleteMapping("/{inquiry-id}")
-	public ResponseEntity<String> cancelInquiry(@PathVariable("inquiry-id") Long inquiryId) {
+	public ResponseEntity<?> cancelInquiry(@PathVariable("inquiry-id") Long inquiryId) {
 		inquiryService.cancelInquiry(inquiryId);
-		return ResponseEntity.ok("1:1 상담 데이터가 성공적으로 삭제되었습니다.");
+		return ResponseEntity.status(HttpStatus.OK).body(inquiryId);
 	}
 }
