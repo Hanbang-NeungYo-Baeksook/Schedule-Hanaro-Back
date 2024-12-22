@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallInfoResponse;
+import com.hanaro.schedule_hanaro.admin.service.AdminCallService;
 import com.hanaro.schedule_hanaro.customer.dto.request.CallRequest;
 import com.hanaro.schedule_hanaro.customer.dto.request.TimeSlotAvailabilityRequest;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallDetailResponse;
@@ -52,7 +54,6 @@ public class CallService {
 		Customer customer = customerRepository.findById(PrincipalUtils.getId(authentication))
 			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CUSTOMER));
 
-		// 시간대 범위 설정 (30분 간격)
 		LocalDateTime[] timeSlotRange = getTimeSlotRange(request.callDate());
 		LocalDateTime startTime = timeSlotRange[0];
 		LocalDateTime endTime = timeSlotRange[1];
@@ -111,7 +112,7 @@ public class CallService {
 			int availableSlots = Math.max(0, MAX_RESERVATION - reservedCount);
 
 			responses.add(TimeSlotAvailabilityResponse.builder()
-				.timeSlot(startTime.toLocalTime() + "-" + endTime.toLocalTime())
+				.timeSlot(startTime.toLocalTime() + "-" + endTime.plusSeconds(1).toLocalTime())
 				.availableSlots(availableSlots)
 				.build()
 			);
