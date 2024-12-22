@@ -11,9 +11,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 @Tag(name = "Admin-Visit", description = "관리자 방문 상담 API")
 @RestController
@@ -37,6 +34,17 @@ public class AdminVisitController {
             @PathVariable("visit-id") Long visitId
     ) {
         AdminVisitStatusUpdateResponse response = adminVisitService.updateVisitStatus(visitId);
+        return ResponseEntity.ok(response);
+    }
+
+
+
+    @Operation(summary = "현재 진행중인 상담 조회", description = "해당 섹션에서 현재 진행중인 상담을 조회합니다.")
+    @GetMapping("/sections/{section-id}/current")
+    public ResponseEntity<AdminVisitStatusUpdateResponse> getCurrentVisit(
+            @PathVariable("section-id") Long sectionId
+    ) {
+        AdminVisitStatusUpdateResponse response = adminVisitService.getCurrentVisit(sectionId);
         return ResponseEntity.ok(response);
     }
 }

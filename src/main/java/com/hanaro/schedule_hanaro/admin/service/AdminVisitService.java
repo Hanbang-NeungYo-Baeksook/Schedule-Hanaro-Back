@@ -194,4 +194,39 @@ public class AdminVisitService {
             throw new GlobalException(ErrorCode.CONCURRENT_VISIT_UPDATE);
         }
     }
+
+    public AdminVisitStatusUpdateResponse getCurrentVisit(Long sectionId) {
+        Section section = sectionRepository.findById(sectionId)
+                .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_SECTION));
+
+        Visit currentVisit = visitRepository.findCurrentProgressVisit(sectionId, Status.PROGRESS)
+                .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_VISIT));
+
+        // 다음 대기 번호 조회
+        Visit nextVisit = visitRepository.findNextPendingVisit(sectionId, Status.PENDING)
+                .orElse(null);
+
+        // CsVisit 조회
+        CsVisit csVisit = csVisitRepository.findByBranchIdAndDate(section.getBranch().getId(), LocalDate.now())
+                .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CS_VISIT));
+
+        AdminVisitStatusUpdateResponse.SectionInfo sectionInfo = AdminVisitStatusUpdateResponse.SectionInfo.builder()
+                .sectionId(section.getId())
+                .sectionType(section.getSectionType().toString())
+                .currentNum(section.getCurrentNum())
+                .waitAmount(section.getWaitAmount())
+                .waitTime(section.getWaitTime())
+                .todayVisitors(csVisit.getTotalNum())
+                .build();
+
+        return AdminVisitStatusUpdateResponse.builder()
+                .previousNum(-1)
+                .previousCategory("")
+                .currentNum(currentVisit.getNum())
+                .currentCategory(currentVisit.getCategory().getCategory())
+                .nextNum(nextVisit != null ? nextVisit.getNum() : -1)
+                .nextCategory(nextVisit != null ? nextVisit.getCategory().getCategory() : "")
+                .sectionInfo(sectionInfo)
+                .build();
+    }
 }
