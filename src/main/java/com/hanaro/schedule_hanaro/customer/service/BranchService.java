@@ -75,7 +75,7 @@ public class BranchService {
 			));
 
 			BranchDetailResponse dto = dtoMap.get(objects.branchId());
-			dto.sectionTypes().add(objects.sectionType().getType());
+			dto.sectionTypes().add(objects.sectionType() != null ? objects.sectionType().getType() : "null");
 			dto.waitAmount().add(objects.waitAmount());
 			dto.waitTime().add(objects.waitTime());
 			}

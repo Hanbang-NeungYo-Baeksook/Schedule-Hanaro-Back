@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hanaro.schedule_hanaro.customer.dto.request.VisitCreateRequest;
+import com.hanaro.schedule_hanaro.customer.dto.response.CreateVisitResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.VisitDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.VisitListResponse;
 import com.hanaro.schedule_hanaro.customer.service.VisitService;
@@ -55,7 +56,7 @@ public class VisitController {
 
 	@Operation(summary = "방문 상담 예약 생성", description = "새로운 방문 상담 예약을 생성합니다.")
 	@PostMapping
-	public ResponseEntity<Long> addVisit(
+	public ResponseEntity<CreateVisitResponse> addVisit(
 		@RequestBody VisitCreateRequest visitReservationCreateRequest,
 		Authentication authentication
 	) throws InterruptedException {

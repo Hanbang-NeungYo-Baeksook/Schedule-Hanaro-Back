@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.hanaro.schedule_hanaro.customer.dto.CancelReservationDto;
 import com.hanaro.schedule_hanaro.customer.dto.RegisterReservationDto;
 import com.hanaro.schedule_hanaro.customer.dto.request.VisitCreateRequest;
+import com.hanaro.schedule_hanaro.customer.dto.response.CreateVisitResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.VisitDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.VisitListResponse;
 import com.hanaro.schedule_hanaro.global.domain.Section;
@@ -67,7 +68,7 @@ public class VisitService {
 		this.sectionService = sectionService;
 	}
 
-	public Long addVisitReservation(
+	public CreateVisitResponse addVisitReservation(
 		VisitCreateRequest visitReservationCreateRequest,
 		Authentication authentication
 	) throws RuntimeException, InterruptedException {
@@ -130,7 +131,7 @@ public class VisitService {
 				.category(visitReservationCreateRequest.category())
 				.build()
 		);
-		return savedVisit.getId();
+		return new CreateVisitResponse(savedVisit.getId());
 	}
 
 	private boolean isReserved(Customer customer, Section section, LocalDateTime now) {
