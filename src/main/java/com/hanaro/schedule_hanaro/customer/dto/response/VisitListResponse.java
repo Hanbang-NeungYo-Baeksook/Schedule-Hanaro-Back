@@ -16,6 +16,7 @@ public record VisitListResponse(
 	public record VisitData(
 		@JsonProperty("visit_id") Long visitId,
 		@JsonProperty("branch_name") String branchName,
+		@JsonProperty("section_type") String sectionType,
 		@JsonProperty("visit_num") int visitNum,
 		@JsonProperty("waiting_amount") int waitingAmount,
 		@JsonProperty("waiting_time") int waitingTime

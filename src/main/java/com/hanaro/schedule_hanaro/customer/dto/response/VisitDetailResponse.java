@@ -12,6 +12,9 @@ public record VisitDetailResponse(
 	@JsonProperty("branch_name")
 	String branchName,
 
+	@JsonProperty("section_type")
+	String sectionType,
+
 	@JsonProperty("visit_num")
 	int visitNum,
 
@@ -27,6 +30,7 @@ public record VisitDetailResponse(
 	public static VisitDetailResponse of(
 		Long visitId,
 		String branchName,
+		String sectionType,
 		int visitNum,
 		int currentNum,
 		int waitingAmount,
@@ -36,6 +40,7 @@ public record VisitDetailResponse(
 			.builder()
 			.visitId(visitId)
 			.branchName(branchName)
+			.sectionType(sectionType)
 			.visitNum(visitNum)
 			.currentNum(currentNum)
 			.waitingAmount(waitingAmount)

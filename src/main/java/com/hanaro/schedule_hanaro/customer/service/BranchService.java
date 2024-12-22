@@ -5,9 +5,11 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,15 +20,22 @@ import com.hanaro.schedule_hanaro.customer.dto.response.BranchDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchListResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchRecommendationResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchWithMetrics;
+import com.hanaro.schedule_hanaro.global.auth.info.CustomUserDetails;
+import com.hanaro.schedule_hanaro.global.auth.info.UserInfo;
 import com.hanaro.schedule_hanaro.global.domain.Section;
+import com.hanaro.schedule_hanaro.global.domain.Visit;
 import com.hanaro.schedule_hanaro.global.domain.enums.SectionType;
+import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
 import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 import com.hanaro.schedule_hanaro.global.repository.BranchRepository;
 import com.hanaro.schedule_hanaro.global.domain.Branch;
 import com.hanaro.schedule_hanaro.global.domain.enums.BranchType;
+import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
 import com.hanaro.schedule_hanaro.global.repository.SectionRepository;
+import com.hanaro.schedule_hanaro.global.repository.VisitRepository;
 import com.hanaro.schedule_hanaro.global.utils.DistanceUtils;
+import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -35,51 +44,62 @@ import lombok.RequiredArgsConstructor;
 public class BranchService {
 	private final BranchRepository branchRepository;
 	private final SectionRepository sectionRepository;
+	private final VisitRepository visitRepository;
+	private final CustomerRepository customerRepository;
 
-	public BranchDetailResponse findBranchById(Long branchId){
-		Map<Long, BranchDetailResponse>dtoMap=new LinkedHashMap<>();
-		List<BankVO> branches= branchRepository.findBranchByBranch_Id(branchId);
+	public BranchDetailResponse findBranchById(Long branchId, Authentication authentication) {
+		List<BankVO> results= branchRepository.findBranchByBranch_Id(branchId);
+		List<Visit> visitOptional = visitRepository.findByCustomer_IdAndStatus(PrincipalUtils.getId(authentication),
+			Status.PENDING);
+		List<Long> reservedList = getReservedList(authentication);
 
-		branches.forEach(objects -> {
-
-			dtoMap.computeIfAbsent(objects.branchId(), id -> new BranchDetailResponse(
-				objects.branchId(), objects.name(), objects.xPosition(), objects.yPosition(), objects.address(),
-				objects.tel(), objects.businessHours(), objects.branchType().getBranchType(),
-				new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), 0
-			));
-
-				BranchDetailResponse dto = dtoMap.get(objects.branchId());
-				dto.sectionTypes().add(objects.sectionType().getType());
-				dto.waitAmount().add(objects.waitAmount());
-				dto.waitTime().add(objects.waitTime());
-			}
-		);
+		Map<Long, BranchDetailResponse> dtoMap = createBranchDtoMapFromBankVoList(results, reservedList);
 
 		return dtoMap.get(branchId);
 	}
 
-	public BranchListResponse listBranch(double userLat, double userLon) {
+	private List<Long> getReservedList(Authentication authentication) {
+		List<Visit> visitOptional = visitRepository.findByCustomer_IdAndStatus(PrincipalUtils.getId(authentication),
+			Status.PENDING);
+		return visitOptional.stream()
+			.map(visit -> visit.getSection().getBranch().getId())
+			.toList();
+	}
 
-		Map<Long, BranchDetailResponse>dtoMap=new LinkedHashMap<>();
-		List<Branch> atmList = branchRepository.findAllByBranchTypeOrderByIdAsc(BranchType.ATM);
-		List<BankVO> result = branchRepository.findBranchByBranchType(BranchType.BANK);
-
-		result.forEach(objects -> {
-
-			dtoMap.computeIfAbsent(objects.branchId(), id -> new BranchDetailResponse(
-				objects.branchId(), objects.name(), objects.xPosition(), objects.yPosition(), objects.address(),
-				objects.tel(), objects.businessHours(), objects.branchType().getBranchType(), new ArrayList<>(),
-				new ArrayList<>(), new ArrayList<>(),
-				Math.round(DistanceUtils.calculateDistance(userLat, userLon, Double.parseDouble(objects.yPosition()),
-					Double.parseDouble(objects.xPosition())) * 1000)
-			));
-
+	private Map<Long, BranchDetailResponse> createBranchDtoMapFromBankVoList(List<BankVO> bankVoList, List<Long> reservedList) {
+		Map<Long, BranchDetailResponse> dtoMap = new LinkedHashMap<>();
+		System.out.println("예약리스트"+reservedList);
+		bankVoList.forEach(objects -> {
+			dtoMap.computeIfAbsent(objects.branchId(), id -> {
+				boolean reserved = false;
+				for (Long reservedBranchId : reservedList) {
+					if (reservedBranchId.equals(objects.branchId())) {
+						reserved = true;
+						break;
+					}
+				}
+				return new BranchDetailResponse(
+					objects.branchId(), objects.name(), objects.xPosition(), objects.yPosition(), objects.address(),
+					objects.tel(), objects.businessHours(), objects.branchType().getBranchType(),
+					reserved, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), 0
+				);
+			});
 			BranchDetailResponse dto = dtoMap.get(objects.branchId());
 			dto.sectionTypes().add(objects.sectionType() != null ? objects.sectionType().getType() : "null");
 			dto.waitAmount().add(objects.waitAmount());
 			dto.waitTime().add(objects.waitTime());
-			}
-		);
+		});
+		return dtoMap;
+	}
+
+	public BranchListResponse listBranch(double userLat, double userLon, Authentication authentication) {
+
+		List<Branch> atmList = branchRepository.findAllByBranchTypeOrderByIdAsc(BranchType.ATM);
+		List<BankVO> results = branchRepository.findBranchByBranchType(BranchType.BANK);
+
+		List<Long> reservedList = getReservedList(authentication);
+
+		Map<Long, BranchDetailResponse> dtoMap = createBranchDtoMapFromBankVoList(results, reservedList);
 
 		List<AtmInfoDto> atmInfoDtoList = atmList.stream()
 			.map(atm -> AtmInfoDto.of(

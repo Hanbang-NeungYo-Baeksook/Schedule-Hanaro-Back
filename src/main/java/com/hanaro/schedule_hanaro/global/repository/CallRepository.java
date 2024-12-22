@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryStatsDto;
 import com.hanaro.schedule_hanaro.global.domain.Call;
+import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 
@@ -82,5 +83,7 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 			((Number) result[3]).intValue()
 		);
 	}
+
+	Integer countCallsByCustomer(Customer customer);
 
 }

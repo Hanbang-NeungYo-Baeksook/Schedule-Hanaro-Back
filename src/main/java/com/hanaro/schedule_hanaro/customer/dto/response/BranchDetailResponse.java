@@ -23,6 +23,9 @@ public record BranchDetailResponse(
 	@JsonProperty("branch_type")
 	String branchType,
 
+	@JsonProperty("reserved")
+	boolean reserved,
+
 	@JsonProperty("section_types")
 	List<String> sectionTypes,
 

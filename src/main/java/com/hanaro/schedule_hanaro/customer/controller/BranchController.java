@@ -3,6 +3,7 @@ package com.hanaro.schedule_hanaro.customer.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,17 +30,23 @@ import lombok.RequiredArgsConstructor;
 public class BranchController {
 	private final BranchService branchService;
 
-	@Operation(summary = "영업점 상세 정보 조회", description = "특정 영업점의 지점정보와 대기 현황 정보를 조회합니다.")
-	@GetMapping("/{branch-id}")
-	public ResponseEntity<BranchDetailResponse> getBranchDetail(@PathVariable("branch-id") Long branchId) {
-		return ResponseEntity.ok().body(branchService.findBranchById(branchId));
+	@Operation(summary = "영업점 정보 목록 조회", description = "영업점의 목록을 조회합니다.")
+	@GetMapping("")
+	public ResponseEntity<BranchListResponse> getBranchList(
+		@RequestParam("x_position") double xPosition,        // 사용자 위도
+		@RequestParam("y_position") double yPosition,
+		Authentication authentication
+	) {
+		return ResponseEntity.ok().body(branchService.listBranch(yPosition, xPosition, authentication));
 	}
 
-	@Operation(summary = "영업점 정보 목록 조회", description = "영업점의 목록을 조회합니다.")
-	@GetMapping("/list")
-	public ResponseEntity<BranchListResponse> getBranchList(@RequestParam("latitude") double latitude,        // 사용자 위도
-		@RequestParam("longitude") double longitude) {
-		return ResponseEntity.ok().body(branchService.listBranch(latitude, longitude));
+	@Operation(summary = "영업점 상세 정보 조회", description = "특정 영업점의 지점정보와 대기 현황 정보를 조회합니다.")
+	@GetMapping("/{branch-id}")
+	public ResponseEntity<BranchDetailResponse> getBranchDetail(
+		@PathVariable("branch-id") Long branchId,
+		Authentication authentication
+	) {
+		return ResponseEntity.ok().body(branchService.findBranchById(branchId, authentication));
 	}
 
 	// 형석이 테스트용...
