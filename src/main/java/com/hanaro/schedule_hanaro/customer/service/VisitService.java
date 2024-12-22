@@ -207,9 +207,6 @@ public class VisitService {
 
 		List<VisitListResponse.VisitData> visitDataList = visitSlice.getContent().stream()
 			.map(visit -> {
-				CsVisit csVisit = csVisitRepository.findByBranchIdAndDate(
-					visit.getSection().getBranch().getId(), LocalDate.now()
-				).orElseThrow();
 				List<Category> categoryList = visitRepository.findCategoryBySectionIdAndNumBeforeAndStatus(
 					visit.getSection().getId(),visit.getNum(),Status.PENDING
 				);
@@ -217,7 +214,7 @@ public class VisitService {
 					.visitId(visit.getId())
 					.visitNum(visit.getNum())
 					.branchName(visit.getSection().getBranch().getName())
-					.waitingAmount(csVisit.getWaitAmount())
+					.waitingAmount(categoryList.size())
 					.waitingTime(calculateWaitingTime(categoryList))
 					.build();
 			})
