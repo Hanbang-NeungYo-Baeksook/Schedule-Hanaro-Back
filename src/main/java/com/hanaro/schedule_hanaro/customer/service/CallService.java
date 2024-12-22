@@ -34,6 +34,7 @@ import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
+import com.hanaro.schedule_hanaro.global.websocket.handler.WebsocketHandler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +45,8 @@ public class CallService {
 
 	private final CallRepository callRepository;
 	private final CustomerRepository customerRepository;
+	private final WebsocketHandler websocketHandler;
+	private final AdminCallService adminCallService;
 
 	private static final int MAX_RESERVATION = 60;
 	private static final int CONSULTANTS = 25;
@@ -77,6 +80,9 @@ public class CallService {
 					.build();
 
 				Call savedCall = callRepository.save(newCall);
+
+				AdminCallInfoResponse adminCallInfoResponse = adminCallService.getCallInfo(savedCall);
+				websocketHandler.notifySubscribers(1L, "새로운 Call 등록: " + adminCallInfoResponse);
 
 				return CallResponse.builder()
 					.callId(savedCall.getId())
@@ -135,6 +141,8 @@ public class CallService {
 
 		call.setStatus(Status.CANCELED);
 		callRepository.save(call);
+
+		websocketHandler.notifySubscribers(1L, "Call 취소됨: " + callId);
 	}
 
 	private LocalDateTime[] getTimeSlotRange(LocalDateTime callDateTime) {
