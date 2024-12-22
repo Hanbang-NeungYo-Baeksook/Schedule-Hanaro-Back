@@ -33,11 +33,11 @@ public class BranchController {
 	@Operation(summary = "영업점 정보 목록 조회", description = "영업점의 목록을 조회합니다.")
 	@GetMapping("")
 	public ResponseEntity<BranchListResponse> getBranchList(
-		@RequestParam("latitude") double latitude,        // 사용자 위도
-		@RequestParam("longitude") double longitude,
+		@RequestParam("x_position") double xPosition,        // 사용자 위도
+		@RequestParam("y_position") double yPosition,
 		Authentication authentication
 	) {
-		return ResponseEntity.ok().body(branchService.listBranch(latitude, longitude, authentication));
+		return ResponseEntity.ok().body(branchService.listBranch(yPosition, xPosition, authentication));
 	}
 
 	@Operation(summary = "영업점 상세 정보 조회", description = "특정 영업점의 지점정보와 대기 현황 정보를 조회합니다.")

@@ -188,6 +188,7 @@ public class VisitService {
 		return VisitDetailResponse.of(
 			visit.getId(),
 			visit.getSection().getBranch().getName(),
+			visit.getSection().getSectionType().getType(),
 			visit.getNum(),
 			currentNum,
 			waitingAmount,
@@ -214,6 +215,7 @@ public class VisitService {
 					.visitId(visit.getId())
 					.visitNum(visit.getNum())
 					.branchName(visit.getSection().getBranch().getName())
+					.sectionType(visit.getSection().getSectionType().getType())
 					.waitingAmount(categoryList.size())
 					.waitingTime(calculateWaitingTime(categoryList))
 					.build();
