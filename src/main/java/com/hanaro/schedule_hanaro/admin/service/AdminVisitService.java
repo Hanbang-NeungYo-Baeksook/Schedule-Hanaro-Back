@@ -123,17 +123,15 @@ public class AdminVisitService {
             throw new GlobalException(ErrorCode.INVALID_VISIT_NUMBER);
         }
 
-        Visit currentVisit = visitRepository.findById(visitId)
+        Visit currentVisit = visitRepository.findByIdWithPessimisticLock(visitId)
                 .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_VISIT));
 
         if (currentVisit.getStatus() != Status.PENDING) {
             throw new GlobalException(ErrorCode.ALREADY_PROGRESS);
         }
 
-        Section section = currentVisit.getSection();
-        if (section == null) {
-            throw new GlobalException(ErrorCode.NOT_FOUND_SECTION);
-        }
+        Section section = sectionRepository.findByIdWithPessimisticLock(currentVisit.getSection().getId())
+                .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_SECTION));
 
         if (section.getBranch() == null) {
             throw new GlobalException(ErrorCode.NOT_FOUND_BRANCH);
@@ -144,7 +142,7 @@ public class AdminVisitService {
         }
 
         // CsVisit 조회 및 유효성 검사
-        CsVisit csVisit = csVisitRepository.findByBranchIdAndDate(section.getBranch().getId(), LocalDate.now())
+        CsVisit csVisit = csVisitRepository.findByBranchIdAndDateWithPessimisticLock(section.getBranch().getId(), LocalDate.now())
                 .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CS_VISIT));
 
         try {
@@ -157,7 +155,7 @@ public class AdminVisitService {
             sectionRepository.save(section);
 
             // 다음 대기 번호 설정
-            Visit nextVisit = visitRepository.findNextPendingVisit(section.getId(), Status.PENDING)
+            Visit nextVisit = visitRepository.findNextPendingVisitWithPessimisticLock(section.getId(), Status.PENDING)
                     .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_NEXT_VISITOR));
 
             int nextNum = (nextVisit != null) ? nextVisit.getNum() : -1;
