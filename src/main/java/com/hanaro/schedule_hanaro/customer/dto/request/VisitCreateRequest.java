@@ -8,6 +8,8 @@ import lombok.Builder;
 
 @Builder
 public record VisitCreateRequest(
+	@JsonProperty("customer_id")
+	Long customerId,
 	@JsonProperty("branch_id")
 	Long branchId,
 	String content,
