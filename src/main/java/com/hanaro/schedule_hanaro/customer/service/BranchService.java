@@ -44,8 +44,8 @@ public class BranchService {
 
 			dtoMap.computeIfAbsent(objects.branchId(), id -> new BranchDetailResponse(
 				objects.branchId(), objects.name(), objects.xPosition(), objects.yPosition(), objects.address(),
-				objects.tel(), objects.branchType().getBranchType(), new ArrayList<>(), new ArrayList<>(),
-				new ArrayList<>(), 0
+				objects.tel(), objects.businessHours(), objects.branchType().getBranchType(),
+				new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), 0
 			));
 
 				BranchDetailResponse dto = dtoMap.get(objects.branchId());
@@ -68,8 +68,8 @@ public class BranchService {
 
 			dtoMap.computeIfAbsent(objects.branchId(), id -> new BranchDetailResponse(
 				objects.branchId(), objects.name(), objects.xPosition(), objects.yPosition(), objects.address(),
-				objects.tel(), objects.branchType().getBranchType(), new ArrayList<>(), new ArrayList<>(),
-				new ArrayList<>(),
+				objects.tel(), objects.businessHours(), objects.branchType().getBranchType(), new ArrayList<>(),
+				new ArrayList<>(), new ArrayList<>(),
 				Math.round(DistanceUtils.calculateDistance(userLat, userLon, Double.parseDouble(objects.yPosition()),
 					Double.parseDouble(objects.xPosition())) * 1000)
 			));
@@ -89,7 +89,9 @@ public class BranchService {
 				atm.getYPosition(),
 				atm.getAddress(),
 				atm.getBusinessTime(),
-				atm.getBranchType().toString()
+				atm.getBranchType().toString(),
+				Math.round(DistanceUtils.calculateDistance(userLat, userLon, Double.parseDouble(atm.getYPosition()),
+					Double.parseDouble(atm.getXPosition())) * 1000)
 			))
 			.toList();
 
