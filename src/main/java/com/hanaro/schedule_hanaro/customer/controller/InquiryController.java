@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Inquiry", description = "1:1 상담 API")
@@ -31,13 +32,11 @@ public class InquiryController {
 	@PostMapping
 	public ResponseEntity<?> createInquiry(
 		@RequestBody InquiryCreateRequest request,
-		Principal principal
+		Authentication authentication
 	) {
 		try {
-			String customerAuthId = principal.getName();
-			InquiryCreateResponse response = inquiryService.createInquiry(customerAuthId, request);
+			InquiryCreateResponse response = inquiryService.createInquiry(authentication, request);
 			return ResponseEntity.status(HttpStatus.CREATED).body(response);
-
 		} catch (NumberFormatException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 				.body(new ErrorResponse("400", "Invalid customer ID format."));
@@ -79,8 +78,8 @@ public class InquiryController {
 	// 1:1 상담 취소
 	@Operation(summary = "1:1 상담 예약 취소", description = "특정 1:1 상담 예약을 취소합니다.")
 	@DeleteMapping("/{inquiry-id}")
-	public ResponseEntity<String> cancelInquiry(@PathVariable("inquiry-id") Long inquiryId) {
+	public ResponseEntity<?> cancelInquiry(@PathVariable("inquiry-id") Long inquiryId) {
 		inquiryService.cancelInquiry(inquiryId);
-		return ResponseEntity.ok("1:1 상담 데이터가 성공적으로 삭제되었습니다.");
+		return ResponseEntity.status(HttpStatus.OK).body(inquiryId);
 	}
 }

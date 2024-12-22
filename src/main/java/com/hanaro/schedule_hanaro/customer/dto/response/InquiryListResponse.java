@@ -1,26 +1,31 @@
 package com.hanaro.schedule_hanaro.customer.dto.response;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 @Builder
 public record InquiryListResponse(
-	List<InquiryResponse> inquiryList,
+	List<InquiryData> data,
 	Pagination pagination
 ) {
-	@Getter
+
 	@Builder
-	@AllArgsConstructor
-	@NoArgsConstructor
-	public static class Pagination {
-		int currentPage;
-		int pageSize;
-		int totalItems;
-		int totalPages;
-		boolean hasNext;
+	public record InquiryData(
+		@JsonProperty("inquiry_id") Long inquiryId,
+		@JsonProperty("inquiry_num") int inquiryNum,
+		String category,
+		String status,
+		String content,
+		List<String> tags
+	) {
+	}
+
+	@Builder
+	public record Pagination (
+		int currentPage,
+		int pageSize,
+		boolean hasNext
+	) {
 	}
 }
