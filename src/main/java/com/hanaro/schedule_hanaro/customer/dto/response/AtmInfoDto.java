@@ -18,7 +18,9 @@ public record AtmInfoDto(
 	@JsonProperty("business_hours")
 	String businessHours,
 	@JsonProperty("branch_type")
-	String branchType
+	String branchType,
+	@JsonProperty("distance")
+	long distance
 ) {
 	public static AtmInfoDto of(
 		Long id,
@@ -27,7 +29,8 @@ public record AtmInfoDto(
 		String yPosition,
 		String address,
 		String businessHours,
-		String branchType
+		String branchType,
+		Long distance
 	) {
 		return AtmInfoDto.builder()
 			.id(id)
@@ -37,6 +40,7 @@ public record AtmInfoDto(
 			.address(address)
 			.businessHours(businessHours)
 			.branchType(branchType)
+			.distance(distance)
 			.build();
 	}
 }

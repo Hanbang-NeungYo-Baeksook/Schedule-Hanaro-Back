@@ -10,6 +10,7 @@ public record BankVO(
 	String yPosition,
 	String address,
 	String tel,
+	String businessHours,
 	BranchType branchType,
 	SectionType sectionType,
 	Integer waitTime,
