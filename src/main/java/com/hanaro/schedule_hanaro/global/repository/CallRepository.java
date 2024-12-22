@@ -3,10 +3,12 @@ package com.hanaro.schedule_hanaro.global.repository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,11 +19,16 @@ import com.hanaro.schedule_hanaro.global.domain.Call;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 
+import jakarta.persistence.LockModeType;
 
 public interface CallRepository extends JpaRepository<Call, Long> {
 
-	@Query("SELECT COUNT(c) FROM Call c WHERE DATE(c.callDate) = :date AND c.callDate BETWEEN :startTime AND :endTime")
-	int countByDateAndTimeSlot(@Param("date") LocalDate date, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
+	@Query(value = "SELECT MAX(call_num) FROM `Call` WHERE call_date BETWEEN :startTime AND :endTime FOR UPDATE", nativeQuery = true)
+	Integer findMaxCallNumByCallDateBetweenForUpdate(@Param("startTime") LocalDateTime startTime,
+		@Param("endTime") LocalDateTime endTime);
+
+	@Query("SELECT COUNT(c) FROM Call c WHERE c.callDate BETWEEN :startTime AND :endTime")
+	int countByCallDateBetween(@Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
 
 	Slice<Call> findByStatus(Status status, Pageable pageable);
 

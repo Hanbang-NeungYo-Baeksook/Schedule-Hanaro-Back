@@ -37,6 +37,10 @@ dependencies {
 //	spring security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 
+    //테스트용
+    testImplementation 'org.springframework.security:spring-security-test'
+
+
 //	database
 //	runtimeOnly 'com.mysql:mysql-connector-j'
     implementation 'org.springframework.boot:spring-boot-starter-websocket'

@@ -24,4 +24,9 @@ public enum Category {
 	BRANCH("영업점",20);
 	private final String category;
 	private final int waitTime;
+
+	@Override
+	public String toString() {
+		return this.category;
+	}
 }
