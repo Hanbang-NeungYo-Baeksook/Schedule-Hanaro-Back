@@ -35,7 +35,7 @@ public class AdminVisitService {
 
     public Visit findVisitById(Long visitId) {
         return visitRepository.findById(visitId)
-                .orElseThrow();
+                .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_VISIT));
     }
 
     private final CsVisitRepository csVisitRepository;
@@ -202,17 +202,15 @@ public class AdminVisitService {
         Visit currentVisit = visitRepository.findCurrentProgressVisit(sectionId, Status.PROGRESS)
                 .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_VISIT));
 
-        // 다음 대기 번호 조회
         Visit nextVisit = visitRepository.findNextPendingVisit(sectionId, Status.PENDING)
                 .orElse(null);
 
-        // CsVisit 조회
         CsVisit csVisit = csVisitRepository.findByBranchIdAndDate(section.getBranch().getId(), LocalDate.now())
                 .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CS_VISIT));
 
         AdminVisitStatusUpdateResponse.SectionInfo sectionInfo = AdminVisitStatusUpdateResponse.SectionInfo.builder()
                 .sectionId(section.getId())
-                .sectionType(section.getSectionType().toString())
+                .sectionType(section.getSectionType().getType())
                 .currentNum(section.getCurrentNum())
                 .waitAmount(section.getWaitAmount())
                 .waitTime(section.getWaitTime())
