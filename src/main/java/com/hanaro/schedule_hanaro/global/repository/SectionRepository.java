@@ -25,4 +25,6 @@ public interface SectionRepository extends JpaRepository<Section, Long> {
 	Optional<Section> findByIdWithOptimisticLock(final Long id);
 
 	Optional<Section> findByBranchAndSectionType(Branch branch, SectionType sectionType);
+
+
 }

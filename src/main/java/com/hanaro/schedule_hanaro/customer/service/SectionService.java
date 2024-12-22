@@ -35,16 +35,4 @@ public class SectionService {
 		sectionRepository.saveAndFlush(section);
 	}
 
-	// public void decreaseWait(CancelReservationDto cancelReservationDto) throws InterruptedException {
-	// 	while (true) {
-	// 		try {
-	// 			decrease(cancelReservationDto);
-	// 			break;
-	// 		} catch (OptimisticLockingFailureException ex) {
-	// 			String threadName = Thread.currentThread().getName();
-	// 			System.out.println(threadName + " : " + ex.getMessage());
-	// 			Thread.sleep(500);
-	// 		}
-	// 	}
-	// }
 }

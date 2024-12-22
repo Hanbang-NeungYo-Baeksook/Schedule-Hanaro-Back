@@ -80,7 +80,7 @@ public class VisitService {
 
 		Section section = sectionRepository.findByBranchAndSectionType(branch,
 				GetSectionByCategory.getSectionTypeByCategory(visitReservationCreateRequest.category()))
-			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_DATA));
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_SECTION));
 
 		LocalDateTime now = LocalDateTime.now();
 
@@ -97,7 +97,7 @@ public class VisitService {
 				branch.getId(),
 				now.toLocalDate()
 			)
-			.orElseThrow().getId();
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CS_VISIT)).getId();
 
 		int totalNum;
 		while (true) {
@@ -105,12 +105,16 @@ public class VisitService {
 				RegisterReservationDto registerReservationDto = RegisterReservationDto.of(csVisitId, section.getId(),
 					visitReservationCreateRequest.category().getWaitTime());
 				totalNum = csVisitService.increaseWait(registerReservationDto);
+				System.out.println("totalNum 갱신:" + totalNum);
 				sectionService.increaseWait(registerReservationDto);
+				System.out.println("section갱신");
 				break;
 			} catch (OptimisticLockingFailureException ex) {
 				String threadName = Thread.currentThread().getName();
 				System.out.println(threadName + " : " + ex.getMessage());
 				Thread.sleep(500);
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
 			}
 		}
 		System.out.println(Thread.currentThread().getName() + " : totalNum = " + totalNum);
@@ -168,22 +172,17 @@ public class VisitService {
 	public VisitDetailResponse getVisitDetail(Long visitId) {
 		Visit visit = visitRepository.findById(visitId).orElseThrow();
 
-		int currentNum = csVisitRepository.findByBranchIdAndDate(
-				visit.getSection().getBranch().getId(),
-				LocalDate.now()
-			)
-			.orElseThrow()
-			.getTotalNum();
+		int currentNum = sectionRepository.findById(visit.getSection().getId())
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_SECTION)).getCurrentNum();
 
 		// TODO: * Calculate Waiting Time *
 		// TODO: 1. Find All Visit with BranchId Less than Num And Status
-		List<Visit> visits = visitRepository.findAllBySectionIdAndNumLessThanAndStatus(
-			visit.getSection().getId(), visit.getNum(), Status.PENDING
-		);
+		List<Category> categoryList = visitRepository.findCategoryBySectionIdAndNumBeforeAndStatus(
+			visit.getSection().getId(), visit.getNum(), Status.PENDING);
 		// TODO: 2. Calculate Waiting Amount
-		int waitingAmount = visits.size();
+		int waitingAmount=categoryList.size();
 		// TODO: 3. Calculate Waiting Time
-		int waitingTime = calculateWaitingTime(visits);
+		int waitingTime = calculateWaitingTime(categoryList);
 
 		return VisitDetailResponse.of(
 			visit.getId(),
@@ -195,8 +194,8 @@ public class VisitService {
 		);
 	}
 
-	private int calculateWaitingTime(List<Visit> visits) {
-		return visits.size() * 5;
+	private int calculateWaitingTime(List<Category> categoryList) {
+		return categoryList.size() * 5;
 	}
 
 	public VisitListResponse getVisitList(Authentication authentication, int page, int size) {
@@ -210,15 +209,15 @@ public class VisitService {
 				CsVisit csVisit = csVisitRepository.findByBranchIdAndDate(
 					visit.getSection().getBranch().getId(), LocalDate.now()
 				).orElseThrow();
-				List<Visit> visits = visitRepository.findAllBySection_Id(
-					visit.getSection().getId()
+				List<Category> categoryList = visitRepository.findCategoryBySectionIdAndNumBeforeAndStatus(
+					visit.getSection().getId(),visit.getNum(),Status.PENDING
 				);
 				return VisitListResponse.VisitData.builder()
 					.visitId(visit.getId())
 					.visitNum(visit.getNum())
 					.branchName(visit.getSection().getBranch().getName())
 					.waitingAmount(csVisit.getWaitAmount())
-					.waitingTime(calculateWaitingTime(visits))
+					.waitingTime(calculateWaitingTime(categoryList))
 					.build();
 			})
 			.toList();
@@ -238,14 +237,15 @@ public class VisitService {
 	public String deleteVisitReservation(Long visitId) throws InterruptedException {
 		Visit visit = visitRepository.findById(visitId)
 			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_VISIT));
-		if (visit.getStatus().equals(Status.COMPLETE)) {
-			throw new GlobalException(ErrorCode.ALREADY_RESERVED);
+		if (visit.getStatus().equals(Status.COMPLETE) || visit.getStatus().equals(Status.CANCELED)) {
+			throw new GlobalException(ErrorCode.ALREADY_RESERVED,"이미 완료되거나 취소된 예약입니다.");
 		}
 		while (true) {
 			try {
 				// 창구에 대기 현황 반영
 				sectionService.decreaseWait(
 					CancelReservationDto.of(visit.getSection().getId(), visit.getCategory().getWaitTime()));
+				cancelReservation(visitId);
 				break;
 			} catch (OptimisticLockingFailureException ex) {
 				String threadName = Thread.currentThread().getName();
@@ -254,5 +254,13 @@ public class VisitService {
 			}
 		}
 		return "Success";
+	}
+
+	@Transactional
+	protected void cancelReservation(Long visitId) {
+		Visit visit = visitRepository.findById(visitId)
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_VISIT));
+		visit.setStatus(Status.CANCELED);
+		visitRepository.saveAndFlush(visit);
 	}
 }

@@ -23,6 +23,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
@@ -52,6 +53,7 @@ public class Visit {
 	@Enumerated(EnumType.STRING)
 	@ColumnDefault("'PENDING'")
 	@Column(name = "status", nullable = false)
+	@Setter
 	private Status status = Status.PENDING;
 
 	@Column(name = "started_at")

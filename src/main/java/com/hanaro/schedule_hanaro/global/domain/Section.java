@@ -15,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -48,6 +49,9 @@ public class Section {
 
 	@Column(name = "wait_time", nullable = false, columnDefinition = "int unsigned default 0")
 	private Integer waitTime;
+
+	@Version
+	private Long version;
 
 	@Builder
 	public Section(
