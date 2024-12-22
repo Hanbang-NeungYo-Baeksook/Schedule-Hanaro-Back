@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Inquiry", description = "1:1 상담 API")
@@ -31,13 +32,11 @@ public class InquiryController {
 	@PostMapping
 	public ResponseEntity<?> createInquiry(
 		@RequestBody InquiryCreateRequest request,
-		Principal principal
+		Authentication authentication
 	) {
 		try {
-			String customerAuthId = principal.getName();
-			InquiryCreateResponse response = inquiryService.createInquiry(customerAuthId, request);
+			InquiryCreateResponse response = inquiryService.createInquiry(authentication, request);
 			return ResponseEntity.status(HttpStatus.CREATED).body(response);
-
 		} catch (NumberFormatException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 				.body(new ErrorResponse("400", "Invalid customer ID format."));
