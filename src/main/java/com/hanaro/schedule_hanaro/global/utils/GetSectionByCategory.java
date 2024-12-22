@@ -9,7 +9,7 @@ public class GetSectionByCategory {
 			case FUND, DEPOSIT -> {
 				return SectionType.DEPOSIT;
 			}
-			case FOREX -> {
+			case FOREX, LOAN -> {
 				return SectionType.PERSONAL_LOAN;
 			}
 			default -> {

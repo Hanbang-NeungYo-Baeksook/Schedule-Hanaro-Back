@@ -12,6 +12,7 @@ import com.hanaro.schedule_hanaro.global.domain.Branch;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.Section;
 import com.hanaro.schedule_hanaro.global.domain.Visit;
+import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -42,4 +43,7 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
 
 	@Query("SELECT v FROM Visit v WHERE v.section.id = :sectionId AND v.status = :status ORDER BY v.num ASC")
 	Optional<Visit> findNextPendingVisit(@Param("sectionId") Long sectionId, @Param("status") Status status);
+
+	@Query("select v.category from Visit v where v.section.id = :sectionId and v.status = :status and v.num < :numBefore")
+	List<Category> findCategoryBySectionIdAndNumBeforeAndStatus(Long sectionId, int numBefore, Status status);
 }
