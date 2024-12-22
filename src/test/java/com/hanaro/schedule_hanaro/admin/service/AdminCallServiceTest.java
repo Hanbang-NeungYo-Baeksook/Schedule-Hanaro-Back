@@ -1,29 +1,26 @@
 package com.hanaro.schedule_hanaro.admin.service;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.Optional;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import com.hanaro.schedule_hanaro.global.domain.enums.BranchType;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.Authentication;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.SliceImpl;
 
-import com.hanaro.schedule_hanaro.customer.service.CallService;
+import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallWaitResponse;
 import com.hanaro.schedule_hanaro.global.domain.Admin;
 import com.hanaro.schedule_hanaro.global.domain.Branch;
 import com.hanaro.schedule_hanaro.global.domain.Call;
@@ -32,106 +29,187 @@ import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Gender;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 import com.hanaro.schedule_hanaro.global.repository.AdminRepository;
-import com.hanaro.schedule_hanaro.global.repository.BranchRepository;
+import com.hanaro.schedule_hanaro.global.repository.CallMemoRepository;
 import com.hanaro.schedule_hanaro.global.repository.CallRepository;
 import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
+import com.hanaro.schedule_hanaro.global.repository.InquiryRepository;
 
-import jakarta.persistence.EntityManager;
-import lombok.RequiredArgsConstructor;
+@ExtendWith(MockitoExtension.class)
+class AdminCallServiceTest {
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class AdminCallServiceTest {
+    @InjectMocks
+    private AdminCallService adminCallService;
 
-	@Autowired
-	private AdminCallService AdmincallService;
+    @Mock
+    private CallRepository callRepository;
+    @Mock
+    private InquiryRepository inquiryRepository;
+    @Mock
+    private CallMemoRepository callMemoRepository;
+    @Mock
+    private AdminRepository adminRepository;
+    @Mock
+    private CustomerRepository customerRepository;
 
-	@Autowired
-	private CallService callService;
-	@Autowired
-	private CallRepository callRepository;
-	@Autowired
-	private AdminRepository adminRepository;
-	@Autowired
-	private EntityManager entityManager;
+    private Customer customer;
+    private Call call;
+    private Admin admin;
 
+    @BeforeEach
+    void setUp() {
+        customer = Customer.builder()
+            .authId("test")
+            .password("password")
+            .name("홍길동")
+            .phoneNum("01012345678")
+            .birth(LocalDate.of(1990, 1, 1))
+            .gender(Gender.MALE)
+            .build();
 
-	private Admin admin;
-	@Autowired
-	private BranchRepository branchRepository;
-	@Autowired
-	private CustomerRepository customerRepository;
+        call = Call.builder()
+            .customer(customer)
+            .callDate(LocalDateTime.now())
+            .callNum(1)
+            .category(Category.DEPOSIT)
+            .content("테스트 문의")
+            .tags("태그1,태그2")
+            .build();
 
-	@BeforeAll
-	public void beforeAll() {
-		// Call 생성
-		for (int i = 10; i <= 20; i++) {
-			Customer customer = Customer
-				.builder()
-				.authId("TestAuthId" + i)
-				.name("TestUser" + i)
-				.password("TestPassword")
-				.phoneNum("01012341234")
-				.birth(LocalDate.of(2002, 4, 15))
-				.gender(Gender.FEMALE)
-				.build();
-			customerRepository.save(customer);
+        admin = Admin.builder()
+            .authId("admin")
+            .password("password")
+            .name("관리자")
+            .branch(Branch.builder()
+                .name("테스트 지점")
+                .branchType(BranchType.BANK)
+                .xPosition("127.1234567")
+                .yPosition("37.1234567")
+                .address("서울시 테스트구 테스트동")
+                .tel("02-1234-5678")
+                .businessTime("09:00-16:00")
+                .build())
+            .build();
+    }
 
-			Call call = Call.builder()
-				.callNum(i)
-				.customer(customer)
-				.callDate(LocalDateTime.now())
-				.tags("tags" + i)
-				.content("content" + i)
-				.category(Category.LOAN)
-				.build();
-			callRepository.save(call);
-		}
-	}
+    @Test
+    @DisplayName("대기 목록 조회 테스트")
+    void findWaitList() {
+        // given
+        when(callRepository.findByStatus(Status.PROGRESS)).thenReturn(List.of(call));
+        when(callRepository.findByStatus(Status.PENDING)).thenReturn(List.of(call));
+        when(callRepository.findCallHistoryByCustomerId(any(), any())).thenReturn(List.of());
+        when(inquiryRepository.findByCustomerId(any())).thenReturn(List.of());
 
-	@AfterAll
-	public void afterAll() {
-		for (int i = 10; i <= 20; i++) {
-			Call call = callRepository.findByCallNum(i);
-			callRepository.delete(call);
+        // when
+        AdminCallWaitResponse response = adminCallService.findWaitList();
 
-			Customer customer = customerRepository.findByName("TestUser" + i).orElseThrow();
-			customerRepository.delete(customer);
-		}
-	}
+        // then
+        assertThat(response).isNotNull();
+        verify(callRepository).findByStatus(Status.PROGRESS);
+        verify(callRepository).findByStatus(Status.PENDING);
+    }
 
-	@Test
-	public void testPessimisticLockInCallProgress() throws InterruptedException {
-		Authentication authentication = mock(Authentication.class);
-		when(authentication.getPrincipal()).thenReturn(admin);
+    @Test
+    @DisplayName("상담 상태 변경 테스트 - PENDING에서 PROGRESS로")
+    void changeCallStatus_FromPendingToProgress() {
+        // given
+        call.setStatus(Status.PENDING);
+        when(callRepository.findById(anyLong())).thenReturn(Optional.of(call));
 
-		// 동시 실행을 위한 쓰레드 설정
-		int threadCount = 5;
-		ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
-		CountDownLatch latch = new CountDownLatch(threadCount);
+        // when
+        String result = adminCallService.changeCallStatus(1L);
 
-		List<Future<Long>> results = new ArrayList<>();
+        // then
+        assertThat(result).isEqualTo("상담 진행 처리되었습니다.");
+        verify(callRepository).updateStatus(anyLong(), eq(Status.PROGRESS));
+    }
 
-		for (int i = 0; i < threadCount; i++) {
-			results.add(executorService.submit(() -> {
-				try {
-					return AdmincallService.changeCallStatusProgress(authentication);
-				} catch (Exception e) {
-					return null;
-				} finally {
-					latch.countDown();
-				}
-			}));
-		}
+    @Test
+    @DisplayName("상담 상태 변경 테스트 - PROGRESS에서 COMPLETE로")
+    void changeCallStatus_FromProgressToComplete() {
+        // given
+        call.setStatus(Status.PROGRESS);
+        when(callRepository.findById(anyLong())).thenReturn(Optional.of(call));
 
-		latch.await(); // 모든 스레드가 종료될 때까지 대기
-		executorService.shutdown();
+        // when
+        String result = adminCallService.changeCallStatus(1L);
 
-		// When
-		List<Call> progressedCalls = callRepository.findByStatus(Status.PROGRESS);
+        // then
+        assertThat(result).isEqualTo("상담 완료 처리되었습니다.");
+        verify(callRepository).updateStatus(anyLong(), eq(Status.COMPLETE));
+    }
 
-		// Then
-		assertEquals(1, progressedCalls.size(), "동시에 접근해도 하나의 상담만 할당되어야 합니다.");
-	}
+    @Test
+    @DisplayName("상담 상태 변경 테스트 - COMPLETE 상태에서 변경 시도")
+    void changeCallStatus_FromComplete_ThrowsException() {
+        // given
+        call.setStatus(Status.COMPLETE);
+        when(callRepository.findById(anyLong())).thenReturn(Optional.of(call));
+
+        // when & then
+        assertThatThrownBy(() -> adminCallService.changeCallStatus(1L))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("이미 완료된 상담입니다.");
+    }
+
+    @Test
+    @DisplayName("상담 메모 저장 테스트")
+    void saveCallMemo() {
+        // given
+        when(callRepository.findById(anyLong())).thenReturn(Optional.of(call));
+        when(adminRepository.findById(3L)).thenReturn(Optional.of(admin));
+
+        // when
+        String result = adminCallService.saveCallMemo(1L, "테스트 메모");
+
+        // then
+        assertThat(result).isEqualTo("Success");
+        verify(callMemoRepository).save(any());
+    }
+
+    @Test
+    @DisplayName("필터링된 상담 목록 조회 테스트")
+    void findFilteredCalls() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+        when(callRepository.findByFiltering(any(), any(), any(), any(), any(), any()))
+            .thenReturn(new SliceImpl<>(List.of(call)));
+
+        // when
+        var result = adminCallService.findFilteredCalls(1, 10, Status.PENDING, 
+            LocalDate.now(), LocalDate.now(), Category.DEPOSIT, "검색어");
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.data()).isNotEmpty();
+        verify(callRepository).findByFiltering(any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("상담 조회 테스트")
+    void findCall() {
+        // given
+        when(callRepository.findById(anyLong())).thenReturn(Optional.of(call));
+        when(customerRepository.findById(6L)).thenReturn(Optional.of(customer));
+
+        // when
+        var result = adminCallService.findCall(1L);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.callId()).isEqualTo(call.getId());
+        assertThat(result.customerName()).isEqualTo(customer.getName());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 상담 조회 시 예외 발생")
+    void findCall_WithInvalidId_ThrowsException() {
+        // given
+        when(callRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> adminCallService.findCall(1L))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("존재하지 않는 상담입니다.");
+    }
 }
