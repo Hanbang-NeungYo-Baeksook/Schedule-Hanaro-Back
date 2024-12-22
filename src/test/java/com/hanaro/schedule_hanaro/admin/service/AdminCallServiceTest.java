@@ -171,7 +171,6 @@ class AdminCallServiceTest {
     @DisplayName("필터링된 상담 목록 조회 테스트")
     void findFilteredCalls() {
         // given
-        Pageable pageable = PageRequest.of(0, 10);
         when(callRepository.findByFiltering(any(), any(), any(), any(), any(), any()))
             .thenReturn(new SliceImpl<>(List.of(call)));
 
