@@ -68,10 +68,6 @@ public class Call {
 	@Column(name = "tags", nullable = false)
 	private String tags;
 
-	// 낙관적 락
-	@Version
-	private Long version;
-
 	@Builder
 	public Call(Customer customer, LocalDateTime callDate, int callNum, Category category,
 		String content, LocalDateTime startedAt, LocalDateTime endedAt, String tags) {
