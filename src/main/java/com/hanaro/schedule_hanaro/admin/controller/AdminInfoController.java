@@ -24,6 +24,6 @@ public class AdminInfoController {
     @Operation(summary = "관리자 정보 조회", description = "관리자의 전화 문의 / 1:1 문의의 일별, 주별, 월별 접수 건수와 총 접수 건수 통계를 제공합니다.")
     @GetMapping("/stats")
     public ResponseEntity<AdminInfoResponse> getAdminStats(Authentication authentication) {
-        return ResponseEntity.ok(adminService.getAdminStats(authentication));
+        return ResponseEntity.ok().body(adminService.getAdminStats(authentication));
     }
 }

@@ -48,4 +48,7 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
 
 	@Query("select v.category from Visit v where v.section.id = :sectionId and v.status = :status and v.num < :numBefore")
 	List<Category> findCategoryBySectionIdAndNumBeforeAndStatus(Long sectionId, int numBefore, Status status);
+
+	@Query("SELECT v FROM Visit v WHERE v.section.id = :sectionId AND v.status = :status")
+	Optional<Visit> findCurrentProgressVisit(@Param("sectionId") Long sectionId, @Param("status") Status status);
 }

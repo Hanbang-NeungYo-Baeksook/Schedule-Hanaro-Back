@@ -31,7 +31,7 @@ public class AdminCustomerController {
         @RequestParam(defaultValue = "10") int size
     ) {
         AdminCustomerListResponse response = adminCustomerService.getCustomerList(page, size);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok().body(response);
     }
 
     @Operation(summary = "고객 상세 정보 조회", description = "특정 고객의 상세 정보를 조회합니다.")
@@ -44,7 +44,7 @@ public class AdminCustomerController {
     @GetMapping("/{customer-id}/content")
     public ResponseEntity<AdminCustomerInquiryListResponse> getCustomerInquiries(@PathVariable("customer-id") Long customerId) {
         AdminCustomerInquiryListResponse response = adminCustomerService.findCustomerInquiryList(customerId);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok().body(response);
     }
 
 }
