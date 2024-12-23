@@ -1,5 +1,7 @@
 package com.hanaro.schedule_hanaro.global.domain.enums;
 
+import java.util.Arrays;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -28,5 +30,12 @@ public enum Category {
 	@Override
 	public String toString() {
 		return this.category;
+	}
+
+	public static Category fromCategoryName(String categoryName) {
+		return Arrays.stream(values())
+			.filter(category -> category.getCategory().equals(categoryName))
+			.findFirst()
+			.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 카테고리입니다: " + categoryName));
 	}
 }

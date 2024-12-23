@@ -47,7 +47,7 @@ public class InquiryService {
 			.customer(customer)
 			.content(request.content())
 			.inquiryNum(newInquiryNum)
-			.category(request.category())
+			.category(category)
 			.status(InquiryStatus.PENDING)
 			.tags("default")
 			.build();
@@ -97,8 +97,8 @@ public class InquiryService {
 		return InquiryResponse.builder()
 			.inquiryId(inquiry.getId())
 			.inquiryNum(inquiry.getInquiryNum())
-			.category(inquiry.getCategory().name())
-			.status(inquiry.getInquiryStatus().name().toLowerCase())
+			.category(inquiry.getCategory().toString())
+			.status(inquiry.getInquiryStatus().toString())
 			.content(inquiry.getContent())
 			.tags(List.of(inquiry.getTags().split(",")))
 			.build();
@@ -116,7 +116,7 @@ public class InquiryService {
 
 		return InquiryReplyDetailResponse.builder()
 			.content(inquiry.getContent())
-			.status(inquiry.getInquiryStatus().name())
+			.status(inquiry.getInquiryStatus().toString())
 			.reply(replyContent)
 			.tag(List.of(inquiry.getTags().split(",")))
 			.build();

@@ -9,4 +9,9 @@ public enum InquiryStatus {
 	PENDING("답변 대기중"),
 	REGISTRATIONCOMPLETE("답변완료");
 	private final String inquiryStatus;
+
+	@Override
+	public String toString() {
+		return this.inquiryStatus;
+	}
 }

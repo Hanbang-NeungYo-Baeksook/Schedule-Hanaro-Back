@@ -74,7 +74,7 @@ public class CallService {
 					.customer(customer)
 					.callDate(request.callDate())
 					.callNum(newCallNum)
-					.category(Category.valueOf(request.category().toUpperCase()))
+					.category(category)
 					.content(request.content())
 					.tags("default")
 					.build();
