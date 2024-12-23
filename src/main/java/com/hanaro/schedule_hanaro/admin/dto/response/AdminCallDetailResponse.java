@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hanaro.schedule_hanaro.global.domain.Call;
+import com.hanaro.schedule_hanaro.global.domain.CallMemo;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 
@@ -30,7 +31,8 @@ public record AdminCallDetailResponse(
 ) {
 	public static AdminCallDetailResponse from (
 		final Call call,
-		final Customer customer
+		final Customer customer,
+		final CallMemo callMemo
 	) {
 		return AdminCallDetailResponse.builder()
 			.callId(call.getId())
@@ -42,7 +44,7 @@ public record AdminCallDetailResponse(
 			.endedAt(call.getEndedAt())
 			.customerName(customer.getName())
 			.mobile(customer.getPhoneNum())
-			// .replyContent(call.get)
+			.replyContent(callMemo.getContent())
 			.build();
 	}
 }

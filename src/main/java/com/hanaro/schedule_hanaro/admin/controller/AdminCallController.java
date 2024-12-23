@@ -39,12 +39,25 @@ public class AdminCallController {
 		return ResponseEntity.ok(callService.findWaitList());
 	}
 
-	@Operation(summary = "전화 상담 상태 변경", description = "특정 전화 상담 항목의 상태를 변경합니다. (전화 상담 대기/전화 상담 완료)")
-	@PatchMapping("/{call-id}")
-	public ResponseEntity<String> patchCallStatus(Authentication authentication, @PathVariable("call-id") Long callId) {
+	@Operation(summary = "전화 상담 시작", description = "특정 전화 상담 항목의 상태를 진행 중으로 변경합니다. (전화 상담 대기)")
+	@PatchMapping("/progress")
+	public ResponseEntity<?> patchCallStatusProgress(Authentication authentication) {
 		// 전화 상담 상태 변경
 		try {
-			return ResponseEntity.ok(callService.changeCallStatus(authentication, callId));
+			return ResponseEntity.ok(callService.changeCallStatusProgress(authentication));
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+		} catch (IllegalStateException e) {
+			return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+		}
+	}
+
+	@Operation(summary = "전화 상담 완료", description = "특정 전화 상담 항목의 상태를 완료로 변경합니다. (전화 상담 완료)")
+	@PatchMapping("/{call-id}")
+	public ResponseEntity<String> patchCallStatusComplete(@PathVariable("call-id") Long callId) {
+		// 전화 상담 상태 변경
+		try {
+			return ResponseEntity.ok(callService.changeCallStatusComplete(callId));
 		} catch (IllegalArgumentException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 		} catch (IllegalStateException e) {

@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hanaro.schedule_hanaro.global.domain.Call;
+import com.hanaro.schedule_hanaro.global.domain.CallMemo;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 
@@ -31,11 +32,14 @@ public record AdminCallInfoResponse(
 	LocalDate birthDt,
 
 	List<AdminCallHistoryResponse> calls,
-	List<AdminInquiryHistoryResponse> inquires
+	List<AdminInquiryHistoryResponse> inquires,
+
+	String memo
 ) {
 	public static AdminCallInfoResponse from(final Call call, final Customer customer,
 		final List<AdminCallHistoryResponse> calls,
-		final List<AdminInquiryHistoryResponse> inquires) {
+		final List<AdminInquiryHistoryResponse> inquires,
+		final CallMemo memo) {
 		return new AdminCallInfoResponse(
 			call.getId(),
 			call.getCallNum(),
@@ -50,7 +54,8 @@ public record AdminCallInfoResponse(
 			customer.getPhoneNum(),
 			customer.getBirth(),
 			calls,
-			inquires
+			inquires,
+			memo == null ? null : memo.getContent()
 		);
 	}
 }

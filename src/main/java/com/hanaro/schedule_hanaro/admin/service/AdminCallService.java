@@ -1,8 +1,11 @@
 package com.hanaro.schedule_hanaro.admin.service;
 
+import static com.hanaro.schedule_hanaro.global.exception.ErrorCode.*;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -66,7 +69,31 @@ public class AdminCallService {
 	}
 
 	@Transactional
-	public String changeCallStatus(Authentication authentication, Long callId) {
+	public Long changeCallStatusProgress(Authentication authentication) {
+		// 상담 진행 중으로 변경
+		Admin admin = adminRepository.findById(PrincipalUtils.getId(authentication))
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_ADMIN));
+
+		// 대기 번호가 가장 빠른 상담 조회 (비관적 락)
+		Call call = callRepository.findFirstByStatusOrderByCallNumAsc(Status.PENDING)
+			.orElseThrow(() -> new GlobalException(ErrorCode.EMPTY_WAITS));
+
+		// call의 상태를 progress로 변경
+		callRepository.updateStatusWithStartedAt(call.getId(), Status.PROGRESS, LocalDateTime.now());
+
+		// call memo 빈 문자열로 등록
+		callMemoRepository.save(CallMemo.builder()
+			.call(call)
+			.admin(admin)
+			.content("")
+			.build());
+		return call.getId();
+
+	}
+
+	@Transactional
+	public String changeCallStatusComplete(Long callId) {
+		// 상담 완료로 변경
 		Call call = callRepository.findById(callId)
 			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CALL));
 
@@ -97,20 +124,33 @@ public class AdminCallService {
 
 		CallMemo callMemo = callMemoRepository.findByCallId(callId);
 
-		if (!callMemo.getContent().isEmpty()) {
-			throw new GlobalException(ErrorCode.ALREADY_POST_MEMO);
-		}
+		if (callMemo != null) {
+			if (!callMemo.getContent().isEmpty()) {
+				throw new GlobalException(ErrorCode.ALREADY_POST_MEMO);
+			}
 
-		Admin admin = adminRepository.findById(PrincipalUtils.getId(authentication))
-			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_ADMIN));
+			CallMemo updatedCallMemo = CallMemo.builder()
+				.id(callMemo.getId())
+				.call(callMemo.getCall())
+				.admin(callMemo.getAdmin())
+				.content(content)
+				.build();
 
-		callMemoRepository.save(
-			CallMemo.builder()
+			callMemoRepository.save(updatedCallMemo);
+
+		} else {
+			Admin admin = adminRepository.findById(PrincipalUtils.getId(authentication))
+				.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_ADMIN));
+
+			CallMemo newCallMemo = CallMemo.builder()
 				.call(call)
 				.admin(admin)
 				.content(content)
-				.build()
-		);
+				.build();
+
+			callMemoRepository.save(newCallMemo);
+		}
+
 
 		return "Success";
 	}
@@ -144,23 +184,28 @@ public class AdminCallService {
 		Call call = callRepository.findById(callId)
 			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CALL));
 
-		Customer customer = customerRepository.findById(6L).orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CUSTOMER));
+		Customer customer = customerRepository.findById(call.getCustomer().getId()).orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CUSTOMER));
 
-		return AdminCallDetailResponse.from(call, customer);
+		CallMemo callMemo = callMemoRepository.findByCallId(callId);
+
+		return AdminCallDetailResponse.from(call, customer, callMemo);
 	}
 
 	public AdminCallInfoResponse getCallInfo(Call call) {
+		CallMemo callMemo = callMemoRepository.findByCallId(call.getId());
+
 		return AdminCallInfoResponse.from(
 			call,
 			call.getCustomer(),
-			callRepository.findCallHistoryByCustomerId(call.getCustomer().getId(), call.getId())
+			callRepository.findByCustomerIdAndIdNotAndStatus(call.getCustomer().getId(), call.getId(), Status.COMPLETE)
 				.stream()
 				.map(AdminCallHistoryResponse::from)
 				.toList(),
 			inquiryRepository.findByCustomerId(call.getCustomer().getId())
 				.stream()
 				.map(AdminInquiryHistoryResponse::from)
-				.toList()
+				.toList(),
+			callMemo
 		);
 	}
 }
