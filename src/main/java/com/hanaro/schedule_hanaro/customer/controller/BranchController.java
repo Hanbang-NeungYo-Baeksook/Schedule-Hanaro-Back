@@ -18,6 +18,7 @@ import com.hanaro.schedule_hanaro.customer.service.BranchService;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchRecommendationResponse;
 import com.hanaro.schedule_hanaro.global.domain.enums.SectionType;
+import com.hanaro.schedule_hanaro.global.domain.enums.TransportType;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -60,7 +61,7 @@ public class BranchController {
 	public ResponseEntity<List<BranchRecommendationResponse>> recommendBranches(
 		@RequestParam("latitude") double latitude,        // 사용자 위도
 		@RequestParam("longitude") double longitude,      // 사용자 경도
-		@RequestParam("transportType") String transportType, // 이동 방식 (도보/차량)
+		@RequestParam("transportType") TransportType transportType, // 이동 방식 (도보/차량)
 		@RequestParam("category") SectionType category         // 카테고리 (예금/개인대출/기업대출)
 	) {
 

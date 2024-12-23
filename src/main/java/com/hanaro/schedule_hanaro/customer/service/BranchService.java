@@ -26,6 +26,7 @@ import com.hanaro.schedule_hanaro.global.domain.Section;
 import com.hanaro.schedule_hanaro.global.domain.Visit;
 import com.hanaro.schedule_hanaro.global.domain.enums.SectionType;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
+import com.hanaro.schedule_hanaro.global.domain.enums.TransportType;
 import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
 import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 import com.hanaro.schedule_hanaro.global.repository.BranchRepository;
@@ -137,8 +138,7 @@ public class BranchService {
 	}
 
 	// 추천 영업점 알고리즘
-	public List<BranchRecommendationResponse> recommendBranches(double userLat, double userLon,
-		String transportType, SectionType sectionType) {
+	public List<BranchRecommendationResponse> recommendBranches(double userLat, double userLon, TransportType transportType, SectionType sectionType) {
 		// 최대 거리 설정
 		double maxDistance = transportType.equals("도보") ? 3.0 : 15.0;
 
