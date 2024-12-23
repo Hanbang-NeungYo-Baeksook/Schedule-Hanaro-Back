@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.hanaro.schedule_hanaro.global.auth.dto.response.SignUpResponse;
 import com.hanaro.schedule_hanaro.global.auth.info.UserInfo;
 import com.hanaro.schedule_hanaro.global.domain.enums.Role;
 import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
@@ -80,7 +81,7 @@ public class AuthService {
 		return response;
 	}
 
-	public void signUp(AuthSignUpRequest authSignUpRequest){
+	public SignUpResponse signUp(AuthSignUpRequest authSignUpRequest){
 		customerRepository.save(Customer.builder()
 			.authId(authSignUpRequest.authId())
 			.password(bCryptPasswordEncoder.encode(authSignUpRequest.password()))
@@ -89,9 +90,10 @@ public class AuthService {
 			.birth(authSignUpRequest.birth())
 			.gender(Gender.valueOf(authSignUpRequest.gender()))
 			.build());
+		return SignUpResponse.of();
 	}
 
-	public String adminSignUpAdmin(AuthAdminSignUpRequest authAdminSignUpRequest) {
+	public SignUpResponse adminSignUpAdmin(AuthAdminSignUpRequest authAdminSignUpRequest) {
 		Branch branch = branchRepository.findById(5L).orElseThrow();
 		adminRepository.save(Admin.builder()
 				.authId(authAdminSignUpRequest.authId())
@@ -101,6 +103,7 @@ public class AuthService {
 			.build()
 		);
 
-		return "Success";
+		return SignUpResponse.of();
 	}
+
 }
