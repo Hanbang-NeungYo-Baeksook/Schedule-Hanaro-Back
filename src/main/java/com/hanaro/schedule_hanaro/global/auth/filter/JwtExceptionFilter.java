@@ -25,7 +25,7 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
 			filterChain.doFilter(request, response);
 		} catch (MalformedJwtException e) {
 			logger.error("JwtExceptionFilter throw Malformed Jwt Exception : ");
-			request.setAttribute("exception", ErrorCode.MALFOREMD_ACCESS_TOKEN);
+			request.setAttribute("exception", ErrorCode.MALFORMED_ACCESS_TOKEN);
 			filterChain.doFilter(request, response);
 		} catch (ExpiredJwtException e) {
 			logger.error("JwtExceptionFilter throw Expired Jwt Exception : ");

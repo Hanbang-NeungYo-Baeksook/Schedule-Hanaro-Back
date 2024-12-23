@@ -11,6 +11,7 @@ import com.hanaro.schedule_hanaro.global.auth.dto.request.AuthAdminSignUpRequest
 import com.hanaro.schedule_hanaro.global.auth.dto.request.AuthSignUpRequest;
 import com.hanaro.schedule_hanaro.global.auth.dto.request.SignInRequest;
 import com.hanaro.schedule_hanaro.global.auth.dto.response.JwtTokenDto;
+import com.hanaro.schedule_hanaro.global.auth.dto.response.SignUpResponse;
 import com.hanaro.schedule_hanaro.global.auth.service.AuthService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,10 +30,10 @@ public class AuthController {
 
 	@Operation(summary = "사용자 회원가입", description = "Schedule Hanaro 사용자에게 회원가입 서비스를 제공합니다.")
 	@PostMapping("/sign-up")
-	public ResponseEntity<?> signUp(@RequestBody AuthSignUpRequest authSignUpRequest) {
+	public ResponseEntity<SignUpResponse> signUp(@RequestBody AuthSignUpRequest authSignUpRequest) {
 		log.info("signUp 컨트롤러 진입");
-		authService.signUp(authSignUpRequest);
-		return ResponseEntity.ok(null);
+		return ResponseEntity.ok().body(
+			authService.signUp(authSignUpRequest));
 	}
 
 	@Operation(summary = "사용자 로그인", description = "Schedule Hanaro 사용자에게 로그인 서비스를 제공합니다.")
@@ -44,9 +45,9 @@ public class AuthController {
 
 	@Operation(summary = "관리자 회원가입", description = "Schedule Hanaro 서비스 관리자 페이지에 관리자를 등록합니다.")
 	@PostMapping("/admin/sign-up")
-	public ResponseEntity<String> signUpAdmin(@RequestBody AuthAdminSignUpRequest authAdminSignUpRequest) {
+	public ResponseEntity<SignUpResponse> signUpAdmin(@RequestBody AuthAdminSignUpRequest authAdminSignUpRequest) {
 		// 관리자 등록 - 테스트용
-		return ResponseEntity.ok(authService.adminSignUpAdmin(authAdminSignUpRequest));
+		return ResponseEntity.ok().body(authService.adminSignUpAdmin(authAdminSignUpRequest));
 	}
 
 	@Operation(summary = "관리자 로그인", description = "Schedule Hanaro 서비스 관리자 페이지에 로그인합니다.")
