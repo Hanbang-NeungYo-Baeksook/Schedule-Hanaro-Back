@@ -28,6 +28,12 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 	Integer findMaxCallNumByCallDateBetweenForUpdate(@Param("startTime") LocalDateTime startTime,
 		@Param("endTime") LocalDateTime endTime);
 
+	@Query("SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END " +
+		"FROM Call c WHERE c.customer.id = :customerId AND c.callDate BETWEEN :startTime AND :endTime")
+	boolean isExistReservationsInSlot(@Param("customerId") Long customerId,
+		@Param("startTime") LocalDateTime startTime,
+		@Param("endTime") LocalDateTime endTime);
+
 	@Query("SELECT COUNT(c) FROM Call c WHERE c.callDate BETWEEN :startTime AND :endTime")
 	int countByCallDateBetween(@Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
 	Call findByCallNum(int callNum);

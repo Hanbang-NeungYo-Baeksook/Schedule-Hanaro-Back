@@ -26,6 +26,7 @@ public enum ErrorCode {
 	ALREADY_POST_RESPONSE(40012, HttpStatus.BAD_REQUEST, "이미 답변이 등록된 상담입니다."),
 	EMPTY_WAITS(40013, HttpStatus.BAD_REQUEST, "대기 중인 상담이 더이상 없습니다."),
 
+
 	// 403
 	FORBIDDEN_REQUEST(40300, HttpStatus.FORBIDDEN, "권한이 존재하지 않습니다."),
 
@@ -45,6 +46,7 @@ public enum ErrorCode {
 
 	// 409
 	CONCURRENT_VISIT_UPDATE(40900, HttpStatus.CONFLICT, "방문 정보가 동시에 수정되었습니다."),
+	CONFLICTING_CALL_RESERVATION(40013, HttpStatus.CONFLICT, "해당 시간대에 이미 예약이 존재합니다."),
 	;
 	private final Integer code;
 	private final HttpStatus httpStatus;

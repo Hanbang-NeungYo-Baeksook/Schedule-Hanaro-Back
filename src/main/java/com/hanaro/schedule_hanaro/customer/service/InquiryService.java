@@ -5,6 +5,7 @@ import com.hanaro.schedule_hanaro.customer.dto.response.InquiryCreateResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryListResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryReplyDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryResponse;
+import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
 import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 import com.hanaro.schedule_hanaro.global.repository.InquiryRepository;
@@ -38,6 +39,8 @@ public class InquiryService {
 		Customer customer = customerRepository.findById(PrincipalUtils.getId(authentication))
 			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CUSTOMER));
 
+		Category category = Category.fromCategoryName(request.category());
+
 		int maxInquiryNum = inquiryRepository.findMaxInquiryNum();
 
 		// 번호 추가
@@ -47,7 +50,7 @@ public class InquiryService {
 			.customer(customer)
 			.content(request.content())
 			.inquiryNum(newInquiryNum)
-			.category(request.category())
+			.category(category)
 			.status(InquiryStatus.PENDING)
 			.tags("default")
 			.build();
@@ -97,8 +100,8 @@ public class InquiryService {
 		return InquiryResponse.builder()
 			.inquiryId(inquiry.getId())
 			.inquiryNum(inquiry.getInquiryNum())
-			.category(inquiry.getCategory().name())
-			.status(inquiry.getInquiryStatus().name().toLowerCase())
+			.category(inquiry.getCategory().toString())
+			.status(inquiry.getInquiryStatus().toString())
 			.content(inquiry.getContent())
 			.tags(List.of(inquiry.getTags().split(",")))
 			.build();
@@ -116,7 +119,7 @@ public class InquiryService {
 
 		return InquiryReplyDetailResponse.builder()
 			.content(inquiry.getContent())
-			.status(inquiry.getInquiryStatus().name())
+			.status(inquiry.getInquiryStatus().toString())
 			.reply(replyContent)
 			.tag(List.of(inquiry.getTags().split(",")))
 			.build();
