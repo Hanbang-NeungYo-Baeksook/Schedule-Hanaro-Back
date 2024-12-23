@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hanaro.schedule_hanaro.customer.dto.request.VisitCreateRequest;
 import com.hanaro.schedule_hanaro.customer.dto.response.CreateVisitResponse;
+import com.hanaro.schedule_hanaro.customer.dto.response.DeleteVisitResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.VisitDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.VisitListResponse;
 import com.hanaro.schedule_hanaro.customer.service.VisitService;
@@ -50,8 +51,8 @@ public class VisitController {
 
 	@Operation
 	@DeleteMapping("/{visit-id}")
-	public ResponseEntity<String> deleteVisit(@PathVariable("visit-id") Long visitId) throws InterruptedException {
-		return ResponseEntity.ok(visitService.deleteVisitReservation(visitId));
+	public ResponseEntity<DeleteVisitResponse> deleteVisit(@PathVariable("visit-id") Long visitId) throws InterruptedException {
+		return ResponseEntity.ok().body(visitService.deleteVisitReservation(visitId));
 	}
 
 	@Operation(summary = "방문 상담 예약 생성", description = "새로운 방문 상담 예약을 생성합니다.")

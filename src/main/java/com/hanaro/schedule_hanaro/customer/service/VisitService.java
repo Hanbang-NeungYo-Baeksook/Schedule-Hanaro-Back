@@ -15,6 +15,7 @@ import com.hanaro.schedule_hanaro.customer.dto.CancelReservationDto;
 import com.hanaro.schedule_hanaro.customer.dto.RegisterReservationDto;
 import com.hanaro.schedule_hanaro.customer.dto.request.VisitCreateRequest;
 import com.hanaro.schedule_hanaro.customer.dto.response.CreateVisitResponse;
+import com.hanaro.schedule_hanaro.customer.dto.response.DeleteVisitResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.VisitDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.VisitListResponse;
 import com.hanaro.schedule_hanaro.global.domain.Section;
@@ -237,11 +238,11 @@ public class VisitService {
 			.build();
 	}
 
-	public String deleteVisitReservation(Long visitId) throws InterruptedException {
+	public DeleteVisitResponse deleteVisitReservation(Long visitId) throws InterruptedException {
 		Visit visit = visitRepository.findById(visitId)
 			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_VISIT));
 		if (visit.getStatus().equals(Status.COMPLETE) || visit.getStatus().equals(Status.CANCELED)) {
-			throw new GlobalException(ErrorCode.ALREADY_RESERVED,"이미 완료되거나 취소된 예약입니다.");
+			throw new GlobalException(ErrorCode.ALREADY_COMPLETE);
 		}
 		while (true) {
 			try {
@@ -256,7 +257,7 @@ public class VisitService {
 				Thread.sleep(500);
 			}
 		}
-		return "Success";
+		return DeleteVisitResponse.of(visit.getSection().getBranch().getId());
 	}
 
 	@Transactional

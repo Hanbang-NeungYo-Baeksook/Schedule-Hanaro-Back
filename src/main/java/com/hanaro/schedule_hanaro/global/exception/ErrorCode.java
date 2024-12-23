@@ -31,7 +31,7 @@ public enum ErrorCode {
 
 	// 403
 	FORBIDDEN_REQUEST(40300, HttpStatus.FORBIDDEN, "권한이 존재하지 않습니다."),
-	MALFOREMD_ACCESS_TOKEN(40301, HttpStatus.BAD_REQUEST, "access 토큰이 올바르지 않습니다."),
+	MALFORMED_ACCESS_TOKEN(40301, HttpStatus.BAD_REQUEST, "access 토큰이 올바르지 않습니다."),
 	NOT_FOUND_REFRESH_TOKEN(40301, HttpStatus.FORBIDDEN, "refresh 토큰을 찾을 수 없습니다."),
 	NOT_MATCHED_REFRESH_TOKEN(40302, HttpStatus.FORBIDDEN, "refresh 토큰이 일치하지 않습니다."),
 
