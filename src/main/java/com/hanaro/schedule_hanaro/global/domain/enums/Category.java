@@ -27,6 +27,15 @@ public enum Category {
 	private final String category;
 	private final int waitTime;
 
+	// public static Category from(String value) {
+	// 	for (Category category : Category.values()) {
+	// 		if (category.name().equalsIgnoreCase(value)) { // 대소문자 무시 매핑
+	// 			return category;
+	// 		}
+	// 	}
+	// 	throw new IllegalArgumentException("Invalid Category: " + value);
+	// }
+
 	@Override
 	public String toString() {
 		return this.category;

@@ -13,6 +13,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.InquiryStatus;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryDto;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryStatsDto;
@@ -67,8 +69,8 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
 		"     c.name LIKE %:searchContent%)" +
 		"ORDER BY i.createdAt DESC")
 	Page<Inquiry> findFilteredInquiries(
-		@Param("status") String status,
-		@Param("category") String category,
+		@Param("status") InquiryStatus status,
+		@Param("category") Category category,
 		@Param("searchContent") String searchContent,
 		Pageable pageable
 	);

@@ -23,6 +23,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class AdminVisitService {
@@ -123,77 +125,63 @@ public class AdminVisitService {
             throw new GlobalException(ErrorCode.INVALID_VISIT_NUMBER);
         }
 
-        Visit currentVisit = visitRepository.findById(visitId)
-                .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_VISIT));
+        Visit currentVisit = visitRepository.findByIdWithPessimisticLock(visitId)
+            .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_VISIT));
 
         if (currentVisit.getStatus() != Status.PENDING) {
-            throw new GlobalException(ErrorCode.ALREADY_PROGRESS);
+            throw new GlobalException(ErrorCode.ALREADY_PROGRESS, "Visit ID: " + visitId);
         }
 
-        Section section = currentVisit.getSection();
-        if (section == null) {
-            throw new GlobalException(ErrorCode.NOT_FOUND_SECTION);
-        }
+        Section section = sectionRepository.findByIdWithPessimisticLock(currentVisit.getSection().getId())
+            .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_SECTION));
 
-        if (section.getBranch() == null) {
-            throw new GlobalException(ErrorCode.NOT_FOUND_BRANCH);
-        }
-
-        if (section.getBranch().getId() == null) {
-            throw new GlobalException(ErrorCode.NOT_FOUND_BRANCH);
-        }
-
-        // CsVisit 조회 및 유효성 검사
-        CsVisit csVisit = csVisitRepository.findByBranchIdAndDate(section.getBranch().getId(), LocalDate.now())
-                .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CS_VISIT));
+        CsVisit csVisit = csVisitRepository.findByBranchIdAndDateWithPessimisticLock(
+                section.getBranch().getId(), LocalDate.now())
+            .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CS_VISIT));
 
         try {
             String previousCategory = currentVisit.getCategory().getCategory();
             int previousNum = currentVisit.getNum();
             currentVisit.changeStatusToProgress();
 
-            // 현재 상태 업데이트
             section.updateStatusPendingToProgress(currentVisit.getNum(), 10);
             sectionRepository.save(section);
 
-            // 다음 대기 번호 설정
-            Visit nextVisit = visitRepository.findNextPendingVisit(section.getId(), Status.PENDING)
-                    .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_NEXT_VISITOR));
+            Optional<Visit> nextVisitOpt = visitRepository.findNextPendingVisitWithPessimisticLock(
+                section.getId(), Status.PENDING);
 
-            int nextNum = (nextVisit != null) ? nextVisit.getNum() : -1;
-            String nextCategory = (nextVisit != null) ? nextVisit.getCategory().getCategory() : "";
+            int nextNum = nextVisitOpt.map(Visit::getNum).orElse(-1);
+            String nextCategory = nextVisitOpt.map(visit -> visit.getCategory().getCategory()).orElse("");
 
             String message = "다음 방문자 대기: [다음 번호: " + nextNum + ", 다음 카테고리: " + nextCategory + "]";
             websocketHandler.notifySubscribers(section.getBranch().getId(), message);
 
-            // CsVisit 업데이트
             csVisit.increaseTotalNum();
             csVisitRepository.save(csVisit);
 
-            // Response 반환
             AdminVisitStatusUpdateResponse.SectionInfo sectionInfo = AdminVisitStatusUpdateResponse.SectionInfo.builder()
-                    .sectionId(section.getId())
-                    .sectionType(section.getSectionType().toString())
-                    .currentNum(section.getCurrentNum())
-                    .waitAmount(section.getWaitAmount())
-                    .waitTime(section.getWaitTime())
-                    .todayVisitors(csVisit.getTotalNum())
-                    .build();
+                .sectionId(section.getId())
+                .sectionType(section.getSectionType().toString())
+                .currentNum(section.getCurrentNum())
+                .waitAmount(section.getWaitAmount())
+                .waitTime(section.getWaitTime())
+                .todayVisitors(csVisit.getTotalNum())
+                .build();
 
             return AdminVisitStatusUpdateResponse.builder()
-                    .previousNum(previousNum)
-                    .previousCategory(previousCategory)
-                    .currentNum(currentVisit.getNum())
-                    .currentCategory(currentVisit.getCategory().getCategory())
-                    .nextNum(nextNum)
-                    .nextCategory(nextCategory)
-                    .sectionInfo(sectionInfo)
-                    .build();
-
+                .previousNum(previousNum)
+                .previousCategory(previousCategory)
+                .currentNum(currentVisit.getNum())
+                .currentCategory(currentVisit.getCategory().getCategory())
+                .nextNum(nextNum)
+                .nextCategory(nextCategory)
+                .sectionInfo(sectionInfo)
+                .build();
         } catch (Exception e) {
-            throw new GlobalException(ErrorCode.CONCURRENT_VISIT_UPDATE);
+            throw new GlobalException(ErrorCode.CONCURRENT_VISIT_UPDATE, "Visit ID: " + visitId);
         }
     }
+
 
     public AdminVisitStatusUpdateResponse getCurrentVisit(Long sectionId) {
         Section section = sectionRepository.findById(sectionId)
