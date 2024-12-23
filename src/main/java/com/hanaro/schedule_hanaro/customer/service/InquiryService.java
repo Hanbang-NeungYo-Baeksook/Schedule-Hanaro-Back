@@ -63,11 +63,11 @@ public class InquiryService {
 	}
 
 	// 1:1 상담 목록 조회
-	public InquiryListResponse getInquiryList(String status, int page, int size) {
+	public InquiryListResponse getInquiryList(Long customerId, String status, int page, int size) {
 		InquiryStatus inquiryStatus = InquiryStatus.valueOf(status.toUpperCase());
 		Pageable pageable = PageRequest.of(page - 1, size);
 
-		Slice<Inquiry> inquirySlice = inquiryRepository.findByInquiryStatus(inquiryStatus, pageable);
+		Slice<Inquiry> inquirySlice = inquiryRepository.findByCustomerIdAndInquiryStatus(customerId, inquiryStatus, pageable);
 
 		List<InquiryListResponse.InquiryData> inquiryDataList = inquirySlice.getContent().stream()
 			.map(inquiry -> InquiryListResponse.InquiryData.builder()
