@@ -95,7 +95,7 @@ public class InquiryService {
 	// 1:1 상담 상세
 	public InquiryResponse getInquiryDetail(Long inquiryId) {
 		Inquiry inquiry = inquiryRepository.findById(inquiryId)
-			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 상담 ID입니다."));
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_INQUIRY));
 
 		return InquiryResponse.builder()
 			.inquiryId(inquiry.getId())
@@ -110,7 +110,7 @@ public class InquiryService {
 	// 1:1 상담 답변 상세
 	public InquiryReplyDetailResponse getInquiryReplyDetail(Long inquiryId) {
 		Inquiry inquiry = inquiryRepository.findById(inquiryId)
-			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 상담 ID입니다."));
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_INQUIRY));
 
 		com.hanaro.schedule_hanaro.global.domain.InquiryResponse inquiryResponse =
 			inquiryResponseRepository.findByInquiry(inquiry).orElse(null);

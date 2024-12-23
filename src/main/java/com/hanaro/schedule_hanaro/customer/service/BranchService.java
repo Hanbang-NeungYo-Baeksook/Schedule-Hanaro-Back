@@ -140,10 +140,10 @@ public class BranchService {
 	// 추천 영업점 알고리즘
 	public List<BranchRecommendationResponse> recommendBranches(double userLat, double userLon, TransportType transportType, SectionType sectionType) {
 		// 최대 거리 설정
-		double maxDistance = transportType.equals("도보") ? 3.0 : 15.0;
+		double maxDistance = transportType == TransportType.WALK ? 3.0 : 15.0;
 
 		// 가중치 설정
-		double distanceWeight = transportType.equals("도보") ? 0.7 : 0.6;
+		double distanceWeight = transportType == TransportType.WALK ? 0.7 : 0.6;
 		double categoryWeight = 1.0 - distanceWeight;
 
 		// BranchType이 "BANK"인 데이터만 가져오기
@@ -205,9 +205,6 @@ public class BranchService {
 			.collect(Collectors.toList());
 	}
 
-	/**
-	 * 거리와 예상 대기 인원에 기반하여 가중치를 계산합니다.
-	 */
 	private double calculateWeight(double distance, int waitAmount, double distanceWeight, double categoryWeight) {
 		return (distance * distanceWeight) + (waitAmount * categoryWeight);
 	}
