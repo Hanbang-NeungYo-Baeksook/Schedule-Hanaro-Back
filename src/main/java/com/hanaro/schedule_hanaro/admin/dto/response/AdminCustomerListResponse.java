@@ -9,7 +9,7 @@ import lombok.Builder;
 
 @Builder
 public record AdminCustomerListResponse(
-	List<CustomerData> customers,
+	List<CustomerData> data,
 	@JsonProperty("current_page") Integer currentPage,
 	@JsonProperty("page_size") Integer pageSize,
 	@JsonProperty("total_items") Long totalItems,
@@ -18,6 +18,8 @@ public record AdminCustomerListResponse(
 
 	@Builder
 	public record CustomerData(
+		@JsonProperty("customer_id") Long customerId,
+		@JsonProperty("auth_id") String authId,
 		@JsonProperty("customer_name") String customerName,
 		@JsonProperty("phone_number") String phoneNumber,
 		@JsonProperty("birth_date") String birthDate,
@@ -25,6 +27,8 @@ public record AdminCustomerListResponse(
 	) {
 		public static CustomerData of(Customer customer) {
 			return CustomerData.builder()
+				.customerId(customer.getId())
+				.authId(customer.getAuthId())
 				.customerName(customer.getName())
 				.phoneNumber(customer.getPhoneNum())
 				.birthDate(customer.getBirth().toString())
@@ -36,7 +40,7 @@ public record AdminCustomerListResponse(
 	public static AdminCustomerListResponse from(
 		List<CustomerData> customers, Integer currentPage, Integer pageSize, Long totalItems, Integer totalPages) {
 		return AdminCustomerListResponse.builder()
-			.customers(customers)
+			.data(customers)
 			.currentPage(currentPage)
 			.pageSize(pageSize)
 			.totalItems(totalItems)
