@@ -5,6 +5,7 @@ import com.hanaro.schedule_hanaro.customer.dto.response.InquiryCreateResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryListResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryReplyDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryResponse;
+import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
 import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 import com.hanaro.schedule_hanaro.global.repository.InquiryRepository;
@@ -37,6 +38,8 @@ public class InquiryService {
 	public InquiryCreateResponse createInquiry(Authentication authentication, InquiryCreateRequest request) {
 		Customer customer = customerRepository.findById(PrincipalUtils.getId(authentication))
 			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CUSTOMER));
+
+		Category category = Category.fromCategoryName(request.category());
 
 		int maxInquiryNum = inquiryRepository.findMaxInquiryNum();
 
