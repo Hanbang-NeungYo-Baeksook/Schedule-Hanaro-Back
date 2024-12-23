@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 
@@ -13,25 +12,18 @@ import com.hanaro.schedule_hanaro.customer.dto.request.TimeSlotAvailabilityReque
 import com.hanaro.schedule_hanaro.customer.dto.response.CallDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallListResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallResponse;
-import com.hanaro.schedule_hanaro.customer.dto.response.ErrorResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.TimeSlotAvailabilityResponse;
 import com.hanaro.schedule_hanaro.customer.service.CallService;
-import com.hanaro.schedule_hanaro.global.auth.info.UserInfo;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Nullable;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Tag(name = "Call", description = "전화 상담 API")
 @RestController
 @RequestMapping("/api/calls")
 @RequiredArgsConstructor
 public class CallController {
-
 	private final CallService callService;
 
 	@Operation(summary = "전화 상담 예약 생성", description = "새로운 전화 상담 예약을 생성합니다.")
@@ -39,32 +31,17 @@ public class CallController {
 	public ResponseEntity<?> createCall(
 		Authentication authentication,
 		@RequestBody CallRequest request
-	) {
-		try {
-			CallResponse response = callService.createCall(authentication, request);
-			return ResponseEntity.status(HttpStatus.CREATED).body(response);
-		} catch (IllegalStateException e) {
-			return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse("2020102", e.getMessage()));
-		} catch (IllegalArgumentException e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("2010203", e.getMessage()));
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		}
+	) throws InterruptedException {
+		CallResponse response = callService.createCall(authentication, request);
+		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
+
 
 	@Operation(summary = "전화 상담 예약 취소", description = "특정 전화 상담 예약을 취소합니다.")
 	@DeleteMapping("/{call-id}")
 	public ResponseEntity<?> cancelCall(@PathVariable("call-id") Long callId) {
-		try {
-			callService.cancelCall(callId);
-			return ResponseEntity.noContent().build();
-		} catch (IllegalArgumentException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-				.body(new ErrorResponse("2010301", "존재하지 않는 상담 데이터입니다."));
-		} catch (IllegalStateException e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-				.body(new ErrorResponse("2010303", e.getMessage()));
-		}
+		callService.cancelCall(callId);
+		return ResponseEntity.noContent().build();
 	}
 
 	@PostMapping("/availability")
@@ -91,12 +68,7 @@ public class CallController {
 	public ResponseEntity<?> getCallDetail(
 		@PathVariable("call-id") Long callId
 	) {
-		try {
-			CallDetailResponse response = callService.getCallDetail(callId);
-			return ResponseEntity.ok(response);
-		} catch (IllegalArgumentException e) {
-			return ResponseEntity.status(404)
-				.body(new ErrorResponse("2010201", "존재하지 않는 상담 데이터입니다."));
-		}
+		CallDetailResponse response = callService.getCallDetail(callId);
+		return ResponseEntity.ok(response);
 	}
 }
