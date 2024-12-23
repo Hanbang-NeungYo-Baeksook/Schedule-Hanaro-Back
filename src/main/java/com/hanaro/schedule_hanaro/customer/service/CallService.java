@@ -61,6 +61,12 @@ public class CallService {
 		LocalDateTime startTime = timeSlotRange[0];
 		LocalDateTime endTime = timeSlotRange[1];
 
+		Category category = Category.fromCategoryName(request.category());
+
+		if (callRepository.isExistReservationsInSlot(customer.getId(), startTime, endTime)) {
+			throw new GlobalException(ErrorCode.CONFLICTING_CALL_RESERVATION, "같은 시간대에 이미 예약한 내역이 존재합니다.");
+		}
+
 
 		while (true) {
 			try {
