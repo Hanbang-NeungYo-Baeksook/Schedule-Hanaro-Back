@@ -13,14 +13,16 @@ import com.hanaro.schedule_hanaro.global.repository.SectionRepository;
 import com.hanaro.schedule_hanaro.global.repository.VisitRepository;
 import com.hanaro.schedule_hanaro.global.domain.CsVisit;
 import com.hanaro.schedule_hanaro.global.domain.Visit;
+import com.hanaro.schedule_hanaro.global.websocket.handler.WebsocketHandler;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class AdminVisitService {
@@ -28,6 +30,8 @@ public class AdminVisitService {
     private int angle = 0;
     private final VisitRepository visitRepository;
     private final SectionRepository sectionRepository;
+
+    private final WebsocketHandler websocketHandler;
 
     public Visit findVisitById(Long visitId) {
         return visitRepository.findById(visitId)
@@ -135,6 +139,10 @@ public class AdminVisitService {
             throw new GlobalException(ErrorCode.NOT_FOUND_BRANCH);
         }
 
+        if (section.getBranch().getId() == null) {
+            throw new GlobalException(ErrorCode.NOT_FOUND_BRANCH);
+        }
+
         // CsVisit 조회 및 유효성 검사
         CsVisit csVisit = csVisitRepository.findByBranchIdAndDate(section.getBranch().getId(), LocalDate.now())
                 .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CS_VISIT));
@@ -154,6 +162,9 @@ public class AdminVisitService {
 
             int nextNum = (nextVisit != null) ? nextVisit.getNum() : -1;
             String nextCategory = (nextVisit != null) ? nextVisit.getCategory().getCategory() : "";
+
+            String message = "다음 방문자 대기: [다음 번호: " + nextNum + ", 다음 카테고리: " + nextCategory + "]";
+            websocketHandler.notifySubscribers(section.getBranch().getId(), message);
 
             // CsVisit 업데이트
             csVisit.increaseTotalNum();

@@ -26,6 +26,7 @@ import com.hanaro.schedule_hanaro.global.domain.CallMemo;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
+import com.hanaro.schedule_hanaro.global.websocket.handler.WebsocketHandler;
 
 import lombok.RequiredArgsConstructor;
 
@@ -37,6 +38,8 @@ public class AdminCallService {
 	private final CallMemoRepository callMemoRepository;
 	private final AdminRepository adminRepository;
 	private final CustomerRepository customerRepository;
+
+	private final WebsocketHandler websocketHandler;
 
 	public AdminCallWaitResponse findWaitList() {
 
@@ -67,6 +70,10 @@ public class AdminCallService {
 			return "상담 완료 처리되었습니다.";
 		} else if (call.getStatus().equals(Status.PENDING)) {
 			callRepository.updateStatus(callId, Status.PROGRESS);
+
+			String message = "관리자가 새로운 상담을 시작했습니다: 상담 ID " + callId;
+			websocketHandler.notifySubscribers(1L, message);
+
 			return "상담 진행 처리되었습니다.";
 		} else if (call.getStatus().equals(Status.COMPLETE)){
 			throw new IllegalStateException("이미 완료된 상담입니다.");
