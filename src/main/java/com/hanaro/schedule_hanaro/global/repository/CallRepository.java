@@ -30,6 +30,10 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 
 	@Query("SELECT COUNT(c) FROM Call c WHERE c.callDate BETWEEN :startTime AND :endTime")
 	int countByCallDateBetween(@Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
+	Call findByCallNum(int callNum);
+
+	@Query("SELECT COUNT(c) FROM Call c WHERE DATE(c.callDate) = :date AND c.callDate BETWEEN :startTime AND :endTime")
+	int countByDateAndTimeSlot(@Param("date") LocalDate date, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
 
 	Slice<Call> findByStatus(Status status, Pageable pageable);
 
@@ -44,8 +48,8 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 	void updateStatusWithStartedAt(@Param("callId") Long callId, @Param("status") Status status, @Param("startedAt") LocalDateTime startedAt);
 
 
-	@Query("SELECT c FROM Call c WHERE c.customer.id = :customerId AND c.id != :callId AND c.status = 'COMPLETE'")
-	List<Call> findCallHistoryByCustomerId(Long customerId, Long callId);
+	List<Call> findByCustomerIdAndIdNotAndStatus(Long customerId, Long callId, Status status);
+
 
 	@Query("SELECT c FROM Call c " +
 		"WHERE c.status = :status " +
@@ -62,9 +66,10 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 		@Param("keyword") String keyword
 	);
 
-	
-
 	List<Call> findByCustomerId(Long customerId);
+
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	Optional<Call> findFirstByStatusOrderByCallNumAsc(Status status);
 
 	@Query(nativeQuery = true, value = """ 
 		SELECT 

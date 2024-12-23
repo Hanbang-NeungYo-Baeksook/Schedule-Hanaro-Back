@@ -23,6 +23,8 @@ public enum ErrorCode {
 	VISIT_TIME_EXPIRED(40012, HttpStatus.BAD_REQUEST, "방문 시간이 만료되었습니다."),
 	ALREADY_COMPLETE(40010, HttpStatus.BAD_REQUEST, "이미 완료된 상담입니다."),
 	ALREADY_POST_MEMO(40011, HttpStatus.BAD_REQUEST, "이미 메모가 등록된 상담입니다."),
+	ALREADY_POST_RESPONSE(40012, HttpStatus.BAD_REQUEST, "이미 답변이 등록된 상담입니다."),
+	EMPTY_WAITS(40013, HttpStatus.BAD_REQUEST, "대기 중인 상담이 더이상 없습니다."),
 
 	// 403
 	FORBIDDEN_REQUEST(40300, HttpStatus.FORBIDDEN, "권한이 존재하지 않습니다."),
