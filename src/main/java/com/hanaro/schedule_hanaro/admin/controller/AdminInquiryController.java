@@ -34,7 +34,7 @@ public class AdminInquiryController {
 	@Operation(summary = "1:1 상담 목록 조회", description = "1:1 상담 목록을 조회합니다.")
 	@GetMapping
 	public ResponseEntity<?> getInquiryList(
-		@RequestParam(value = "status", required = false, defaultValue = "PENDING") String inquiryStatus,
+		@RequestParam(value = "status", required = false, defaultValue = "PENDING") InquiryStatus inquiryStatus,
 		@RequestParam(required = false) Category category,
 		@RequestParam(value = "search_content", required = false) String searchContent,
 		@RequestParam(defaultValue = "1") Integer page,
