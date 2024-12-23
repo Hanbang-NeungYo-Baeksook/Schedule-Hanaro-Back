@@ -6,14 +6,14 @@ import com.hanaro.schedule_hanaro.global.domain.enums.SectionType;
 public class GetSectionByCategory {
 	public static SectionType getSectionTypeByCategory(Category category) {
 		switch (category) {
-			case FUND, DEPOSIT -> {
+			case DEPOSIT, TRUST, FUND, FOREX, CD -> {
 				return SectionType.DEPOSIT;
 			}
-			case FOREX, LOAN -> {
+			case LOAN -> {
 				return SectionType.PERSONAL_LOAN;
 			}
 			default -> {
-				return SectionType.BUSINESS_LOAN;
+				return SectionType.OTHERS;
 			}
 		}
 	}

@@ -10,6 +10,6 @@ import lombok.Getter;
 public enum SectionType {
 	DEPOSIT("예금"),
 	PERSONAL_LOAN("개인대출"),
-	BUSINESS_LOAN("기업대출");
+	OTHERS("기타");
 	private final String type;
 }

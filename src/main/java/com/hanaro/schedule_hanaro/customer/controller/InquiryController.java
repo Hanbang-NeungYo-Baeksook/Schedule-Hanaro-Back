@@ -50,29 +50,29 @@ public class InquiryController {
 	// 1:1 상담 목록
 	@Operation(summary = "1:1 상담 목록 조회", description = "1:1 상담 목록을 조회합니다.")
 	@GetMapping
-	public ResponseEntity<InquiryListResponse> getInquiries(
+	public ResponseEntity<?> getInquiries(
 		@RequestParam(defaultValue = "pending") String status,
 		@RequestParam(defaultValue = "1") int page,
 		@RequestParam(defaultValue = "5") int size) {
 		status = status.toUpperCase();
 		InquiryListResponse response = inquiryService.getInquiryList(status, page, size);
-		return ResponseEntity.ok(response);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
 	// 1:1 상담 상세
 	@Operation(summary = "1:1 상담 상세 조회", description = "특정 1:1 상담 상세 정보를 조회합니다.")
 	@GetMapping("/{inquiry-id}")
-	public ResponseEntity<InquiryResponse> getInquiryDetail(@PathVariable("inquiry-id") Long inquiryId) {
+	public ResponseEntity<?> getInquiryDetail(@PathVariable("inquiry-id") Long inquiryId) {
 		InquiryResponse response = inquiryService.getInquiryDetail(inquiryId);
-		return ResponseEntity.ok(response);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
 	// 1:1 상담 답변 상세
 	@Operation(summary = "1:1 상담 답변 상세", description = "특정 1:1 상담의 답변 상세 내용을 조회합니다.")
 	@GetMapping("/{inquiry-id}/reply")
-	public ResponseEntity<InquiryReplyDetailResponse> getInquiryReplyDetail(@PathVariable("inquiry-id") Long inquiryId) {
+	public ResponseEntity<?> getInquiryReplyDetail(@PathVariable("inquiry-id") Long inquiryId) {
 		InquiryReplyDetailResponse response = inquiryService.getInquiryReplyDetail(inquiryId);
-		return ResponseEntity.ok(response);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
 	// 1:1 상담 취소

@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/schedule_hanaro_test
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate.format_sql: true
+  test:
+    enabled: true
+    jwt:
+      secret: test-secret-key
+      accessExpiration: 1 # 1시간
+      refreshExpiration: 24

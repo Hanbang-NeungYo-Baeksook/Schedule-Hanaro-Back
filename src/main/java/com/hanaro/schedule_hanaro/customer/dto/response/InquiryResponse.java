@@ -16,5 +16,4 @@ public record InquiryResponse(
 	String content,
 	List<String> tags
 ) {
-
 }
