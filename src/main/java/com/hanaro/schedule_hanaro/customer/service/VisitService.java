@@ -177,13 +177,9 @@ public class VisitService {
 		int currentNum = sectionRepository.findById(visit.getSection().getId())
 			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_SECTION)).getCurrentNum();
 
-		// TODO: * Calculate Waiting Time *
-		// TODO: 1. Find All Visit with BranchId Less than Num And Status
 		List<Category> categoryList = visitRepository.findCategoryBySectionIdAndNumBeforeAndStatus(
 			visit.getSection().getId(), visit.getNum(), Status.PENDING);
-		// TODO: 2. Calculate Waiting Amount
 		int waitingAmount=categoryList.size();
-		// TODO: 3. Calculate Waiting Time
 		int waitingTime = calculateWaitingTime(categoryList);
 
 		return VisitDetailResponse.of(
