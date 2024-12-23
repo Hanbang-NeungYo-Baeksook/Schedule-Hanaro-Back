@@ -9,7 +9,10 @@ import com.hanaro.schedule_hanaro.customer.dto.response.InquiryCreateResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryListResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryReplyDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryResponse;
+import com.hanaro.schedule_hanaro.customer.service.CustomerService;
 import com.hanaro.schedule_hanaro.customer.service.InquiryService;
+import com.hanaro.schedule_hanaro.global.auth.info.CustomUserDetails;
+import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class InquiryController {
 	private final InquiryService inquiryService;
+	private final CustomerService customerService;
 
 	// 1:1 상담 예약
 	@Operation(summary = "1:1 상담 예약 생성", description = "새로운 1:1 상담 예약을 생성합니다.")
@@ -53,9 +57,12 @@ public class InquiryController {
 	public ResponseEntity<?> getInquiries(
 		@RequestParam(defaultValue = "pending") String status,
 		@RequestParam(defaultValue = "1") int page,
-		@RequestParam(defaultValue = "5") int size) {
+		@RequestParam(defaultValue = "5") int size,
+		Authentication authentication
+		) {
+		Long customerId = PrincipalUtils.getId(authentication);
 		status = status.toUpperCase();
-		InquiryListResponse response = inquiryService.getInquiryList(status, page, size);
+		InquiryListResponse response = inquiryService.getInquiryList(customerId, status, page, size);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 

@@ -8,6 +8,7 @@ import com.hanaro.schedule_hanaro.global.domain.Inquiry;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -76,4 +77,6 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
 	Optional<Inquiry> findInquiryDetailById(@Param("inquiryId") Long inquiryId);
 
 	Integer countInquiryByCustomer(Customer customer);
+
+	Slice<Inquiry> findByCustomerIdAndInquiryStatus(Long customerId, InquiryStatus inquiryStatus, Pageable pageable);
 }
