@@ -56,7 +56,6 @@ public class AdminInquiryService {
 				inquiry.getCustomer().getName()
 			))
 			.collect(Collectors.toList());
-		System.out.println("inquiry 3");
 
 		return AdminInquiryListResponse.from(
 			inquiryDataList,
