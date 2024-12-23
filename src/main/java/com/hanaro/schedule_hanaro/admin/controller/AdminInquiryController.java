@@ -1,6 +1,7 @@
 package com.hanaro.schedule_hanaro.admin.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,7 +38,7 @@ public class AdminInquiryController {
 		@RequestParam(defaultValue = "0") Integer page,
 		@RequestParam(defaultValue = "5") Integer size
 	) {
-		AdminInquiryListRequest request = AdminInquiryListRequest.from(status, category,searchContent,page,size);
+		AdminInquiryListRequest request = AdminInquiryListRequest.from(status, category, searchContent,page,size);
 		AdminInquiryListResponse response = adminInquiryService.findInquiryList(request);
 		return ResponseEntity.ok().body(response);
 	}
@@ -52,12 +53,14 @@ public class AdminInquiryController {
 	}
 
 	@Operation(summary = "1:1 상담 답변 등록", description = "특정 1:1 상담에 대해 답변을 등록합니다.")
-	@PostMapping("/register/{inquiry-id}")
+	@PostMapping("/{inquiry-id}")
 	public ResponseEntity<AdminInquiryResponse> registerInquiryResponse(
 		@PathVariable("inquiry-id") Long inquiryId,
-		@RequestBody AdminInquiryResponseRequest request
+		@RequestBody AdminInquiryResponseRequest request,
+		Authentication authentication
 	) {
-		AdminInquiryResponse response = adminInquiryService.registerInquiryResponse(inquiryId, request);
-		return ResponseEntity.status(201).body(response);
+		AdminInquiryResponse response = adminInquiryService.registerInquiryResponse(inquiryId, request.content(),
+			authentication);
+		return ResponseEntity.status(200).body(response);
 	}
 }
