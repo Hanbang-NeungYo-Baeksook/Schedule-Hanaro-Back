@@ -15,8 +15,11 @@ import com.hanaro.schedule_hanaro.global.auth.info.UserInfo;
 import com.hanaro.schedule_hanaro.global.auth.provider.JwtAuthenticationProvider;
 import com.hanaro.schedule_hanaro.global.auth.provider.JwtTokenProvider;
 import com.hanaro.schedule_hanaro.global.domain.enums.Role;
+import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
+import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -51,10 +54,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		Claims claims = jwtTokenProvider.validateToken(token);
 		UserInfo userInfo = new UserInfo(claims.getId(), Role.valueOf(claims.get("role").toString()));
-		System.out.println("jwtauthenticationfilter: "+ userInfo.id());
+		System.out.println("jwtauthenticationfilter: " + userInfo.id());
 		UsernamePasswordAuthenticationToken unAuthenticatedToken = new UsernamePasswordAuthenticationToken(userInfo,
 			null, null);
-		System.out.println("이어서: "+unAuthenticatedToken.getPrincipal());
+		System.out.println("이어서: " + unAuthenticatedToken.getPrincipal());
 		UsernamePasswordAuthenticationToken authenticatedToken = (UsernamePasswordAuthenticationToken)jwtAuthenticationProvider.authenticate(
 			unAuthenticatedToken);
 
@@ -63,7 +66,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		System.out.println(authenticatedToken.getName());
 		System.out.println(authenticatedToken.getAuthorities());
 		SecurityContextHolder.getContext().setAuthentication(authenticatedToken);
-		System.out.println("context 설정 완료"+SecurityContextHolder.getContext().toString());
+		System.out.println("context 설정 완료" + SecurityContextHolder.getContext().toString());
 
 		filterChain.doFilter(request, response);
 	}

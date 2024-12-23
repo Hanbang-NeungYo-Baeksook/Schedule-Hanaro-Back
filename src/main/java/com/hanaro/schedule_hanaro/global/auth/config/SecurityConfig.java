@@ -14,6 +14,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 import com.hanaro.schedule_hanaro.global.auth.filter.JwtAuthenticationFilter;
+import com.hanaro.schedule_hanaro.global.auth.filter.JwtExceptionFilter;
+import com.hanaro.schedule_hanaro.global.auth.handler.CustomAuthenticationEntryPointHandler;
+
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -22,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
+	private final CustomAuthenticationEntryPointHandler customAuthenticationEntryPointHandler;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -48,9 +52,16 @@ public class SecurityConfig {
 					.requestMatchers("/admin/api/**").hasAuthority("ADMIN")
 					.anyRequest().authenticated()
 			)
+			.exceptionHandling(exception -> exception
+				.authenticationEntryPoint(customAuthenticationEntryPointHandler)
+			)
 			.addFilterBefore(
 				jwtAuthenticationFilter,
 				UsernamePasswordAuthenticationFilter.class
+			)
+			.addFilterBefore(
+				new JwtExceptionFilter(),
+				JwtAuthenticationFilter.class
 			)
 			.cors(
 				httpSecurityCorsConfigurer -> httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource()))

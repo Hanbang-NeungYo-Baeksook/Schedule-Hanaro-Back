@@ -1,5 +1,6 @@
 package com.hanaro.schedule_hanaro.global.auth.controller;
 
+import org.apache.tomcat.util.http.HeaderUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +15,7 @@ import com.hanaro.schedule_hanaro.global.auth.service.AuthService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,7 +29,7 @@ public class AuthController {
 
 	@Operation(summary = "사용자 회원가입", description = "Schedule Hanaro 사용자에게 회원가입 서비스를 제공합니다.")
 	@PostMapping("/sign-up")
-	public ResponseEntity<?> signUp(@RequestBody AuthSignUpRequest authSignUpRequest){
+	public ResponseEntity<?> signUp(@RequestBody AuthSignUpRequest authSignUpRequest) {
 		log.info("signUp 컨트롤러 진입");
 		authService.signUp(authSignUpRequest);
 		return ResponseEntity.ok(null);
@@ -54,4 +56,10 @@ public class AuthController {
 		return ResponseEntity.ok().body(response);
 	}
 
+	@PostMapping("/reissue")
+	public ResponseEntity<JwtTokenDto> reissue(HttpServletRequest request) {
+		String refreshToken = request.getHeader("Authorization").substring(7);
+		JwtTokenDto response = authService.refresh(refreshToken);
+		return ResponseEntity.ok().body(response);
+	}
 }

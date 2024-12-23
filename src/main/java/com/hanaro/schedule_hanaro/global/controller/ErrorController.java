@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.hanaro.schedule_hanaro.global.dto.ExceptionDto;
 import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 
 
@@ -15,8 +16,8 @@ public class ErrorController {
 
 	@ExceptionHandler(GlobalException.class)
 	@ResponseBody
-	public ResponseEntity<?> handleAuthError(GlobalException e) {
-		return ResponseEntity.status(e.getErrorCode().getHttpStatus()).body(e.getMessage());
+	public ResponseEntity<ExceptionDto> handleGlobalException(GlobalException e) {
+		return ResponseEntity.status(e.getErrorCode().getHttpStatus()).body(new ExceptionDto(e.getErrorCode()));
 	}
 
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

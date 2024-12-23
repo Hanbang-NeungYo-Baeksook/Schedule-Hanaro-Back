@@ -26,9 +26,14 @@ public enum ErrorCode {
 	ALREADY_POST_RESPONSE(40012, HttpStatus.BAD_REQUEST, "이미 답변이 등록된 상담입니다."),
 	EMPTY_WAITS(40013, HttpStatus.BAD_REQUEST, "대기 중인 상담이 더이상 없습니다."),
 
+	// 401
+	EXPIRED_ACCESS_TOKEN(40101, HttpStatus.UNAUTHORIZED, "access 토큰이 만료되었습니다."),
 
 	// 403
 	FORBIDDEN_REQUEST(40300, HttpStatus.FORBIDDEN, "권한이 존재하지 않습니다."),
+	MALFOREMD_ACCESS_TOKEN(40301, HttpStatus.BAD_REQUEST, "access 토큰이 올바르지 않습니다."),
+	NOT_FOUND_REFRESH_TOKEN(40301, HttpStatus.FORBIDDEN, "refresh 토큰을 찾을 수 없습니다."),
+	NOT_MATCHED_REFRESH_TOKEN(40302, HttpStatus.FORBIDDEN, "refresh 토큰이 일치하지 않습니다."),
 
 	// 404
 	NOT_FOUND_CUSTOMER(40401, HttpStatus.NOT_FOUND, "존재하지 않는 고객입니다."),
