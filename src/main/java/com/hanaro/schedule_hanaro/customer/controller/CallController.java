@@ -1,6 +1,7 @@
 package com.hanaro.schedule_hanaro.customer.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -44,31 +45,38 @@ public class CallController {
 		return ResponseEntity.noContent().build();
 	}
 
+	@Operation(summary = "전화 상담 시간대 가능 인원 반환", description = "전화 상담 시간대의 가능 인원 반환합니다.")
 	@PostMapping("/availability")
-	public ResponseEntity<List<TimeSlotAvailabilityResponse>> getTimeSlotAvailability(
+	public ResponseEntity<Map<String, Object>> getTimeSlotAvailability(
 		@RequestBody TimeSlotAvailabilityRequest request) {
 		List<TimeSlotAvailabilityResponse> responses = callService.getTimeSlotAvailability(request);
-		return ResponseEntity.ok(responses);
+
+		Map<String, Object> responseMap = Map.of(
+			"data", responses
+		);
+
+		return ResponseEntity.ok().body(responseMap);
 	}
 
 	@Operation(summary = "전화 상담 목록 조회", description = "전화 상담 목록을 조회합니다.")
 	@GetMapping
 	public ResponseEntity<CallListResponse> getCallList(
-		@RequestHeader(value = "Authorization", required = false) String authorization,
+		Authentication authentication,
 		@RequestParam(value = "status", defaultValue = "pending") String status,
 		@RequestParam(value = "page", defaultValue = "1") int page,
 		@RequestParam(value = "size", defaultValue = "10") int size
 	) {
-		CallListResponse response = callService.getCallList(status, page, size);
-		return ResponseEntity.ok(response);
+		CallListResponse response = callService.getCallList(authentication, status, page, size);
+		return ResponseEntity.ok().body(response);
 	}
 
 	@Operation(summary = "전화 상담 정보 상세", description = "특정 전화 상담의 상세 정보를 조회합니다.")
 	@GetMapping("/{call-id}")
-	public ResponseEntity<?> getCallDetail(
+	public ResponseEntity<Map<String, CallDetailResponse>> getCallDetail(
 		@PathVariable("call-id") Long callId
 	) {
 		CallDetailResponse response = callService.getCallDetail(callId);
-		return ResponseEntity.ok(response);
+		Map<String, CallDetailResponse> wrappedResponse = Map.of("data", response);
+		return ResponseEntity.ok().body(wrappedResponse);
 	}
 }

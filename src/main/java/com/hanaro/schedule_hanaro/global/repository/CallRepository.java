@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryStatsDto;
 import com.hanaro.schedule_hanaro.global.domain.Call;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
+import com.hanaro.schedule_hanaro.global.domain.Visit;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 
@@ -38,10 +39,7 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 	int countByCallDateBetween(@Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
 	Call findByCallNum(int callNum);
 
-	@Query("SELECT COUNT(c) FROM Call c WHERE DATE(c.callDate) = :date AND c.callDate BETWEEN :startTime AND :endTime")
-	int countByDateAndTimeSlot(@Param("date") LocalDate date, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
-
-	Slice<Call> findByStatus(Status status, Pageable pageable);
+	Slice<Call> findByCustomerIdAndStatus(Long customerId, Status status, Pageable pageable);
 
 	List<Call> findByStatus(Status status);
 

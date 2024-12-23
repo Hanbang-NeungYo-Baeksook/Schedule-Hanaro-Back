@@ -123,11 +123,10 @@ public class CallService {
 			int reservedCount = callRepository.countByCallDateBetween(startTime, endTime);
 			int availableSlots = Math.max(0, MAX_RESERVATION - reservedCount);
 
-			responses.add(TimeSlotAvailabilityResponse.builder()
-				.timeSlot(startTime.toLocalTime() + "-" + endTime.plusSeconds(1).toLocalTime())
-				.availableSlots(availableSlots)
-				.build()
-			);
+			responses.add(TimeSlotAvailabilityResponse.of(
+				startTime.toLocalTime() + "-" + endTime.plusSeconds(1).toLocalTime(),
+				availableSlots
+			));
 
 			startOfDay = startOfDay.plusMinutes(30);
 		}
@@ -158,26 +157,29 @@ public class CallService {
 		return new LocalDateTime[]{startTime, endTime};
 	}
 
-	public CallListResponse getCallList(String status, int page, int size) {
+	public CallListResponse getCallList(Authentication authentication, String status, int page, int size) {
+
+		Long customerId = PrincipalUtils.getId(authentication);
+
 		Status callStatus = Status.valueOf(status.toUpperCase());
 		Pageable pageable = PageRequest.of(page - 1, size);
 
-		Slice<Call> callSlice = callRepository.findByStatus(callStatus, pageable);
+		Slice<Call> callSlice = callRepository.findByCustomerIdAndStatus(customerId, callStatus, pageable);
 
 		List<CallListResponse.CallData> callDataList = callSlice.getContent().stream()
 			.map(call -> {
 				Map<String, Integer> waitInfo = calculateWaitInfo(call);
 
-				return CallListResponse.CallData.builder()
-					.callId(call.getId())
-					.callDate(call.getCallDate().toLocalDate().toString())
-					.callTime(call.getCallDate().toLocalTime().toString())
-					.callNum(call.getCallNum())
-					.category(call.getCategory().toString())
-					.status(call.getStatus().toString())
-					.waitNum(waitInfo.get("waitNum"))
-					.estimatedWaitTime(waitInfo.get("estimatedWaitTime"))
-					.build();
+				return CallListResponse.CallData.of(
+					call.getId(),
+					call.getCallDate().toLocalDate().toString(),
+					call.getCallDate().toLocalTime().toString(),
+					call.getCallNum(),
+					call.getCategory(),
+					call.getStatus(),
+					waitInfo.get("waitNum"),
+					waitInfo.get("estimatedWaitTime")
+					);
 			})
 			.toList();
 
@@ -202,19 +204,23 @@ public class CallService {
 		LocalDateTime[] timeSlotRange = getTimeSlotRange(call.getCallDate());
 		String timeSlot = timeSlotRange[0].toLocalTime() + "-" +timeSlotRange[1].plusSeconds(1).toLocalTime();
 
-		return CallDetailResponse.builder()
-			.callId(call.getId())
-			.customerName(call.getCustomer().getName())
-			.callDate(call.getCallDate().toLocalDate().toString())
-			.callTime(timeSlot)
-			.callNum(call.getCallNum())
-			.category(call.getCategory().toString())
-			.status(call.getStatus().toString())
-			.content(call.getContent())
-			.tags(List.of(call.getTags().split(",")))
-			.waitNum(waitInfo.get("waitNum"))
-			.estimatedWaitTime(waitInfo.get("estimatedWaitTime"))
-			.build();
+		List<String> tags = call.getTags() != null && !call.getTags().isEmpty()
+			? List.of(call.getTags().split(","))
+			: List.of();
+
+		return CallDetailResponse.of(
+			call.getId(),
+			call.getCustomer().getName(),
+			call.getCallDate().toLocalDate().toString(),
+			timeSlot,
+			call.getCallNum(),
+			call.getCategory(),
+			call.getStatus(),
+			call.getContent(),
+			tags,
+			waitInfo.getOrDefault("waitNum", 0),
+			waitInfo.getOrDefault("estimatedWaitTime", 0)
+		);
 	}
 
 	private Map<String, Integer> calculateWaitInfo(Call call) {
