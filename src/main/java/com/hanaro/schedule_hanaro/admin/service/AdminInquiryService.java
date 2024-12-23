@@ -89,10 +89,10 @@ public class AdminInquiryService {
 	public AdminInquiryResponse registerInquiryResponse(Long inquiryId, String content, Authentication authentication) {
 		// 입력값 검증
 		if (content == null || content.trim().isEmpty()) {
-			throw new GlobalException(ErrorCode.WRONG_REQUEST_PARAMETER);
+			throw new GlobalException(ErrorCode.WRONG_REQUEST_PARAMETER, "답변 내용이 비어있습니다.");
 		}
 		if (content.length() > 500) {
-			throw new GlobalException(ErrorCode.WRONG_REQUEST_PARAMETER);
+			throw new GlobalException(ErrorCode.WRONG_REQUEST_PARAMETER, "답변 내용이 500자를 초과했습니다.");
 		}
 
 		Inquiry inquiry = inquiryRepository.findById(inquiryId)
