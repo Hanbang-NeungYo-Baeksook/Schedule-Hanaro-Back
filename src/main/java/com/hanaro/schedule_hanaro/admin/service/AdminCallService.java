@@ -34,6 +34,7 @@ import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
+import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
 import com.hanaro.schedule_hanaro.global.websocket.handler.WebsocketHandler;
 
 import lombok.RequiredArgsConstructor;
