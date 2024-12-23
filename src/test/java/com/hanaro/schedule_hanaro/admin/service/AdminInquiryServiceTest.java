@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import com.hanaro.schedule_hanaro.admin.dto.request.AdminInquiryResponseRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -18,9 +19,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.security.core.Authentication;
+import static org.mockito.Mockito.mock;
+import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
 
 import com.hanaro.schedule_hanaro.admin.dto.request.AdminInquiryListRequest;
-import com.hanaro.schedule_hanaro.admin.dto.request.AdminInquiryResponseRequest;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryDetailResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryListResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryResponse;
@@ -29,6 +32,7 @@ import com.hanaro.schedule_hanaro.global.domain.enums.*;
 import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
 import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 import com.hanaro.schedule_hanaro.global.repository.*;
+import com.hanaro.schedule_hanaro.global.auth.info.CustomUserDetails;
 
 @ExtendWith(MockitoExtension.class)
 class AdminInquiryServiceTest {
@@ -59,10 +63,10 @@ class AdminInquiryServiceTest {
             .status(InquiryStatus.PENDING)
             .tags("예금,상담")
             .build();
-            
+
         ReflectionTestUtils.setField(inquiry, "createdAt", LocalDateTime.now());
         ReflectionTestUtils.setField(inquiry, "updatedAt", LocalDateTime.now());
-        
+
         return inquiry;
     }
 
@@ -88,19 +92,19 @@ class AdminInquiryServiceTest {
     @Nested
     @DisplayName("문의 목록 조회 테스트")
     class FindInquiryListTest {
-        
+
         @Test
         @DisplayName("문의 목록 조회 성공")
         void findInquiryList_Success() {
             // given
             AdminInquiryListRequest request = AdminInquiryListRequest.from(
-                "PENDING", 
-                Category.DEPOSIT, 
-                "", 
-                0, 
+                "PENDING",
+                Category.DEPOSIT,
+                "",
+                0,
                 5
             );
-            
+
             Customer customer = createCustomer();
             Inquiry inquiry = createInquiry(customer);
             List<Inquiry> inquiries = List.of(inquiry);
@@ -124,15 +128,15 @@ class AdminInquiryServiceTest {
         void findInquiryList_WithInvalidStatus() {
             // given
             AdminInquiryListRequest request = AdminInquiryListRequest.from(
-                "INVALID_STATUS", 
-                Category.DEPOSIT, 
-                "", 
-                0, 
+                "INVALID_STATUS",
+                Category.DEPOSIT,
+                "",
+                0,
                 5
             );
-            
+
             Page<Inquiry> emptyPage = new PageImpl<>(List.of());
-            
+
             given(inquiryRepository.findFilteredInquiries(
                 anyString(), anyString(), anyString(), any()))
                 .willReturn(emptyPage);
@@ -193,7 +197,7 @@ class AdminInquiryServiceTest {
             Customer customer = createCustomer();
             Inquiry inquiry = createInquiry(customer);
             Admin admin = createAdmin();
-            
+
             InquiryResponse inquiryResponse = InquiryResponse.builder()
                 .inquiry(inquiry)
                 .admin(admin)
@@ -220,41 +224,52 @@ class AdminInquiryServiceTest {
     @DisplayName("문의 답변 등록 테스트")
     class RegisterInquiryResponseTest {
 
+        private CustomUserDetails createCustomUserDetails(Admin admin) {
+            return CustomUserDetails.of(
+                admin.getId(),
+                admin.getAuthId(),
+                admin.getPassword(),
+                Role.ADMIN
+            );
+        }
+
         @Test
         @DisplayName("문의 답변 등록 성공")
         void registerInquiryResponse_Success() {
             // given
             Long inquiryId = 1L;
             Long adminId = 1L;
-            String responseContent = "답변 내용입니다.";
-            
-            AdminInquiryResponseRequest request = AdminInquiryResponseRequest.of(adminId, responseContent);
-            
-            Customer customer = createCustomer();
-            Inquiry inquiry = createInquiry(customer);
+            String content = "답변 내용입니다.";
+            Authentication authentication = mock(Authentication.class);
             Admin admin = createAdmin();
-            
-            ReflectionTestUtils.setField(inquiry, "id", inquiryId);
             ReflectionTestUtils.setField(admin, "id", adminId);
             
+            CustomUserDetails userDetails = createCustomUserDetails(admin);
+            given(authentication.getPrincipal()).willReturn(userDetails);
+
+            Customer customer = createCustomer();
+            Inquiry inquiry = createInquiry(customer);
+            ReflectionTestUtils.setField(inquiry, "id", inquiryId);
+
             InquiryResponse inquiryResponse = InquiryResponse.builder()
                 .inquiry(inquiry)
                 .admin(admin)
-                .content(responseContent)
+                .content(content)
                 .createdAt(LocalDateTime.now())
                 .build();
 
             given(inquiryRepository.findById(inquiryId)).willReturn(Optional.of(inquiry));
             given(adminRepository.findById(adminId)).willReturn(Optional.of(admin));
+            given(inquiryResponseRepository.findByInquiryId(inquiryId)).willReturn(Optional.empty());
             given(inquiryResponseRepository.save(any(InquiryResponse.class))).willReturn(inquiryResponse);
 
             // when
-            AdminInquiryResponse response = adminInquiryService.registerInquiryResponse(inquiryId, request);
+            AdminInquiryResponse response = adminInquiryService.registerInquiryResponse(inquiryId, content, authentication);
 
             // then
             assertThat(response.inquiryId()).isEqualTo(inquiryId);
             assertThat(response.adminId()).isEqualTo(adminId);
-            assertThat(response.content()).isEqualTo(responseContent);
+            assertThat(response.content()).isEqualTo(content);
         }
 
         @Test
@@ -262,36 +277,14 @@ class AdminInquiryServiceTest {
         void registerInquiryResponse_InquiryNotFound() {
             // given
             Long inquiryId = 999L;
-            Long adminId = 1L;
-            AdminInquiryResponseRequest request = AdminInquiryResponseRequest.of(adminId, "답변 내용");
-
+            String content = "답변 내용";
+            Authentication authentication = mock(Authentication.class);
             given(inquiryRepository.findById(inquiryId)).willReturn(Optional.empty());
 
             // when & then
-            assertThatThrownBy(() -> adminInquiryService.registerInquiryResponse(inquiryId, request))
+            assertThatThrownBy(() -> adminInquiryService.registerInquiryResponse(inquiryId, content, authentication))
                 .isInstanceOf(GlobalException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND_INQUIRY);
-        }
-
-        @Test
-        @DisplayName("존재하지 않는 관리자로 답변 등록 시 예외 발생")
-        void registerInquiryResponse_AdminNotFound() {
-            // given
-            Long inquiryId = 1L;
-            Long adminId = 999L;
-            AdminInquiryResponseRequest request = AdminInquiryResponseRequest.of(adminId, "답변 내용");
-
-            Customer customer = createCustomer();
-            Inquiry inquiry = createInquiry(customer);
-            ReflectionTestUtils.setField(inquiry, "id", inquiryId);
-
-            given(inquiryRepository.findById(inquiryId)).willReturn(Optional.of(inquiry));
-            given(adminRepository.findById(adminId)).willReturn(Optional.empty());
-
-            // when & then
-            assertThatThrownBy(() -> adminInquiryService.registerInquiryResponse(inquiryId, request))
-                .isInstanceOf(GlobalException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND_ADMIN);
         }
 
         @Test
@@ -299,17 +292,11 @@ class AdminInquiryServiceTest {
         void registerInquiryResponse_EmptyContent() {
             // given
             Long inquiryId = 1L;
-            Long adminId = 1L;
-            AdminInquiryResponseRequest request = AdminInquiryResponseRequest.of(adminId, "");
-
-            Customer customer = createCustomer();
-            Inquiry inquiry = createInquiry(customer);
-            ReflectionTestUtils.setField(inquiry, "id", inquiryId);
-
-            given(inquiryRepository.findById(inquiryId)).willReturn(Optional.of(inquiry));
+            String content = "";
+            Authentication authentication = mock(Authentication.class);
 
             // when & then
-            assertThatThrownBy(() -> adminInquiryService.registerInquiryResponse(inquiryId, request))
+            assertThatThrownBy(() -> adminInquiryService.registerInquiryResponse(inquiryId, content, authentication))
                 .isInstanceOf(GlobalException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.WRONG_REQUEST_PARAMETER);
         }
@@ -319,18 +306,11 @@ class AdminInquiryServiceTest {
         void registerInquiryResponse_ContentTooLong() {
             // given
             Long inquiryId = 1L;
-            Long adminId = 1L;
-            String longContent = "a".repeat(501); // 500자 초과
-            AdminInquiryResponseRequest request = AdminInquiryResponseRequest.of(adminId, longContent);
-
-            Customer customer = createCustomer();
-            Inquiry inquiry = createInquiry(customer);
-            ReflectionTestUtils.setField(inquiry, "id", inquiryId);
-
-            given(inquiryRepository.findById(inquiryId)).willReturn(Optional.of(inquiry));
+            String content = "a".repeat(501);
+            Authentication authentication = mock(Authentication.class);
 
             // when & then
-            assertThatThrownBy(() -> adminInquiryService.registerInquiryResponse(inquiryId, request))
+            assertThatThrownBy(() -> adminInquiryService.registerInquiryResponse(inquiryId, content, authentication))
                 .isInstanceOf(GlobalException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.WRONG_REQUEST_PARAMETER);
         }

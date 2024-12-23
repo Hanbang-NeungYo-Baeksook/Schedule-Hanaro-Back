@@ -11,7 +11,9 @@ import java.util.Collections;
 import java.util.Collection;
 
 import com.hanaro.schedule_hanaro.global.auth.info.CustomUserDetails;
+import com.hanaro.schedule_hanaro.global.domain.*;
 import com.hanaro.schedule_hanaro.global.domain.enums.*;
+import com.hanaro.schedule_hanaro.global.websocket.handler.WebsocketHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,21 +23,19 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallWaitResponse;
-import com.hanaro.schedule_hanaro.global.domain.Admin;
-import com.hanaro.schedule_hanaro.global.domain.Branch;
-import com.hanaro.schedule_hanaro.global.domain.Call;
-import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.repository.AdminRepository;
 import com.hanaro.schedule_hanaro.global.repository.CallMemoRepository;
 import com.hanaro.schedule_hanaro.global.repository.CallRepository;
 import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
 import com.hanaro.schedule_hanaro.global.repository.InquiryRepository;
+import com.hanaro.schedule_hanaro.global.exception.GlobalException;
+import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
 
 @ExtendWith(MockitoExtension.class)
 class AdminCallServiceTest {
@@ -53,6 +53,8 @@ class AdminCallServiceTest {
     private AdminRepository adminRepository;
     @Mock
     private CustomerRepository customerRepository;
+    @Mock
+    private WebsocketHandler websocketHandler;
 
     private Customer customer;
     private Call call;
@@ -77,6 +79,7 @@ class AdminCallServiceTest {
             .content("테스트 문의")
             .tags("태그1,태그2")
             .build();
+        ReflectionTestUtils.setField(call, "id", 1L);
 
         admin = Admin.builder()
             .authId("admin")
@@ -92,16 +95,40 @@ class AdminCallServiceTest {
                 .businessTime("09:00-16:00")
                 .build())
             .build();
+        ReflectionTestUtils.setField(admin, "id", 1L);
+    }
+
+    private Authentication createMockAuthentication() {
+        Collection<GrantedAuthority> authorities = Collections.singletonList(
+            new SimpleGrantedAuthority("ROLE_ADMIN")
+        );
+        
+        CustomUserDetails userDetails = new CustomUserDetails(
+            admin.getId(),
+            admin.getAuthId(),
+            admin.getPassword(),
+            Role.ADMIN,
+            authorities
+        );
+
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(userDetails);
+        return authentication;
     }
 
     @Test
     @DisplayName("대기 목록 조회 테스트")
     void findWaitList() {
         // given
-        when(callRepository.findByStatus(Status.PROGRESS)).thenReturn(List.of(call));
-        when(callRepository.findByStatus(Status.PENDING)).thenReturn(List.of(call));
-        when(callRepository.findCallHistoryByCustomerId(any(), any())).thenReturn(List.of());
-        when(inquiryRepository.findByCustomerId(any())).thenReturn(List.of());
+        when(callRepository.findByStatus(Status.PROGRESS))
+            .thenReturn(List.of(call));
+        when(callRepository.findByStatus(Status.PENDING))
+            .thenReturn(List.of(call));
+        when(callRepository.findByCustomerIdAndIdNotAndStatus(
+            any(), any(), any()))
+            .thenReturn(List.of());
+        when(inquiryRepository.findByCustomerId(any()))
+            .thenReturn(List.of());
 
         // when
         AdminCallWaitResponse response = adminCallService.findWaitList();
@@ -113,81 +140,133 @@ class AdminCallServiceTest {
     }
 
     @Test
-    @DisplayName("상담 상태 변경 테스트 - PENDING에서 PROGRESS로")
-    void changeCallStatus_FromPendingToProgress() {
+    @DisplayName("상담 상태를 진행 중으로 변경")
+    void changeCallStatusProgress() {
         // given
+        Authentication authentication = createMockAuthentication();
+        
         call.setStatus(Status.PENDING);
-        when(callRepository.findById(anyLong())).thenReturn(Optional.of(call));
+        when(adminRepository.findById(admin.getId())).thenReturn(Optional.of(admin));
+        when(callRepository.findFirstByStatusOrderByCallNumAsc(Status.PENDING))
+            .thenReturn(Optional.of(call));
+        doNothing().when(websocketHandler).notifySubscribers(anyLong(), anyString());
 
         // when
-        String result = adminCallService.changeCallStatus(1L);
+        Long result = adminCallService.changeCallStatusProgress(authentication);
 
         // then
-        assertThat(result).isEqualTo("상담 진행 처리되었습니다.");
-        verify(callRepository).updateStatus(anyLong(), eq(Status.PROGRESS));
+        assertThat(result).isEqualTo(call.getId());
+        verify(callRepository).updateStatusWithStartedAt(eq(call.getId()), eq(Status.PROGRESS), any());
+        verify(callMemoRepository).save(any());
+        verify(websocketHandler).notifySubscribers(anyLong(), anyString());
     }
 
     @Test
-    @DisplayName("상담 상태 변경 테스트 - PROGRESS에서 COMPLETE로")
-    void changeCallStatus_FromProgressToComplete() {
+    @DisplayName("상담 상태를 완료로 변경")
+    void changeCallStatusComplete() {
         // given
         call.setStatus(Status.PROGRESS);
         when(callRepository.findById(anyLong())).thenReturn(Optional.of(call));
 
         // when
-        String result = adminCallService.changeCallStatus(1L);
+        String result = adminCallService.changeCallStatusComplete(1L);
 
         // then
         assertThat(result).isEqualTo("상담 완료 처리되었습니다.");
-        verify(callRepository).updateStatus(anyLong(), eq(Status.COMPLETE));
+        verify(callRepository).updateStatusWithEndedAt(anyLong(), eq(Status.COMPLETE), any());
     }
 
     @Test
-    @DisplayName("상담 상태 변경 테스트 - COMPLETE 상태에서 변경 시도")
-    void changeCallStatus_FromComplete_ThrowsException() {
+    @DisplayName("잘못된 상태에서 완료로 변경 시도시 예외 발생")
+    void changeCallStatusComplete_WithWrongStatus_ThrowsException() {
         // given
-        call.setStatus(Status.COMPLETE);
+        call.setStatus(Status.PENDING);
         when(callRepository.findById(anyLong())).thenReturn(Optional.of(call));
 
         // when & then
-        assertThatThrownBy(() -> adminCallService.changeCallStatus(1L))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessage("이미 완료된 상담입니다.");
+        assertThatThrownBy(() -> adminCallService.changeCallStatusComplete(1L))
+            .isInstanceOf(GlobalException.class)
+            .hasFieldOrPropertyWithValue("errorCode", ErrorCode.WRONG_CALL_STATUS);
     }
 
     @Test
     @DisplayName("상담 메모 저장 테스트")
     void saveCallMemo() {
         // given
-        Collection<GrantedAuthority> authorities = Collections.singletonList(
-            new SimpleGrantedAuthority("ROLE_ADMIN")
-        );
-        
-        CustomUserDetails userDetails = new CustomUserDetails(
-            3L,                    // id
-            admin.getAuthId(),     // authId
-            admin.getPassword(),   // password
-            Role.ADMIN,           // role
-            authorities           // authorities
-        );
-
-        Authentication authentication = new UsernamePasswordAuthenticationToken(
-            userDetails, null, authorities
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        Authentication authentication = createMockAuthentication();
 
         when(callRepository.findById(anyLong())).thenReturn(Optional.of(call));
-        when(adminRepository.findById(3L)).thenReturn(Optional.of(admin));
+        when(adminRepository.findById(admin.getId())).thenReturn(Optional.of(admin));
+        when(callMemoRepository.findByCallId(anyLong())).thenReturn(null);
 
         // when
-        String result = adminCallService.saveCallMemo(1L, "테스트 메모");
+        String result = adminCallService.saveCallMemo(authentication, 1L, "테스트 메모");
 
         // then
         assertThat(result).isEqualTo("Success");
         verify(callMemoRepository).save(any());
+    }
+
+    @Test
+    @DisplayName("이미 메모가 있는 경우 업데이트 테스트")
+    void saveCallMemo_WithExistingMemo() {
+        // given
+        Collection<GrantedAuthority> authorities = Collections.singletonList(
+            new SimpleGrantedAuthority("ROLE_ADMIN")
+        );
         
-        // cleanup
-        SecurityContextHolder.clearContext();
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+            new CustomUserDetails(admin.getId(), admin.getAuthId(), admin.getPassword(), Role.ADMIN, authorities),
+            null,
+            authorities
+        );
+
+        CallMemo existingMemo = CallMemo.builder()
+            .id(1L)
+            .call(call)
+            .admin(admin)
+            .content("")
+            .build();
+
+        when(callRepository.findById(anyLong())).thenReturn(Optional.of(call));
+        when(callMemoRepository.findByCallId(anyLong())).thenReturn(existingMemo);
+
+        // when
+        String result = adminCallService.saveCallMemo(authentication, 1L, "테스트 메모");
+
+        // then
+        assertThat(result).isEqualTo("Success");
+        verify(callMemoRepository).save(any());
+    }
+
+    @Test
+    @DisplayName("이미 내용이 있는 메모 업데이트 시도시 예외 발생")
+    void saveCallMemo_WithNonEmptyMemo_ThrowsException() {
+        // given
+        Collection<GrantedAuthority> authorities = Collections.singletonList(
+            new SimpleGrantedAuthority("ROLE_ADMIN")
+        );
+        
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+            new CustomUserDetails(admin.getId(), admin.getAuthId(), admin.getPassword(), Role.ADMIN, authorities),
+            null,
+            authorities
+        );
+
+        CallMemo existingMemo = CallMemo.builder()
+            .id(1L)
+            .call(call)
+            .admin(admin)
+            .content("기존 메모")
+            .build();
+
+        when(callRepository.findById(anyLong())).thenReturn(Optional.of(call));
+        when(callMemoRepository.findByCallId(anyLong())).thenReturn(existingMemo);
+
+        // when & then
+        assertThatThrownBy(() -> adminCallService.saveCallMemo(authentication, 1L, "테스트 메모"))
+            .isInstanceOf(GlobalException.class)
+            .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ALREADY_POST_MEMO);
     }
 
     @Test
@@ -211,8 +290,16 @@ class AdminCallServiceTest {
     @DisplayName("상담 조회 테스트")
     void findCall() {
         // given
+        CallMemo callMemo = CallMemo.builder()
+            .id(1L)
+            .call(call)
+            .admin(admin)
+            .content("테스트 메모")
+            .build();
+
         when(callRepository.findById(anyLong())).thenReturn(Optional.of(call));
         when(customerRepository.findById(any())).thenReturn(Optional.of(customer));
+        when(callMemoRepository.findByCallId(anyLong())).thenReturn(callMemo);
 
         // when
         var result = adminCallService.findCall(1L);
@@ -221,6 +308,27 @@ class AdminCallServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.callId()).isEqualTo(call.getId());
         assertThat(result.customerName()).isEqualTo(customer.getName());
+        assertThat(result.content()).isEqualTo(call.getContent());
+        assertThat(result.replyContent()).isEqualTo("테스트 메모");
+    }
+
+    @Test
+    @DisplayName("메모가 없는 상담 조회 테스트")
+    void findCall_WithoutMemo() {
+        // given
+        when(callRepository.findById(anyLong())).thenReturn(Optional.of(call));
+        when(customerRepository.findById(any())).thenReturn(Optional.of(customer));
+        when(callMemoRepository.findByCallId(anyLong())).thenReturn(null);
+
+        // when
+        var result = adminCallService.findCall(1L);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.callId()).isEqualTo(call.getId());
+        assertThat(result.customerName()).isEqualTo(customer.getName());
+        assertThat(result.content()).isEqualTo(call.getContent());
+        assertThat(result.replyContent()).isNull();
     }
 
     @Test
@@ -231,7 +339,7 @@ class AdminCallServiceTest {
 
         // when & then
         assertThatThrownBy(() -> adminCallService.findCall(1L))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("존재하지 않는 상담입니다.");
+            .isInstanceOf(GlobalException.class)
+            .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND_CALL);
     }
 }

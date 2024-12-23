@@ -8,6 +8,7 @@ import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 import com.hanaro.schedule_hanaro.global.repository.CsVisitRepository;
 import com.hanaro.schedule_hanaro.global.repository.SectionRepository;
 import com.hanaro.schedule_hanaro.global.repository.VisitRepository;
+import com.hanaro.schedule_hanaro.global.websocket.handler.WebsocketHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AdminVisitServiceTest {
@@ -38,6 +39,8 @@ class AdminVisitServiceTest {
     private SectionRepository sectionRepository;
     @Mock
     private CsVisitRepository csVisitRepository;
+    @Mock
+    private WebsocketHandler websocketHandler;
 
     private Visit visit;
     private Section section;
@@ -115,11 +118,22 @@ class AdminVisitServiceTest {
     @DisplayName("방문 상태를 업데이트할 수 있다")
     void updateVisitStatus() {
         // given
-        given(visitRepository.findById(1L)).willReturn(Optional.of(visit));
-        given(csVisitRepository.findByBranchIdAndDate(any(), any())).willReturn(Optional.of(csVisit));
-        given(visitRepository.findNextPendingVisit(any(), any())).willReturn(Optional.of(nextVisit));
-        given(sectionRepository.save(any())).willReturn(section);
-        given(csVisitRepository.save(any())).willReturn(csVisit);
+        ReflectionTestUtils.setField(branch, "id", 1L);
+        ReflectionTestUtils.setField(section, "id", 1L);
+        ReflectionTestUtils.setField(visit, "id", 1L);
+        ReflectionTestUtils.setField(visit, "status", Status.PENDING);
+        
+        // Mock repository methods
+        when(visitRepository.findById(1L)).thenReturn(Optional.of(visit));
+        when(csVisitRepository.findByBranchIdAndDate(any(), any())).thenReturn(Optional.of(csVisit));
+        when(visitRepository.findNextPendingVisit(any(), any())).thenReturn(Optional.of(nextVisit));
+        
+        // Mock save methods
+        when(sectionRepository.save(any(Section.class))).thenReturn(section);
+        when(csVisitRepository.save(any(CsVisit.class))).thenReturn(csVisit);
+
+        // Mock websocket handler
+        doNothing().when(websocketHandler).notifySubscribers(any(Long.class), any(String.class));
 
         // when
         AdminVisitStatusUpdateResponse response = adminVisitService.updateVisitStatus(1L);
@@ -130,8 +144,16 @@ class AdminVisitServiceTest {
         assertThat(response.currentCategory()).isEqualTo(Category.DEPOSIT.getCategory());
         assertThat(response.nextNum()).isEqualTo(2);
         assertThat(response.nextCategory()).isEqualTo(Category.LOAN.getCategory());
+        
+        // 상태 변경 확인
+        assertThat(visit.getStatus()).isEqualTo(Status.PROGRESS);
+        
+        // 개별적으로 호출 검증
         verify(sectionRepository).save(any());
         verify(csVisitRepository).save(any());
+        verify(visitRepository, times(1)).findById(1L);
+        verify(visitRepository, times(1)).findNextPendingVisit(any(), any());
+        verify(websocketHandler).notifySubscribers(any(Long.class), any(String.class));
     }
 
     @Test
@@ -232,6 +254,9 @@ class AdminVisitServiceTest {
     @DisplayName("CsVisit 정보가 없으면 상태 업데이트가 불가능하다")
     void updateVisitStatus_WhenCsVisitNotFound() {
         // given
+        ReflectionTestUtils.setField(branch, "id", 1L);  // branch ID 설정
+        ReflectionTestUtils.setField(section, "id", 1L);  // section ID 설정
+        
         given(visitRepository.findById(1L)).willReturn(Optional.of(visit));
         given(csVisitRepository.findByBranchIdAndDate(any(), any())).willReturn(Optional.empty());
 

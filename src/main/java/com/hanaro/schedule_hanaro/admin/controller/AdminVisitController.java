@@ -34,7 +34,7 @@ public class AdminVisitController {
             @PathVariable("visit-id") Long visitId
     ) {
         AdminVisitStatusUpdateResponse response = adminVisitService.updateVisitStatus(visitId);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok().body(response);
     }
 
 
@@ -45,6 +45,6 @@ public class AdminVisitController {
             @PathVariable("section-id") Long sectionId
     ) {
         AdminVisitStatusUpdateResponse response = adminVisitService.getCurrentVisit(sectionId);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok().body(response);
     }
 }

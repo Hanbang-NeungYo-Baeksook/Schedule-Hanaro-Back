@@ -114,7 +114,7 @@ class AdminCustomerServiceTest {
         AdminCustomerListResponse response = adminCustomerService.getCustomerList(page, size);
 
         // then
-        assertThat(response.customers()).hasSize(1);
+        assertThat(response.data()).hasSize(1);
         assertThat(response.currentPage()).isEqualTo(1);
         assertThat(response.totalItems()).isEqualTo(1);
     }

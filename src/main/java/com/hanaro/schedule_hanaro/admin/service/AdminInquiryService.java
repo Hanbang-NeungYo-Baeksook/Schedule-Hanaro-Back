@@ -86,12 +86,20 @@ public class AdminInquiryService {
 	}
 
 	@Transactional
-	public AdminInquiryResponse registerInquiryResponse(Long inquiryId, String content, Authentication authentication){
+	public AdminInquiryResponse registerInquiryResponse(Long inquiryId, String content, Authentication authentication) {
+		// 입력값 검증
+		if (content == null || content.trim().isEmpty()) {
+			throw new GlobalException(ErrorCode.WRONG_REQUEST_PARAMETER);
+		}
+		if (content.length() > 500) {
+			throw new GlobalException(ErrorCode.WRONG_REQUEST_PARAMETER);
+		}
+
 		Inquiry inquiry = inquiryRepository.findById(inquiryId)
 			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_INQUIRY));
 
 		Admin admin = adminRepository.findById(PrincipalUtils.getId(authentication))
-			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CUSTOMER));
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_ADMIN));
 
 		InquiryResponse response = inquiryResponseRepository.findByInquiryId(inquiryId).orElse(null);
 
