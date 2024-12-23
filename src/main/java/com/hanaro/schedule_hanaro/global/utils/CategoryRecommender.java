@@ -3,6 +3,9 @@ package com.hanaro.schedule_hanaro.global.utils;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import java.util.*;
 import java.util.stream.Collectors;
+import com.hanaro.schedule_hanaro.global.utils.FAQTokenizer;
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.RealVector;
 
 public class CategoryRecommender {
     // 카테고리별 관련 키워드 매핑
@@ -24,7 +27,7 @@ public class CategoryRecommender {
         
         put(Category.DEPOSIT, Arrays.asList(
             "예금", "적금", "이자", "금리", "통장", "계좌", "입금", "출금", "예치", "만기",
-            "이율", "수익률", "저축", "예치금", "정기예금", "자유적금"
+            "이율", "수익률", "저축", "예치금", "정기예금", "��유적금"
         ));
         
         put(Category.TRUST, Arrays.asList(
@@ -48,7 +51,7 @@ public class CategoryRecommender {
         ));
         
         put(Category.INERNET_BANKING, Arrays.asList(
-            "인터넷뱅킹", "모바일뱅킹", "앱", "로그인", "비밀번호", "보안", "인증서",
+            "인터넷뱅킹", "모바일뱅킹", "앱", "로그인", "비밀번호", "보안", "���증서",
             "이체", "조회", "스마트폰", "온라인", "웹", "접속", "등록"
         ));
         
@@ -73,7 +76,7 @@ public class CategoryRecommender {
         ));
         
         put(Category.UTILITY_BILL, Arrays.asList(
-            "공과금", "납부", "세금", "국민연금", "건강보험", "전기요금", "수도요금",
+            "공과금", "납부", "세금", "국민연금", "건강보험", "전���요��", "수도요금",
             "가스요금", "지방세", "국세", "범칙금", "과태료"
         ));
         
@@ -102,8 +105,7 @@ public class CategoryRecommender {
     }
 
     private static List<String> tokenizeQuery(String query) {
-        // 간단한 토큰화 (공백 기준)
-        return Arrays.asList(query.toLowerCase().split("\\s+"));
+        return FAQTokenizer.tokenizeNewQuestion(query);
     }
 
     private static Map<Category, Double> calculateCategoryScores(List<String> tokens) {
@@ -118,20 +120,20 @@ public class CategoryRecommender {
     }
 
     private static double calculateSimilarity(List<String> queryTokens, List<String> categoryKeywords) {
-        // 코사인 유사도 계산
+        // 모든 고유 단어 수집
         Set<String> allTerms = new HashSet<>();
         allTerms.addAll(queryTokens);
         allTerms.addAll(categoryKeywords);
         
         // 벡터 생성
-        double[] queryVector = createVector(queryTokens, allTerms);
-        double[] categoryVector = createVector(categoryKeywords, allTerms);
+        RealVector queryVector = createVector(queryTokens, allTerms);
+        RealVector categoryVector = createVector(categoryKeywords, allTerms);
         
         // 코사인 유사도 계산
         return cosineSimilarity(queryVector, categoryVector);
     }
 
-    private static double[] createVector(List<String> tokens, Set<String> allTerms) {
+    private static RealVector createVector(List<String> tokens, Set<String> allTerms) {
         double[] vector = new double[allTerms.size()];
         List<String> termsList = new ArrayList<>(allTerms);
         
@@ -140,22 +142,16 @@ public class CategoryRecommender {
             vector[i] = Collections.frequency(tokens, term);
         }
         
-        return vector;
+        return new ArrayRealVector(vector);
     }
 
-    private static double cosineSimilarity(double[] vectorA, double[] vectorB) {
-        double dotProduct = 0.0;
-        double normA = 0.0;
-        double normB = 0.0;
-        
-        for (int i = 0; i < vectorA.length; i++) {
-            dotProduct += vectorA[i] * vectorB[i];
-            normA += Math.pow(vectorA[i], 2);
-            normB += Math.pow(vectorB[i], 2);
-        }
+    private static double cosineSimilarity(RealVector vectorA, RealVector vectorB) {
+        double dotProduct = vectorA.dotProduct(vectorB);
+        double normA = vectorA.getNorm();
+        double normB = vectorB.getNorm();
         
         if (normA == 0 || normB == 0) return 0.0;
         
-        return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+        return dotProduct / (normA * normB);
     }
 } 
