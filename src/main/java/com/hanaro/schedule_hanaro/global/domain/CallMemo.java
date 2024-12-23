@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @Table(name = "Call_Memo")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
 public class CallMemo {
 
 
@@ -27,8 +27,10 @@ public class CallMemo {
 	@Column(name = "content",length = 500, nullable = false)
 	private String content;
 
+
 	@Builder
-	public CallMemo(Call call, Admin admin, String content) {
+	public CallMemo(Long id, Call call, Admin admin, String content) {
+		this.id = id;
 		this.call = call;
 		this.admin = admin;
 		this.content = content;

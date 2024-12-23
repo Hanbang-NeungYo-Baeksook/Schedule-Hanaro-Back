@@ -21,6 +21,10 @@ public enum ErrorCode {
 	INVALID_VISIT_NUMBER(40010, HttpStatus.BAD_REQUEST, "잘못된 방문 번호입니다."),
 	INVALID_TOTAL_VISITOR_COUNT(40011, HttpStatus.BAD_REQUEST, "잘못된 방문자 수입니다."),
 	VISIT_TIME_EXPIRED(40012, HttpStatus.BAD_REQUEST, "방문 시간이 만료되었습니다."),
+	ALREADY_COMPLETE(40010, HttpStatus.BAD_REQUEST, "이미 완료된 상담입니다."),
+	ALREADY_POST_MEMO(40011, HttpStatus.BAD_REQUEST, "이미 메모가 등록된 상담입니다."),
+	ALREADY_POST_RESPONSE(40012, HttpStatus.BAD_REQUEST, "이미 답변이 등록된 상담입니다."),
+	EMPTY_WAITS(40013, HttpStatus.BAD_REQUEST, "대기 중인 상담이 더이상 없습니다."),
 
 	// 403
 	FORBIDDEN_REQUEST(40300, HttpStatus.FORBIDDEN, "권한이 존재하지 않습니다."),
@@ -38,7 +42,7 @@ public enum ErrorCode {
 	NOT_FOUND_CS_VISIT(40410, HttpStatus.NOT_FOUND, "해당 지점의 방문 통계 데이터를 찾을 수 없습니다."),
 	NOT_FOUND_NEXT_VISITOR(40411, HttpStatus.NOT_FOUND, "다음 대기 방문자가 존재하지 않습니다."),
 	NOT_FOUND_DATA(40499, HttpStatus.NOT_FOUND, "존재하지 않는 데이터입니다."),
-	
+
 	// 409
 	CONCURRENT_VISIT_UPDATE(40900, HttpStatus.CONFLICT, "방문 정보가 동시에 수정되었습니다."),
 	;

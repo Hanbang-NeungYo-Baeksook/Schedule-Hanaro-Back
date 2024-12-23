@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,7 @@ import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.Inquiry;
 import com.hanaro.schedule_hanaro.global.domain.InquiryResponse;
 import com.hanaro.schedule_hanaro.global.repository.InquiryRepository;
+import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -84,17 +86,23 @@ public class AdminInquiryService {
 	}
 
 	@Transactional
-	public AdminInquiryResponse registerInquiryResponse(Long inquiryId, AdminInquiryResponseRequest request){
+	public AdminInquiryResponse registerInquiryResponse(Long inquiryId, String content, Authentication authentication){
 		Inquiry inquiry = inquiryRepository.findById(inquiryId)
 			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_INQUIRY));
 
-		Admin admin = adminRepository.findById(request.adminId())
-			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_ADMIN));
+		Admin admin = adminRepository.findById(PrincipalUtils.getId(authentication))
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CUSTOMER));
+
+		InquiryResponse response = inquiryResponseRepository.findByInquiryId(inquiryId).orElse(null);
+
+		if (response != null) {
+			throw new GlobalException(ErrorCode.ALREADY_POST_RESPONSE);
+		}
 
 		InquiryResponse inquiryResponse = InquiryResponse.builder()
 			.inquiry(inquiry)
 			.admin(admin)
-			.content(request.content())
+			.content(content)
 			.createdAt(LocalDateTime.now())
 			.build();
 

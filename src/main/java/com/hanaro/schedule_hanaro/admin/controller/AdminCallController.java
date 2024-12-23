@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,12 +39,25 @@ public class AdminCallController {
 		return ResponseEntity.ok(callService.findWaitList());
 	}
 
-	@Operation(summary = "전화 상담 상담 상태 변경", description = "특정 전화 상담 항목의 상태를 변경합니다. (전화 상담 대기/전화 상담 완료)")
-	@PatchMapping("/{call-id}")
-	public ResponseEntity<String> patchCallStatus(@PathVariable("call-id") Long callId) {
+	@Operation(summary = "전화 상담 시작", description = "특정 전화 상담 항목의 상태를 진행 중으로 변경합니다. (전화 상담 대기)")
+	@PatchMapping("/progress")
+	public ResponseEntity<?> patchCallStatusProgress(Authentication authentication) {
 		// 전화 상담 상태 변경
 		try {
-			return ResponseEntity.ok(callService.changeCallStatus(callId));
+			return ResponseEntity.ok(callService.changeCallStatusProgress(authentication));
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+		} catch (IllegalStateException e) {
+			return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+		}
+	}
+
+	@Operation(summary = "전화 상담 완료", description = "특정 전화 상담 항목의 상태를 완료로 변경합니다. (전화 상담 완료)")
+	@PatchMapping("/{call-id}")
+	public ResponseEntity<String> patchCallStatusComplete(@PathVariable("call-id") Long callId) {
+		// 전화 상담 상태 변경
+		try {
+			return ResponseEntity.ok(callService.changeCallStatusComplete(callId));
 		} catch (IllegalArgumentException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 		} catch (IllegalStateException e) {
@@ -53,9 +67,9 @@ public class AdminCallController {
 
 	@Operation(summary = "전화 상담 메모 등록", description = "특정 전화 상담의 메모를 작성 후 등록합니다.")
 	@PostMapping("/{call-id}")
-	public ResponseEntity<String> postCallMemo(@PathVariable("call-id") Long callId, @RequestBody AdminCallMemoRequest request) {
+	public ResponseEntity<String> postCallMemo(@PathVariable("call-id") Long callId, @RequestBody AdminCallMemoRequest request, Authentication authentication) {
 		// 전화 상담 메모 등록
-		return ResponseEntity.ok(callService.saveCallMemo(callId, request.content()));
+		return ResponseEntity.ok(callService.saveCallMemo(authentication, callId, request.content()));
 	}
 
 	@Operation(summary = "전화 상담 목록 조회", description = "전화 상담 목록을 내용, 카테고리, 날짜 등으로 필터링해 조회합니다.")
