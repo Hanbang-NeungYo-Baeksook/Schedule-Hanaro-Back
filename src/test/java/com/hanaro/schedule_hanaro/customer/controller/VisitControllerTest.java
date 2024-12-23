@@ -28,6 +28,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hanaro.schedule_hanaro.customer.dto.request.VisitCreateRequest;
 import com.hanaro.schedule_hanaro.customer.dto.response.CreateVisitResponse;
+import com.hanaro.schedule_hanaro.global.auth.info.CustomUserDetails;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.repository.BranchRepository;
 import com.hanaro.schedule_hanaro.global.repository.CsVisitRepository;
@@ -396,7 +397,14 @@ public class VisitControllerTest {
 	public void deleteVisitReservationTest() throws Exception {
 		Customer customer = customerRepository.findByName("TestUser4").orElseThrow();
 		Branch branch = branchRepository.findByName("NormalTestBranch6").orElseThrow();
-		Authentication authentication = new UsernamePasswordAuthenticationToken(customer.getId(), null);
+		CustomUserDetails customUserDetails = CustomUserDetails.of(
+			customer.getId(),
+			customer.getName(),
+			customer.getPassword(),
+			customer.getRole() // Role 전달
+		);
+		Authentication authentication = new UsernamePasswordAuthenticationToken(customUserDetails, null);
+
 
 
 		Long visitId = visitService.addVisitReservation(VisitCreateRequest.builder()
@@ -407,14 +415,12 @@ public class VisitControllerTest {
 
 		String deleteUrl = "/api/visits/" + visitId;
 
-		// Perform delete request
 		ResultActions result = mockMvc.perform(delete(deleteUrl)
 				.header("Authorization", "Bearer mockToken"));
 
 		result.andExpect(status().isOk())
 				.andExpect(content().string("Success"));
 
-		// Verify deletion
 		assertThat(visitRepository.findById(visitId)).isEmpty();
 	}
 

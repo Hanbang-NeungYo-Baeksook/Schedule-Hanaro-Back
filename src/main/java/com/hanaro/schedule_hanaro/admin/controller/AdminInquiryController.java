@@ -17,6 +17,8 @@ import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryListResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryResponse;
 import com.hanaro.schedule_hanaro.admin.service.AdminInquiryService;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
+import com.hanaro.schedule_hanaro.global.domain.enums.InquiryStatus;
+import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,14 +33,19 @@ public class AdminInquiryController {
 
 	@Operation(summary = "1:1 상담 목록 조회", description = "1:1 상담 목록을 조회합니다.")
 	@GetMapping
-	public ResponseEntity<AdminInquiryListResponse> getInquiryList(
-		@RequestParam(required = false) String status,
+	public ResponseEntity<?> getInquiryList(
+		@RequestParam(value = "status", required = false, defaultValue = "PENDING") String inquiryStatus,
 		@RequestParam(required = false) Category category,
-		@RequestParam(required = false) String searchContent,
-		@RequestParam(defaultValue = "0") Integer page,
+		@RequestParam(value = "search_content", required = false) String searchContent,
+		@RequestParam(defaultValue = "1") Integer page,
 		@RequestParam(defaultValue = "5") Integer size
 	) {
-		AdminInquiryListRequest request = AdminInquiryListRequest.from(status, category, searchContent,page,size);
+		Category enumCategory = (category != null) ? category : Category.LOAN;
+
+		AdminInquiryListRequest request = AdminInquiryListRequest.from(
+			inquiryStatus, enumCategory, searchContent, page, size
+		);
+
 		AdminInquiryListResponse response = adminInquiryService.findInquiryList(request);
 		return ResponseEntity.ok().body(response);
 	}
@@ -53,7 +60,7 @@ public class AdminInquiryController {
 	}
 
 	@Operation(summary = "1:1 상담 답변 등록", description = "특정 1:1 상담에 대해 답변을 등록합니다.")
-	@PostMapping("/{inquiry-id}")
+	@PostMapping("/register/{inquiry-id}")
 	public ResponseEntity<AdminInquiryResponse> registerInquiryResponse(
 		@PathVariable("inquiry-id") Long inquiryId,
 		@RequestBody AdminInquiryResponseRequest request,

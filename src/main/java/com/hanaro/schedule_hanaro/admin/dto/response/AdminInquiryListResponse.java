@@ -27,7 +27,7 @@ public record AdminInquiryListResponse(
 	public static AdminInquiryListResponse from(List<InquiryData> data, Integer currentPage, Integer pageSize, Long totalItems, Integer totalPages) {
 		return AdminInquiryListResponse.builder()
 			.inquiryList(data)
-			.currentPage(currentPage)
+			.currentPage(currentPage+1)
 			.pageSize(pageSize)
 			.totalItems(totalItems)
 			.totalPages(totalPages)

@@ -42,11 +42,13 @@ public class AdminInquiryService {
 		Pageable pageable = PageRequest.of(request.page(), request.size());
 
 		Page<Inquiry> inquiries = inquiryRepository.findFilteredInquiries(
-			request.status(),
-			request.category().toString(),
+			request.inquiryStatus(),
+			request.category(),
 			request.searchContent(),
 			pageable
 		);
+
+
 
 		List<AdminInquiryListResponse.InquiryData> inquiryDataList = inquiries.getContent().stream()
 			.map(inquiry -> AdminInquiryListResponse.InquiryData.from(
@@ -54,6 +56,7 @@ public class AdminInquiryService {
 				inquiry.getCustomer().getName()
 			))
 			.collect(Collectors.toList());
+		System.out.println("inquiry 3");
 
 		return AdminInquiryListResponse.from(
 			inquiryDataList,
