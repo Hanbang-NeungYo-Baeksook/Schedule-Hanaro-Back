@@ -81,6 +81,9 @@ public class AdminCallService {
 		// call의 상태를 progress로 변경
 		callRepository.updateStatusWithStartedAt(call.getId(), Status.PROGRESS, LocalDateTime.now());
 
+		String message = "관리자가 새로운 상담을 시작했습니다: 상담 ID " + call.getId();
+		websocketHandler.notifySubscribers(1L, message);
+
 		// call memo 빈 문자열로 등록
 		callMemoRepository.save(CallMemo.builder()
 			.call(call)
@@ -100,17 +103,6 @@ public class AdminCallService {
 		if (call.getStatus().equals(Status.PROGRESS)) {
 			callRepository.updateStatusWithEndedAt(callId, Status.COMPLETE, LocalDateTime.now());
 			return "상담 완료 처리되었습니다.";
-		} else if (call.getStatus().equals(Status.PENDING)) {
-			callRepository.updateStatus(callId, Status.PROGRESS);
-
-			String message = "관리자가 새로운 상담을 시작했습니다: 상담 ID " + callId;
-			websocketHandler.notifySubscribers(1L, message);
-
-			callRepository.updateStatusWithStartedAt(callId, Status.PROGRESS, LocalDateTime.now());
-			saveCallMemo(authentication, callId, "");
-			return "상담 진행 처리되었습니다.";
-		} else if (call.getStatus().equals(Status.COMPLETE)){
-			throw new GlobalException(ErrorCode.ALREADY_COMPLETE);
 		} else {
 			throw new GlobalException(ErrorCode.WRONG_CALL_STATUS);
 		}
