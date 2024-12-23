@@ -16,6 +16,10 @@ spring:
     username: ${DATABASE.USERNAME}
     password: ${DATABASE.PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    redis:
+      host: ${redis.host}
+      port: ${redis.port}
 #    hikari:
 #      connection-init-sql: "SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE"
 

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.hanaro.schedule_hanaro.global.auth.dto.response.JwtTokenDto;
+import com.hanaro.schedule_hanaro.global.auth.info.UserInfo;
 import com.hanaro.schedule_hanaro.global.domain.enums.Role;
 
 import io.jsonwebtoken.Claims;
@@ -31,9 +32,9 @@ public class JwtTokenProvider implements InitializingBean {
 		this.key = Keys.hmacShaKeyFor(decoded);
 	}
 
-	public String getUsernameFromToken(String token) {
+	public UserInfo getUserInfoFromToken(String token) {
 		Claims claims = validateToken(token);
-		return claims.getId();
+		return new UserInfo(claims.getId(), Role.valueOf(claims.get("role").toString()));
 	}
 
 	public Claims validateToken(String token) {
