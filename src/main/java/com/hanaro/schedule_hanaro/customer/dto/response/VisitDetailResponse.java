@@ -9,8 +9,17 @@ public record VisitDetailResponse(
 	@JsonProperty("visit_id")
 	Long visitId,
 
+	@JsonProperty("branch_id")
+	Long branchId,
+
 	@JsonProperty("branch_name")
 	String branchName,
+
+	@JsonProperty("x_position")
+	String xPosition,
+
+	@JsonProperty("y_position")
+	String yPosition,
 
 	@JsonProperty("section_type")
 	String sectionType,
@@ -29,7 +38,10 @@ public record VisitDetailResponse(
 ) {
 	public static VisitDetailResponse of(
 		Long visitId,
+		Long branchId,
 		String branchName,
+		String xPosition,
+		String yPosition,
 		String sectionType,
 		int visitNum,
 		int currentNum,
@@ -39,7 +51,10 @@ public record VisitDetailResponse(
 		return VisitDetailResponse
 			.builder()
 			.visitId(visitId)
+			.branchId(branchId)
 			.branchName(branchName)
+			.xPosition(xPosition)
+			.yPosition(yPosition)
 			.sectionType(sectionType)
 			.visitNum(visitNum)
 			.currentNum(currentNum)

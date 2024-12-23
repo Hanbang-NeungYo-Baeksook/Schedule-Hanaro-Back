@@ -187,7 +187,10 @@ public class VisitService {
 
 		return VisitDetailResponse.of(
 			visit.getId(),
+			visit.getSection().getBranch().getId(),
 			visit.getSection().getBranch().getName(),
+			visit.getSection().getBranch().getXPosition(),
+			visit.getSection().getBranch().getYPosition(),
 			visit.getSection().getSectionType().getType(),
 			visit.getNum(),
 			currentNum,
