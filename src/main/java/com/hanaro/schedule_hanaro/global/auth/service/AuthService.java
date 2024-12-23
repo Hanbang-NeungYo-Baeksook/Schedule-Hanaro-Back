@@ -71,7 +71,7 @@ public class AuthService {
 	}
 
 	public String adminSignUpAdmin(AuthAdminSignUpRequest authAdminSignUpRequest) {
-		Branch branch = branchRepository.findById(1L).orElseThrow();
+		Branch branch = branchRepository.findById(5L).orElseThrow();
 		adminRepository.save(Admin.builder()
 				.authId(authAdminSignUpRequest.authId())
 				.password(bCryptPasswordEncoder.encode(authAdminSignUpRequest.password()))

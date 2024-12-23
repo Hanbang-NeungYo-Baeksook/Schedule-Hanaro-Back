@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,9 +54,9 @@ public class AdminCallController {
 
 	@Operation(summary = "전화 상담 메모 등록", description = "특정 전화 상담의 메모를 작성 후 등록합니다.")
 	@PostMapping("/{call-id}")
-	public ResponseEntity<String> postCallMemo(@PathVariable("call-id") Long callId, @RequestBody AdminCallMemoRequest request) {
+	public ResponseEntity<String> postCallMemo(@PathVariable("call-id") Long callId, @RequestBody AdminCallMemoRequest request, Authentication authentication) {
 		// 전화 상담 메모 등록
-		return ResponseEntity.ok(callService.saveCallMemo(callId, request.content()));
+		return ResponseEntity.ok(callService.saveCallMemo(authentication, callId, request.content()));
 	}
 
 	@Operation(summary = "전화 상담 목록 조회", description = "전화 상담 목록을 내용, 카테고리, 날짜 등으로 필터링해 조회합니다.")
