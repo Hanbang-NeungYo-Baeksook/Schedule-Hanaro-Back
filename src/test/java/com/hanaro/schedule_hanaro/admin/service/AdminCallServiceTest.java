@@ -7,8 +7,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Collections;
+import java.util.Collection;
 
-import com.hanaro.schedule_hanaro.global.domain.enums.BranchType;
+import com.hanaro.schedule_hanaro.global.auth.info.CustomUserDetails;
+import com.hanaro.schedule_hanaro.global.domain.enums.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,18 +19,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.SliceImpl;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.GrantedAuthority;
 
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallWaitResponse;
 import com.hanaro.schedule_hanaro.global.domain.Admin;
 import com.hanaro.schedule_hanaro.global.domain.Branch;
 import com.hanaro.schedule_hanaro.global.domain.Call;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
-import com.hanaro.schedule_hanaro.global.domain.enums.Category;
-import com.hanaro.schedule_hanaro.global.domain.enums.Gender;
-import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 import com.hanaro.schedule_hanaro.global.repository.AdminRepository;
 import com.hanaro.schedule_hanaro.global.repository.CallMemoRepository;
 import com.hanaro.schedule_hanaro.global.repository.CallRepository;
@@ -156,6 +159,23 @@ class AdminCallServiceTest {
     @DisplayName("상담 메모 저장 테스트")
     void saveCallMemo() {
         // given
+        Collection<GrantedAuthority> authorities = Collections.singletonList(
+            new SimpleGrantedAuthority("ROLE_ADMIN")
+        );
+        
+        CustomUserDetails userDetails = new CustomUserDetails(
+            3L,                    // id
+            admin.getAuthId(),     // authId
+            admin.getPassword(),   // password
+            Role.ADMIN,           // role
+            authorities           // authorities
+        );
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+            userDetails, null, authorities
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
         when(callRepository.findById(anyLong())).thenReturn(Optional.of(call));
         when(adminRepository.findById(3L)).thenReturn(Optional.of(admin));
 
@@ -165,6 +185,9 @@ class AdminCallServiceTest {
         // then
         assertThat(result).isEqualTo("Success");
         verify(callMemoRepository).save(any());
+        
+        // cleanup
+        SecurityContextHolder.clearContext();
     }
 
     @Test
@@ -189,7 +212,7 @@ class AdminCallServiceTest {
     void findCall() {
         // given
         when(callRepository.findById(anyLong())).thenReturn(Optional.of(call));
-        when(customerRepository.findById(6L)).thenReturn(Optional.of(customer));
+        when(customerRepository.findById(any())).thenReturn(Optional.of(customer));
 
         // when
         var result = adminCallService.findCall(1L);

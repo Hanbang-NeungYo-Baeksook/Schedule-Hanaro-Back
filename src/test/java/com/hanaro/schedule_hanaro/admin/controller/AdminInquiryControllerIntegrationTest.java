@@ -171,10 +171,7 @@ class AdminInquiryControllerIntegrationTest {
     @Test
     @DisplayName("문의 답변 등록")
     void registerInquiryResponse() throws Exception {
-        AdminInquiryResponseRequest request = AdminInquiryResponseRequest.of(
-            testAdmin.getId(),
-            "답변 내용입니다."
-        );
+        AdminInquiryResponseRequest request = AdminInquiryResponseRequest.of("답변 내용입니다.");
 
         mockMvc.perform(post("/admin/api/inquiries/register/{inquiry-id}", testInquiry.getId())
                 .header("Authorization", adminToken)

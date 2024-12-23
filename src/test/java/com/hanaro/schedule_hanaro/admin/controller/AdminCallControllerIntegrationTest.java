@@ -1,28 +1,22 @@
 package com.hanaro.schedule_hanaro.admin.controller;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.assertj.core.api.Assertions.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hanaro.schedule_hanaro.admin.dto.request.AdminCallMemoRequest;
-import com.hanaro.schedule_hanaro.global.auth.info.CustomUserDetails;
-import com.hanaro.schedule_hanaro.global.auth.provider.JwtAuthenticationProvider;
 import com.hanaro.schedule_hanaro.global.auth.provider.JwtTokenProvider;
 import com.hanaro.schedule_hanaro.global.domain.Admin;
-import com.hanaro.schedule_hanaro.global.domain.Call;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
+import com.hanaro.schedule_hanaro.global.domain.Call;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Gender;
-import com.hanaro.schedule_hanaro.global.domain.enums.Role;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
+import com.hanaro.schedule_hanaro.global.domain.enums.Role;
 import com.hanaro.schedule_hanaro.global.repository.AdminRepository;
-import com.hanaro.schedule_hanaro.global.repository.CallRepository;
 import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
+import com.hanaro.schedule_hanaro.global.repository.CallRepository;
+import com.hanaro.schedule_hanaro.admin.dto.request.AdminCallMemoRequest;
 
-import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,10 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -43,14 +33,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collections;
-
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -90,12 +75,10 @@ class AdminCallControllerIntegrationTest {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
-    @Autowired
-    private EntityManager entityManager;
-
     private Admin testAdmin;
     private Customer testCustomer;
     private Call testCall;
+    private String adminToken;
 
     @BeforeEach
     void setUp() {
@@ -130,159 +113,160 @@ class AdminCallControllerIntegrationTest {
                 .callDate(LocalDateTime.now())
                 .callNum(1)
                 .category(Category.DEPOSIT)
-                .content("테스트 콜")
-                .startedAt(LocalDateTime.now())
-                .endedAt(LocalDateTime.now())
+                .content("테스트 상담 내용")
                 .tags("test")
                 .build();
-        testCall.setStatus(Status.PENDING);
         testCall = callRepository.save(testCall);
-    }
 
-    private CustomUserDetails createTestUserDetails() {
-        return CustomUserDetails.of(
-            testAdmin.getId(),
-            testAdmin.getAuthId(),
-            testAdmin.getPassword(),
-            Role.ADMIN
-        );
-    }
-
-    private String createTestToken() {
-        return jwtTokenProvider.generateToken(
-            testAdmin.getAuthId(),  // admin_id와 동일한 authId 사용
-            Role.ADMIN,
-            1
-        );
-    }
-
-    @Test
-    @DisplayName("전화 상담 메모 등록")
-    @WithMockUser(roles = "ADMIN")
-    void postCallMemo() throws Exception {
-        // given
-        Long callId = testCall.getId();
-        AdminCallMemoRequest request = new AdminCallMemoRequest("테스트 메모 내용");
-        
-        CustomUserDetails userDetails = CustomUserDetails.of(
-            testAdmin.getId(),
-            String.valueOf(testAdmin.getId()),
-            testAdmin.getPassword(),
-            Role.ADMIN
-        );
-
-        // when & then
-        mockMvc.perform(post("/admin/api/calls/{call-id}", callId)
-                .with(user(userDetails))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("전화 상담 상태 변경 - PENDING to PROGRESS")
-    void patchCallStatus_PendingToProgress() throws Exception {
-        // given
-        Long callId = testCall.getId();
-        
-        // when & then
-        mockMvc.perform(patch("/admin/api/calls/{call-id}", callId)
-                .header("Authorization", "Bearer " + createTestToken()))
-                .andExpect(status().isOk())
-                .andExpect(content().string("상담 진행 처리되었습니다."));
-        
-        // EntityManager를 통해 캐시를 비우고 다시 조회
-        entityManager.clear();
-        
-        Call updatedCall = callRepository.findById(callId).orElseThrow();
-        assertThat(updatedCall.getStatus()).isEqualTo(Status.PROGRESS);
-    }
-
-    @Test
-    @DisplayName("전화 상담 상태 변경 - PROGRESS to COMPLETE")
-    void patchCallStatus_ProgressToComplete() throws Exception {
-        // given
-        Long callId = testCall.getId();
-        
-        // 먼저 PROGRESS 상태로 변경
-        testCall.setStatus(Status.PROGRESS);
-        callRepository.save(testCall);
-        entityManager.flush();
-        entityManager.clear();
-        
-        // when & then
-        mockMvc.perform(patch("/admin/api/calls/{call-id}", callId)
-                .header("Authorization", "Bearer " + createTestToken()))
-                .andExpect(status().isOk())
-                .andExpect(content().string("상담 완료 처리되었습니다."));
-        
-        // EntityManager를 통해 캐시를 비우고 다시 조회
-        entityManager.clear();
-        
-        Call updatedCall = callRepository.findById(callId).orElseThrow();
-        assertThat(updatedCall.getStatus()).isEqualTo(Status.COMPLETE);
-    }
-
-    @Test
-    @DisplayName("전화 상담 목록 조회")
-    void getCallList() throws Exception {
-        // given
-        Long callId = testCall.getId();
-
-        // when & then
-        mockMvc.perform(get("/admin/api/calls")
-                .header("Authorization", "Bearer " + createTestToken())
-                .param("status", Status.PENDING.name())
-                .param("page", "1")
-                .param("size", "5")
-                .param("category", Category.DEPOSIT.name()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data").isArray())
-                .andExpect(jsonPath("$.data[0].id").value(callId))
-                .andExpect(jsonPath("$.data[0].content").value("테스트 콜"))
-                .andExpect(jsonPath("$.data[0].category").value("DEPOSIT"))
-                .andExpect(jsonPath("$.pagination.currentPage").value(1))
-                .andExpect(jsonPath("$.pagination.pageSize").value(5))
-                .andExpect(jsonPath("$.pagination.hasNext").isBoolean());
-    }
-
-    @Test
-    @DisplayName("전화 상담 상세 조회")
-    void getCallDetail() throws Exception {
-        // given
-        Long callId = testCall.getId();
-
-        // when & then
-        mockMvc.perform(get("/admin/api/calls/{call-id}", callId)
-                .header("Authorization", "Bearer " + createTestToken()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.call_id").value(callId))
-                .andExpect(jsonPath("$.content").value("테스트 콜"))
-                .andExpect(jsonPath("$.category").value("DEPOSIT"))
-                .andExpect(jsonPath("$.customer_name").value("테스트 고객"))
-                .andExpect(jsonPath("$.mobile").value("01012345678"));
+        // 관리자 토큰 생성
+        adminToken = "Bearer " + jwtTokenProvider.generateToken(testAdmin.getAuthId(), Role.ADMIN, 1);
     }
 
     @Test
     @DisplayName("전화 상담 대기 목록 조회")
     void getCallWaitList() throws Exception {
-        // given
-        Long callId = testCall.getId();
-
-        // when & then
         mockMvc.perform(get("/admin/api/calls/wait")
-                .header("Authorization", "Bearer " + createTestToken()))
+                .header("Authorization", adminToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.progress").isEmpty())  // 진행 중인 상담이 없으므로 null
-                .andExpect(jsonPath("$.waiting").isArray())   // 대기 목록은 배열
-                .andExpect(jsonPath("$.waiting[0].id").value(callId))
-                .andExpect(jsonPath("$.waiting[0].category").value("DEPOSIT"))
-                .andExpect(jsonPath("$.waiting[0].content").value("테스트 콜"))
-                .andExpect(jsonPath("$.waiting[0].user_name").value("테스트 고객"))
-                .andExpect(jsonPath("$.waiting[0].mobile").value("01012345678"))
-                .andExpect(jsonPath("$.waiting[0].calls").isArray())
-                .andExpect(jsonPath("$.waiting[0].inquires").isArray())
-                .andExpect(jsonPath("$.waiting[0].waiting_num").value(1));
+                .andExpect(jsonPath("$.calls").isArray())
+                .andExpect(jsonPath("$.calls[0].call_id").value(testCall.getId()))
+                .andExpect(jsonPath("$.calls[0].category").value("DEPOSIT"))
+                .andExpect(jsonPath("$.calls[0].status").value("PENDING"));
+    }
+
+    @Test
+    @DisplayName("전화 상담 진행 중으로 상태 변경")
+    void patchCallStatusProgress() throws Exception {
+        mockMvc.perform(patch("/admin/api/calls/{call-id}", testCall.getId())
+                .header("Authorization", adminToken))
+                .andExpect(status().isOk())
+                .andExpect(content().string("상담 진행 처리되었습니다."));
+
+        // 상태가 변경되었는지 확인
+        mockMvc.perform(get("/admin/api/calls/" + testCall.getId())
+                .header("Authorization", adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(Status.PROGRESS.name()));
+    }
+
+    @Test
+    @DisplayName("전화 상담 완료로 상태 변경")
+    void patchCallStatusComplete() throws Exception {
+        // 먼저 진행 중 상태로 변경
+        mockMvc.perform(patch("/admin/api/calls/{call-id}", testCall.getId())
+                .header("Authorization", adminToken))
+                .andExpect(status().isOk())
+                .andExpect(content().string("상담 진행 처리되었습니다."));
+
+        // 완료 상태로 변경
+        mockMvc.perform(patch("/admin/api/calls/{call-id}", testCall.getId())
+                .header("Authorization", adminToken))
+                .andExpect(status().isOk())
+                .andExpect(content().string("상담 완료 처리되었습니다."));
+
+        // 상태가 변경되었는지 확인
+        mockMvc.perform(get("/admin/api/calls/" + testCall.getId())
+                .header("Authorization", adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(Status.COMPLETE.name()));
+    }
+
+    @Test
+    @DisplayName("잘못된 상태에서 상담 완료 시도 시 에러")
+    void patchCallStatusComplete_WrongStatus() throws Exception {
+        // PENDING 상태에서 바로 완료로 변경 시도
+        mockMvc.perform(patch("/admin/api/calls/{call-id}", testCall.getId())
+                .header("Authorization", adminToken))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("대기 중인 상담이 없을 때 진행 중으로 상태 변경 시도")
+    void patchCallStatusProgress_EmptyWaits() throws Exception {
+        // 먼저 진행 중 상태로 변경
+        mockMvc.perform(patch("/admin/api/calls/progress")
+                .header("Authorization", adminToken))
+                .andExpect(status().isOk());
+
+        // 대기 중�� 상담이 없는 상태에서 다시 시도
+        mockMvc.perform(patch("/admin/api/calls/progress")
+                .header("Authorization", adminToken))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("전화 상담 메모 등록")
+    void postCallMemo() throws Exception {
+        AdminCallMemoRequest request = new AdminCallMemoRequest("상담 메모 내용입니다.");
+
+        mockMvc.perform(post("/admin/api/calls/{call-id}", testCall.getId())
+                .header("Authorization", adminToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Success"));
+    }
+
+    @Test
+    @DisplayName("전화 상담 목록 조회")
+    void getCallList() throws Exception {
+        mockMvc.perform(get("/admin/api/calls")
+                .header("Authorization", adminToken)
+                .param("page", "1")
+                .param("size", "5")
+                .param("status", "PENDING"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.calls").isArray())
+                .andExpect(jsonPath("$.calls[0].call_id").value(testCall.getId()))
+                .andExpect(jsonPath("$.current_page").value(1))
+                .andExpect(jsonPath("$.total_pages").exists());
+    }
+
+    @Test
+    @DisplayName("전화 상담 상세 조회")
+    void getCallDetail() throws Exception {
+        mockMvc.perform(get("/admin/api/calls/{call-id}", testCall.getId())
+                .header("Authorization", adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.call_id").value(testCall.getId()))
+                .andExpect(jsonPath("$.category").value("DEPOSIT"))
+                .andExpect(jsonPath("$.status").value("PENDING"));
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 전화 상담 조회 시 404 응답")
+    void getCallDetail_NotFound() throws Exception {
+        mockMvc.perform(get("/admin/api/calls/{call-id}", 999L)
+                .header("Authorization", adminToken))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("인증되지 않은 요청 시 403 응답")
+    void getCallList_Unauthorized() throws Exception {
+        mockMvc.perform(get("/admin/api/calls")
+                .param("page", "1")
+                .param("size", "5"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("이미 완료된 상담 상태 변경 시 409 응답")
+    void patchCallStatus_AlreadyCompleted() throws Exception {
+        // 먼저 진행 중 상태로 변경
+        mockMvc.perform(patch("/admin/api/calls/{call-id}", testCall.getId())
+                .header("Authorization", adminToken))
+                .andExpect(status().isOk());
+
+        // 완료 상태로 변경
+        mockMvc.perform(patch("/admin/api/calls/{call-id}", testCall.getId())
+                .header("Authorization", adminToken))
+                .andExpect(status().isOk());
+
+        // 다시 상태 변경 시도
+        mockMvc.perform(patch("/admin/api/calls/{call-id}", testCall.getId())
+                .header("Authorization", adminToken))
+                .andExpect(status().isConflict())
+                .andExpect(content().string("이미 완료된 상담입니다."));
     }
 }

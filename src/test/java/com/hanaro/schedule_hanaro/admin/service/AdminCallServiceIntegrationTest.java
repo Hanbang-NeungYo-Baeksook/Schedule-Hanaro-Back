@@ -7,11 +7,16 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.hanaro.schedule_hanaro.global.auth.info.CustomUserDetails;
+import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
@@ -125,28 +130,34 @@ class AdminCallServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("상담 상태 변경 테스트 - PENDING에서 PROGRESS로")
-    void changeCallStatus_PendingToProgress() {
+    @DisplayName("상담 상태 진행 중으로 변경")
+    void changeCallStatusProgress() {
         // given
         Call pendingCall = createCall(Status.PENDING, 1);
+        Authentication authentication = createAuthentication(testAdmin);
 
         // when
-        String result = adminCallService.changeCallStatus(pendingCall.getId());
+        Long resultCallId = adminCallService.changeCallStatusProgress(authentication);
 
         // then
-        assertThat(result).isEqualTo("상담 진행 처리되었습니다.");
+        assertThat(resultCallId).isEqualTo(pendingCall.getId());
         Call updatedCall = callRepository.findById(pendingCall.getId()).orElseThrow();
         assertThat(updatedCall.getStatus()).isEqualTo(Status.PROGRESS);
+        
+        // 빈 메모가 생성되었는지 확인
+        CallMemo memo = callMemoRepository.findByCallId(pendingCall.getId());
+        assertThat(memo).isNotNull();
+        assertThat(memo.getContent()).isEmpty();
     }
 
     @Test
-    @DisplayName("상담 상태 변경 테스트 - PROGRESS에서 COMPLETE로")
-    void changeCallStatus_ProgressToComplete() {
+    @DisplayName("상담 상태 완료로 변경")
+    void changeCallStatusComplete() {
         // given
         Call progressCall = createCall(Status.PROGRESS, 1);
 
         // when
-        String result = adminCallService.changeCallStatus(progressCall.getId());
+        String result = adminCallService.changeCallStatusComplete(progressCall.getId());
 
         // then
         assertThat(result).isEqualTo("상담 완료 처리되었습니다.");
@@ -155,23 +166,39 @@ class AdminCallServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 상담 상태 변경 시 예외 발생")
-    void changeCallStatus_NotFound() {
+    @DisplayName("대기 중인 상담이 없을 때 진행 중으로 변경 시도 시 예외 발생")
+    void changeCallStatusProgress_EmptyWaits() {
+        // given
+        Authentication authentication = createAuthentication(testAdmin);
+
         // when & then
-        assertThrows(IllegalArgumentException.class, () ->
-            adminCallService.changeCallStatus(999L)
+        assertThrows(GlobalException.class, () ->
+            adminCallService.changeCallStatusProgress(authentication)
         );
     }
 
     @Test
-    @DisplayName("이미 완료된 상담 상태 변경 시 예외 발생")
-    void changeCallStatus_AlreadyComplete() {
+    @DisplayName("잘못된 상태에서 상담 완료 시도 시 예외 발생")
+    void changeCallStatusComplete_WrongStatus() {
         // given
-        Call completeCall = createCall(Status.COMPLETE, 1);
+        Call pendingCall = createCall(Status.PENDING, 1);
 
         // when & then
-        assertThrows(IllegalStateException.class, () ->
-            adminCallService.changeCallStatus(completeCall.getId())
+        assertThrows(GlobalException.class, () ->
+            adminCallService.changeCallStatusComplete(pendingCall.getId())
+        );
+    }
+
+    // Authentication 객체 생성을 위한 헬퍼 메소드
+    private Authentication createAuthentication(Admin admin) {
+        return new UsernamePasswordAuthenticationToken(
+            CustomUserDetails.builder()
+                .username(admin.getId().toString())
+                .password(admin.getPassword())
+                .role(admin.getRole())
+                .build(),
+            null,
+            List.of(new SimpleGrantedAuthority("ROLE_" + admin.getRole()))
         );
     }
 
@@ -181,9 +208,10 @@ class AdminCallServiceIntegrationTest {
         // given
         Call call = createCall(Status.PROGRESS, 1);
         String content = "테스트 메모입니다.";
+        Authentication authentication = createAuthentication(testAdmin);
 
         // when
-        String result = adminCallService.saveCallMemo(call.getId(), content);
+        String result = adminCallService.saveCallMemo(authentication, call.getId(), content);
 
         // then
         assertThat(result).isEqualTo("Success");
@@ -198,9 +226,12 @@ class AdminCallServiceIntegrationTest {
     @Test
     @DisplayName("존재하지 않는 상담에 대한 메모 저장 시 예외 발생")
     void saveCallMemo_NotFound() {
+        // given
+        Authentication authentication = createAuthentication(testAdmin);
+
         // when & then
-        assertThrows(IllegalArgumentException.class, () ->
-            adminCallService.saveCallMemo(999L, "테스트 메모")
+        assertThrows(GlobalException.class, () ->
+            adminCallService.saveCallMemo(authentication, 999L, "테스트 메모")
         );
     }
 
