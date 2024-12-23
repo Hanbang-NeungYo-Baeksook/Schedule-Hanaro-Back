@@ -27,7 +27,7 @@ public class CategoryRecommender {
         
         put(Category.DEPOSIT, Arrays.asList(
             "예금", "적금", "이자", "금리", "통장", "계좌", "입금", "출금", "예치", "만기",
-            "이율", "수익률", "저축", "예치금", "정기예금", "��유적금"
+            "이율", "수익률", "저축", "예치금", "정기예금", "지유적금"
         ));
         
         put(Category.TRUST, Arrays.asList(
@@ -51,7 +51,7 @@ public class CategoryRecommender {
         ));
         
         put(Category.INERNET_BANKING, Arrays.asList(
-            "인터넷뱅킹", "모바일뱅킹", "앱", "로그인", "비밀번호", "보안", "���증서",
+            "인터넷뱅킹", "모바일뱅킹", "앱", "로그인", "비밀번호", "보안", "인증서",
             "이체", "조회", "스마트폰", "온라인", "웹", "접속", "등록"
         ));
         
@@ -76,7 +76,7 @@ public class CategoryRecommender {
         ));
         
         put(Category.UTILITY_BILL, Arrays.asList(
-            "공과금", "납부", "세금", "국민연금", "건강보험", "전���요��", "수도요금",
+            "공과금", "납부", "세금", "국민연금", "건강보험", "전기요금", "수도요금",
             "가스요금", "지방세", "국세", "범칙금", "과태료"
         ));
         
