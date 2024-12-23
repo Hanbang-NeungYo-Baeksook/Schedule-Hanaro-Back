@@ -102,6 +102,7 @@ public class InquiryService {
 			.inquiryNum(inquiry.getInquiryNum())
 			.category(inquiry.getCategory().toString())
 			.status(inquiry.getInquiryStatus().toString())
+			.customerName(inquiry.getCustomer().getName())
 			.content(inquiry.getContent())
 			.tags(List.of(inquiry.getTags().split(",")))
 			.build();
