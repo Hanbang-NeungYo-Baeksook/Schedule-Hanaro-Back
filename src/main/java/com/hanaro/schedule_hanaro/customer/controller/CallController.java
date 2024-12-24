@@ -37,12 +37,11 @@ public class CallController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
-
 	@Operation(summary = "전화 상담 예약 취소", description = "특정 전화 상담 예약을 취소합니다.")
 	@DeleteMapping("/{call-id}")
 	public ResponseEntity<?> cancelCall(@PathVariable("call-id") Long callId) {
 		callService.cancelCall(callId);
-		return ResponseEntity.noContent().build();
+		return ResponseEntity.status(HttpStatus.OK).body(callId);
 	}
 
 	@Operation(summary = "전화 상담 시간대 가능 인원 반환", description = "전화 상담 시간대의 가능 인원 반환합니다.")
@@ -72,11 +71,10 @@ public class CallController {
 
 	@Operation(summary = "전화 상담 정보 상세", description = "특정 전화 상담의 상세 정보를 조회합니다.")
 	@GetMapping("/{call-id}")
-	public ResponseEntity<Map<String, CallDetailResponse>> getCallDetail(
+	public ResponseEntity<CallDetailResponse> getCallDetail(
 		@PathVariable("call-id") Long callId
 	) {
 		CallDetailResponse response = callService.getCallDetail(callId);
-		Map<String, CallDetailResponse> wrappedResponse = Map.of("data", response);
-		return ResponseEntity.ok().body(wrappedResponse);
+		return ResponseEntity.ok().body(response);
 	}
 }
