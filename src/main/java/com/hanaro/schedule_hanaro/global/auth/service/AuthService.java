@@ -106,4 +106,7 @@ public class AuthService {
 		return SignUpResponse.of();
 	}
 
+	public void logout(Customer customer) {
+		redisTemplate.delete(customer.getAuthId() + customer.getRole().getRole());
+	}
 }
