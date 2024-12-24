@@ -53,6 +53,10 @@ jobs:
         ls -a build/libs
         pwd
 
+    - name: Clear Gradle Cache
+      run: rm -rf ~/.gradle/caches/
+
+
 #    - name: Docker Image Build
 #      run: docker build -t ${{secrets.DOCKERHUB_USERNAME}}/schedule-hanaro-back:1.0.0 .
 #
@@ -82,7 +86,7 @@ jobs:
         run: |
           pwd
           ls -a
-          scp build/libs/*.jar ec2-user@${{ secrets.WAS }}:home/ubuntu/workspace/
+          scp /home/runner/work/Schedule-Hanaro-Back/Schedule-Hanaro-Back/build/libs/*.jar ec2-user@${{ secrets.WAS }}:/home/ubuntu/workspace/
 
       - name: restart spring
         run: |
