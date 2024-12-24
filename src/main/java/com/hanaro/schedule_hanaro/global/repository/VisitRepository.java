@@ -46,7 +46,7 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
 
 	Slice<Visit> findByCustomerIdAndStatus(Long customerId, Status status, Pageable pageable);
 
-	@Query("SELECT v FROM Visit v WHERE v.section.id = :sectionId AND v.status = :status ORDER BY v.num ASC")
+	@Query("SELECT v FROM Visit v WHERE v.section.id = :sectionId AND v.status = :status ORDER BY v.num ASC LIMIT 1")
 	Optional<Visit> findNextPendingVisit(@Param("sectionId") Long sectionId, @Param("status") Status status);
 
 	@Query("select v.category from Visit v where v.section.id = :sectionId and v.status = :status and v.num < :numBefore")
@@ -56,10 +56,43 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
 	@Query("SELECT v FROM Visit v WHERE v.id = :id")
 	Optional<Visit> findByIdWithPessimisticLock(@Param("id") Long id);
 
-	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query("SELECT v FROM Visit v WHERE v.section.id = :sectionId AND v.status = :status ORDER BY v.num ASC")
-	Optional<Visit> findNextPendingVisitWithPessimisticLock(@Param("sectionId") Long sectionId, @Param("status") Status status);
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	List<Visit> findNextPendingVisitsWithPessimisticLock(@Param("sectionId") Long sectionId, @Param("status") Status status);
 
-	@Query("SELECT v FROM Visit v WHERE v.section.id = :sectionId AND v.status = :status")
+	// JPQL 쿼리 사용 (권장)
+@Query("SELECT v FROM Visit v " +
+"WHERE v.section.id = :sectionId " +
+"AND v.status = :status " +
+"ORDER BY v.num ASC")
+List<Visit> findCurrentProgressVisits(@Param("sectionId") Long sectionId, @Param("status") Status status);
+
+	@Query("SELECT v FROM Visit v " +
+	       "WHERE v.section.id = :sectionId " +
+	       "AND v.visitDate = CURRENT_DATE " +
+	       "AND v.num < :currentNum " +
+	       "AND v.status IN (:completedStatus, :progressStatus) " +
+	       "ORDER BY v.num DESC " +
+	       "LIMIT 1")
+	Optional<Visit> findPreviousVisit(
+		@Param("sectionId") Long sectionId, 
+		@Param("currentNum") int currentNum,
+		@Param("completedStatus") Status completedStatus,
+		@Param("progressStatus") Status progressStatus
+	);
+
+	@Query("SELECT v FROM Visit v " +
+	       "WHERE v.section.id = :sectionId " +
+	       "AND v.status = :status " +
+	       "ORDER BY v.num ASC")
 	Optional<Visit> findCurrentProgressVisit(@Param("sectionId") Long sectionId, @Param("status") Status status);
+
+	// 현재 방문의 이전 방문을 찾는 쿼리 추가
+	@Query("SELECT v FROM Visit v " +
+	       "WHERE v.section.id = :sectionId " +
+	       "AND v.num < :currentNum " +
+	       "ORDER BY v.num DESC " +
+	       "LIMIT 1")
+	Optional<Visit> findPreviousVisit(@Param("sectionId") Long sectionId, @Param("currentNum") int currentNum);
+
 }

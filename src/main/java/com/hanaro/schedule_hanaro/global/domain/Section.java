@@ -76,9 +76,15 @@ public class Section {
 		this.waitTime -= amount;
 	}
 
-	public void updateStatusPendingToProgress(int num, Integer amount){
-		this.currentNum  = num;
-		this.waitAmount -= 1;
-		this.waitTime = Math.max(this.waitTime - amount, 0);
+	public void updateStatusPendingToProgress(int currentNum, int waitTime) {
+		this.currentNum = currentNum;
+		this.waitTime = waitTime;
+		
+		// waitAmount가 0보다 작거나 INT 최대값을 초과하지 않도록 체크
+		if (this.waitAmount != null && this.waitAmount > 0) {
+			this.waitAmount = Math.min(Integer.MAX_VALUE, Math.max(0, this.waitAmount - 1));
+		} else {
+			this.waitAmount = 0;
+		}
 	}
 }

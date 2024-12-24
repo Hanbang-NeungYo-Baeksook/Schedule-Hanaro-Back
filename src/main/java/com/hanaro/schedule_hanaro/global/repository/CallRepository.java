@@ -88,16 +88,6 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 	""")
 	List<Object[]> findStatsByAdminId(@Param("adminId") Long adminId);
 
-	default AdminInquiryStatsDto getStatsByAdminId(Long adminId) {
-		Object[] result = findStatsByAdminId(adminId).get(0);
-		return AdminInquiryStatsDto.of(
-			((Number) result[0]).intValue(),
-			((Number) result[1]).intValue(),
-			((Number) result[2]).intValue(),
-			((Number) result[3]).intValue()
-		);
-	}
-
 	Integer countCallsByCustomer(Customer customer);
 
 }

@@ -19,7 +19,10 @@ import jakarta.persistence.LockModeType;
 public interface CsVisitRepository extends JpaRepository<CsVisit, Long> {
 	Optional<CsVisit> findById(final Long id);
 
-	Optional<CsVisit> findByBranchIdAndDate(Long branchId, LocalDate date);
+	@Query("SELECT cv FROM CsVisit cv " +
+		   "WHERE cv.branch.id = :branchId " +
+		   "AND cv.date = :date")
+	Optional<CsVisit> findByBranchIdAndDate(@Param("branchId") Long branchId, @Param("date") LocalDate date);
 
 	Optional<CsVisit> findByBranchId(Long id);
 
@@ -28,4 +31,11 @@ public interface CsVisitRepository extends JpaRepository<CsVisit, Long> {
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query("SELECT c FROM CsVisit c WHERE c.branch.id = :branchId AND c.date = :date")
 	Optional<CsVisit> findByBranchIdAndDateWithPessimisticLock(@Param("branchId") Long branchId, @Param("date") LocalDate date);
+
+	// Native Query로도 시도해볼 수 있습니다
+	@Query(value = "SELECT * FROM cs_visit " +
+		   "WHERE branch_id = :branchId " +
+		   "AND date = :date", 
+		   nativeQuery = true)
+	Optional<CsVisit> findByBranchIdAndDateNative(@Param("branchId") Long branchId, @Param("date") LocalDate date);
 }
