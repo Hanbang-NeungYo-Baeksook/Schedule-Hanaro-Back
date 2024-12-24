@@ -15,6 +15,7 @@ import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallDetailResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallHistoryListResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallHistoryResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallInfoResponse;
+import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallTotalInfoResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallWaitResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryHistoryResponse;
 
@@ -33,6 +34,12 @@ import com.hanaro.schedule_hanaro.global.repository.CallMemoRepository;
 import com.hanaro.schedule_hanaro.global.repository.CallRepository;
 import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
 import com.hanaro.schedule_hanaro.global.repository.InquiryRepository;
+import com.hanaro.schedule_hanaro.global.domain.Admin;
+import com.hanaro.schedule_hanaro.global.domain.Call;
+import com.hanaro.schedule_hanaro.global.domain.CallMemo;
+import com.hanaro.schedule_hanaro.global.domain.Customer;
+import com.hanaro.schedule_hanaro.global.domain.enums.Category;
+import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
 import com.hanaro.schedule_hanaro.global.websocket.handler.WebsocketHandler;
 
@@ -54,14 +61,17 @@ public class AdminCallService {
 		// 진행 중
 		AdminCallInfoResponse progressCall = callRepository.findByStatus(Status.PROGRESS)
 			.stream()
-			.map(this::getCallInfo)
 			.findFirst()
+			.map((call) -> {
+				System.out.println(call.getId());
+				return AdminCallInfoResponse.from(call, callMemoRepository.findByCallId(call.getId()));
+			})
 			.orElse(null);
 
 		// 대기 중
 		List<AdminCallInfoResponse> pendingCalls = callRepository.findByStatus(Status.PENDING)
 			.stream()
-			.map(this::getCallInfo)
+			.map(call -> AdminCallInfoResponse.from(call, callMemoRepository.findByCallId(call.getId())))
 			.toList();
 
 		return AdminCallWaitResponse.of(progressCall, pendingCalls);
@@ -94,14 +104,14 @@ public class AdminCallService {
 	}
 
 	@Transactional
-	public String changeCallStatusComplete(Long callId) {
+	public Long changeCallStatusComplete(Long callId) {
 		// 상담 완료로 변경
 		Call call = callRepository.findById(callId)
 			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CALL));
 
 		if (call.getStatus().equals(Status.PROGRESS)) {
 			callRepository.updateStatusWithEndedAt(callId, Status.COMPLETE, LocalDateTime.now());
-			return "상담 완료 처리되었습니다.";
+			return callId;
 		} else {
 			throw new GlobalException(ErrorCode.WRONG_CALL_STATUS);
 		}
@@ -109,7 +119,7 @@ public class AdminCallService {
 	}
 
 	@Transactional
-	public String saveCallMemo(Authentication authentication, Long callId, String content) {
+	public Long saveCallMemo(Authentication authentication, Long callId, String content) {
 		Call call = callRepository.findById(callId)
 			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CALL));
 
@@ -128,7 +138,6 @@ public class AdminCallService {
 				.build();
 
 			callMemoRepository.save(updatedCallMemo);
-
 		} else {
 			Admin admin = adminRepository.findById(PrincipalUtils.getId(authentication))
 				.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_ADMIN));
@@ -142,7 +151,8 @@ public class AdminCallService {
 			callMemoRepository.save(newCallMemo);
 		}
 
-		return "Success";
+
+		return callId;
 	}
 
 	public AdminCallHistoryListResponse findFilteredCalls(int page, int size, Status status, LocalDate startedAt,
@@ -183,10 +193,10 @@ public class AdminCallService {
 		return AdminCallDetailResponse.from(call, customer, callMemo);
 	}
 
-	public AdminCallInfoResponse getCallInfo(Call call) {
+	public AdminCallTotalInfoResponse getCallInfo(Call call) {
 		CallMemo callMemo = callMemoRepository.findByCallId(call.getId());
 
-		return AdminCallInfoResponse.from(
+		return AdminCallTotalInfoResponse.from(
 			call,
 			call.getCustomer(),
 			callRepository.findByCustomerIdAndIdNotAndStatus(call.getCustomer().getId(), call.getId(), Status.COMPLETE)

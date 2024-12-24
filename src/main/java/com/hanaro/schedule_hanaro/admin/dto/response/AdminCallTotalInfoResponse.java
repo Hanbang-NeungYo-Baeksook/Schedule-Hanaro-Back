@@ -10,7 +10,7 @@ import com.hanaro.schedule_hanaro.global.domain.CallMemo;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 
-public record AdminCallInfoResponse(
+public record AdminCallTotalInfoResponse(
 	Long id,
 	@JsonProperty("waiting_num")
 	int waitingNum,
@@ -23,13 +23,25 @@ public record AdminCallInfoResponse(
 	LocalDateTime startTime,
 	@JsonProperty("end_time")
 	LocalDateTime endTime,
-	@JsonProperty("customer_id")
-	Long customerId,
+	@JsonProperty("user_name")
+	String userName,
+	@JsonProperty("auth_id")
+	String authId,
+	String mobile,
+	@JsonProperty("birth_dt")
+	LocalDate birthDt,
+
+	List<AdminCallHistoryResponse> calls,
+	List<AdminInquiryHistoryResponse> inquires,
+
 	String memo
 ) {
-	public static AdminCallInfoResponse from(final Call call,
+
+	public static AdminCallTotalInfoResponse from(final Call call, final Customer customer,
+		final List<AdminCallHistoryResponse> calls,
+		final List<AdminInquiryHistoryResponse> inquires,
 		final CallMemo memo) {
-		return new AdminCallInfoResponse(
+		return new AdminCallTotalInfoResponse(
 			call.getId(),
 			call.getCallNum(),
 			call.getCategory(),
@@ -38,7 +50,12 @@ public record AdminCallInfoResponse(
 			call.getCallDate(),
 			call.getStartedAt(),
 			call.getEndedAt(),
-			call.getCustomer().getId(),
+			customer.getName(),
+			customer.getAuthId(),
+			customer.getPhoneNum(),
+			customer.getBirth(),
+			calls,
+			inquires,
 			memo == null ? null : memo.getContent()
 		);
 	}

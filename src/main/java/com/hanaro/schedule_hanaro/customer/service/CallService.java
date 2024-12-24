@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +24,10 @@ import com.hanaro.schedule_hanaro.customer.dto.response.CallDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallListResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.TimeSlotAvailabilityResponse;
+import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
+import com.hanaro.schedule_hanaro.global.exception.GlobalException;
+import com.hanaro.schedule_hanaro.global.repository.CallRepository;
+import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
 import com.hanaro.schedule_hanaro.global.domain.Call;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
@@ -83,8 +88,7 @@ public class CallService {
 
 				Call savedCall = callRepository.save(newCall);
 
-				AdminCallInfoResponse adminCallInfoResponse = adminCallService.getCallInfo(savedCall);
-				websocketHandler.notifySubscribers(1L, "새로운 Call 등록: " + adminCallInfoResponse);
+				websocketHandler.notifySubscribers(1L, "새로운 Call 등록: " + savedCall.getId());
 
 				return CallResponse.builder()
 					.callId(savedCall.getId())
