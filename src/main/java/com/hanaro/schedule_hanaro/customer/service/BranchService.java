@@ -143,28 +143,43 @@ public class BranchService {
 		return "Success";
 	}
 
-	// 추천 영업점 알고리즘
 	public List<BranchRecommendationData> recommendBranches(double userLat, double userLon, TransportType transportType, SectionType sectionType) {
 		// 최대 거리 설정
 		double maxDistance = transportType == TransportType.WALK ? 3.0 : 15.0;
 
 		// 가중치 설정
-		double distanceWeight = transportType == TransportType.WALK ? 0.8 : 0.2;
+		double distanceWeight = transportType == TransportType.WALK ? 0.7 : 0.5; // 가중치 수정
 		double categoryWeight = 1.0 - distanceWeight;
 
 		// BranchType이 "BANK"인 데이터만 가져오기
 		List<Branch> branches = branchRepository.findAllByBranchType(BranchType.BANK);
 
-		// Branch 데이터를 처리하여 BranchWithMetrics 리스트 생성
-		List<BranchWithMetrics> branchMetrics = branches.stream()
+		// 가장 가까운 영업점을 계산하여 저장
+		BranchWithMetrics closesBranch = branches.stream()
 			.map(branch -> {
-				// 거리 계산
 				double distance = DistanceUtils.calculateDistance(
 					userLat, userLon,
 					Double.parseDouble(branch.getYPosition()), Double.parseDouble(branch.getXPosition())
 				);
 
-				// Section 데이터 가져오기
+				Section section = sectionRepository.findByBranchAndSectionType(branch, sectionType)
+					.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_SECTION));
+
+				int waitAmount = section.getWaitAmount();
+
+				return BranchWithMetrics.of(branch, distance, waitAmount);
+			})
+			.min(Comparator.comparingDouble(BranchWithMetrics::distance)) // 가장 가까운 영업점 저장(거리제한)
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_BRANCH));
+
+		// Branch 데이터를 처리하여 BranchWithMetrics 리스트 생성
+		List<BranchWithMetrics> branchMetrics = branches.stream()
+			.map(branch -> {
+				double distance = DistanceUtils.calculateDistance(
+					userLat, userLon,
+					Double.parseDouble(branch.getYPosition()), Double.parseDouble(branch.getXPosition())
+				);
+
 				Section section = sectionRepository.findByBranchAndSectionType(branch, sectionType)
 					.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_SECTION));
 
@@ -176,6 +191,23 @@ public class BranchService {
 			.sorted(Comparator.comparingDouble(BranchWithMetrics::distance)) // 거리 기준 정렬
 			.limit(9) // 최대 9개로 제한
 			.toList();
+
+		// 거리 제한 때문에 리스트가 비어있을 경우 가장 가까운 영업점 추천
+		if (branchMetrics.isEmpty()) {
+			// 가장 가까운 영업점을 DTO로 변환
+			Branch branch = closesBranch.branch();
+			Section section = sectionRepository.findByBranchAndSectionType(branch, sectionType)
+				.orElseThrow(() -> new IllegalStateException("해당 카테고리의 섹션 데이터가 없습니다."));
+
+			return List.of(BranchRecommendationData.of(
+				branch.getId(),
+				branch.getName(),
+				branch.getAddress(),
+				closesBranch.distance(),
+				section.getWaitTime(),
+				section.getCurrentNum()
+			));
+		}
 
 		// 3개씩 그룹화하여 각 그룹의 최적 영업점 선택
 		List<BranchWithMetrics> bestBranches = IntStream.range(0, branchMetrics.size())
@@ -209,7 +241,6 @@ public class BranchService {
 			})
 			.collect(Collectors.toList());
 	}
-
 	private double calculateWeight(double distance, int waitAmount, double distanceWeight, double categoryWeight) {
 		return (distance * distanceWeight) + (waitAmount * categoryWeight);
 	}
