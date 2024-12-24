@@ -9,7 +9,8 @@ public record CustomerInfoResponse(
 		String birth,
 		String phoneNum,
 		Integer callAmount,
-		Integer InquiryAmount
+		Integer inquiryAmount,
+		Integer visitAmount
 ) {
 	public static CustomerInfoResponse of(
 		final String name,
@@ -17,7 +18,8 @@ public record CustomerInfoResponse(
 		final String birth,
 		final String phoneNum,
 		final Integer callAmount,
-		final Integer InquiryAmount
+		final Integer inquiryAmount,
+		final Integer visitAmount
 	) {
 
 		return CustomerInfoResponse.builder()
@@ -26,7 +28,8 @@ public record CustomerInfoResponse(
 			.birth(birth)
 			.phoneNum(phoneNum)
 			.callAmount(callAmount)
-			.InquiryAmount(InquiryAmount)
+			.inquiryAmount(inquiryAmount)
+			.visitAmount(visitAmount)
 			.build();
 	}
 }
