@@ -50,7 +50,7 @@ jobs:
     - name: Build with Gradle Wrapper
       run: |
         ./gradlew clean build
-        ls -a
+        ls -a build/libs
         pwd
 
 #    - name: Docker Image Build
