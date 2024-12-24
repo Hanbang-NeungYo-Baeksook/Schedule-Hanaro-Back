@@ -58,4 +58,8 @@ public class Inquiry extends BaseEntity{
 		this.inquiryStatus = status;
 		this.tags = tags;
 	}
+
+	public void setStatus(InquiryStatus status) {
+		this.inquiryStatus = status;
+	}
 }
