@@ -81,7 +81,7 @@ jobs:
       - name: scp jar to WAS
         run: |
           pwd
-          ls -al
+          ls -a
           scp build/libs/*.jar ec2-user@${{ secrets.WAS }}:home/ubuntu/workspace/
 
       - name: restart spring
