@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,7 +40,8 @@ public class AdminInquiryService {
 	private final InquiryRepository inquiryRepository;
 
 	public AdminInquiryListResponse findInquiryList(AdminInquiryListRequest request) {
-		Pageable pageable = PageRequest.of(request.page(), request.size());
+		Pageable pageable = PageRequest.of(request.page() - 1, request.size(), Sort.by(Sort.Direction.ASC, "id"));
+
 
 		Page<Inquiry> inquiries = inquiryRepository.findFilteredInquiries(
 			request.inquiryStatus(),
@@ -47,6 +49,17 @@ public class AdminInquiryService {
 			request.searchContent(),
 			pageable
 		);
+
+		if (inquiries.isEmpty()) {
+			return AdminInquiryListResponse.from(
+				List.of(), // 빈 목록
+				request.page(),
+				request.size(),
+				0L,        // 총 아이템 수
+				0          // 총 페이지 수
+			);
+		}
+
 
 
 
@@ -59,7 +72,7 @@ public class AdminInquiryService {
 
 		return AdminInquiryListResponse.from(
 			inquiryDataList,
-			inquiries.getNumber(),
+			inquiries.getNumber() + 1,
 			inquiries.getSize(),
 			inquiries.getTotalElements(),
 			inquiries.getTotalPages()
