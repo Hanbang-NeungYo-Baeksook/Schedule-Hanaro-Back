@@ -60,6 +60,9 @@ public class Section {
 	) {
 		this.branch = branch;
 		this.sectionType = sectionType;
+		this.currentNum = 0;
+		this.waitTime = 0;
+		this.waitAmount = 0;
 	}
 
 	public void increase(Integer amount) {

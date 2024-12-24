@@ -17,10 +17,9 @@ import com.hanaro.schedule_hanaro.customer.dto.response.BranchListResponse;
 import com.hanaro.schedule_hanaro.customer.service.BranchService;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchRecommendationResponse;
-import com.hanaro.schedule_hanaro.global.domain.enums.Category;
+import com.hanaro.schedule_hanaro.customer.service.SectionService;
 import com.hanaro.schedule_hanaro.global.domain.enums.SectionType;
 import com.hanaro.schedule_hanaro.global.domain.enums.TransportType;
-import com.hanaro.schedule_hanaro.global.utils.GetSectionByCategory;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/branches")
 public class BranchController {
 	private final BranchService branchService;
+	private final SectionService sectionService;
 
 	@Operation(summary = "영업점 정보 목록 조회", description = "영업점의 목록을 조회합니다.")
 	@GetMapping("")
@@ -75,5 +75,15 @@ public class BranchController {
 
 		return ResponseEntity.ok(response);
 	}
+	//
+	// @PostMapping("/sections")
+	// public ResponseEntity<String> createSection() throws Exception {
+	// 	try {
+	// 		sectionService.insertSections();
+	// 	} catch (Exception e) {
+	// 		throw new Exception(e.getMessage());
+	// 	}
+	// 	return ResponseEntity.ok().body("Success");
+	// }
 
 }
