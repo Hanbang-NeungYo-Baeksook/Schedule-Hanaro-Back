@@ -34,6 +34,4 @@ public class SectionService {
 		section.decrease(cancelReservationDto.waitTime());
 		sectionRepository.saveAndFlush(section);
 	}
-
-	public
 }
