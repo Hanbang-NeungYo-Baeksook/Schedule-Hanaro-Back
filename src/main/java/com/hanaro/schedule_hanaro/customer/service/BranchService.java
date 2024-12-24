@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -20,10 +19,9 @@ import com.hanaro.schedule_hanaro.customer.dto.response.BranchDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchListResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchRecommendationResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchWithMetrics;
-import com.hanaro.schedule_hanaro.global.auth.info.CustomUserDetails;
-import com.hanaro.schedule_hanaro.global.auth.info.UserInfo;
 import com.hanaro.schedule_hanaro.global.domain.Section;
 import com.hanaro.schedule_hanaro.global.domain.Visit;
+import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.SectionType;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 import com.hanaro.schedule_hanaro.global.domain.enums.TransportType;
@@ -32,10 +30,10 @@ import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 import com.hanaro.schedule_hanaro.global.repository.BranchRepository;
 import com.hanaro.schedule_hanaro.global.domain.Branch;
 import com.hanaro.schedule_hanaro.global.domain.enums.BranchType;
-import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
 import com.hanaro.schedule_hanaro.global.repository.SectionRepository;
 import com.hanaro.schedule_hanaro.global.repository.VisitRepository;
 import com.hanaro.schedule_hanaro.global.utils.DistanceUtils;
+import com.hanaro.schedule_hanaro.global.utils.GetSectionByCategory;
 import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
 
 import lombok.RequiredArgsConstructor;
@@ -46,12 +44,9 @@ public class BranchService {
 	private final BranchRepository branchRepository;
 	private final SectionRepository sectionRepository;
 	private final VisitRepository visitRepository;
-	private final CustomerRepository customerRepository;
 
 	public BranchDetailResponse findBranchById(Long branchId, Authentication authentication) {
 		List<BankVO> results= branchRepository.findBranchByBranch_Id(branchId);
-		List<Visit> visitOptional = visitRepository.findByCustomer_IdAndStatus(PrincipalUtils.getId(authentication),
-			Status.PENDING);
 		List<Long> reservedList = getReservedList(authentication);
 
 		Map<Long, BranchDetailResponse> dtoMap = createBranchDtoMapFromBankVoList(results, reservedList);
@@ -93,7 +88,7 @@ public class BranchService {
 		return dtoMap;
 	}
 
-	public BranchListResponse listBranch(double userLat, double userLon, Authentication authentication) {
+	public BranchListResponse listBranch(double userLat, double userLon, String key, String category, Authentication authentication) {
 
 		List<Branch> atmList = branchRepository.findAllByBranchTypeOrderByIdAsc(BranchType.ATM);
 		List<BankVO> results = branchRepository.findBranchByBranchType(BranchType.BANK);
@@ -101,6 +96,16 @@ public class BranchService {
 		List<Long> reservedList = getReservedList(authentication);
 
 		Map<Long, BranchDetailResponse> dtoMap = createBranchDtoMapFromBankVoList(results, reservedList);
+		List<BranchDetailResponse> bankList = new ArrayList<>(dtoMap.values());
+
+		SectionType sectionType = GetSectionByCategory.getSectionTypeByCategory(Category.valueOf(category));
+		if (key.equals("거리순")) {
+			bankList.sort(Comparator.comparing(BranchDetailResponse::distance));
+		} else {
+			bankList.sort(
+				Comparator.comparing(branchDetailResponse -> branchDetailResponse.waitTime()
+					.get(branchDetailResponse.sectionTypes().indexOf(sectionType.getType()))));
+		}
 
 		List<AtmInfoDto> atmInfoDtoList = atmList.stream()
 			.map(atm -> AtmInfoDto.of(
@@ -162,7 +167,6 @@ public class BranchService {
 				Section section = sectionRepository.findByBranchAndSectionType(branch, sectionType)
 					.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_SECTION));
 
-				int currentNum = section.getCurrentNum();
 				int waitAmount = section.getWaitAmount();
 
 				return BranchWithMetrics.of(branch, distance, waitAmount);
