@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.hanaro.schedule_hanaro.customer.dto.response.BranchRecommendationData;
 import com.hanaro.schedule_hanaro.customer.vo.BankVO;
 import com.hanaro.schedule_hanaro.customer.dto.request.BranchListCreateRequest;
 import com.hanaro.schedule_hanaro.customer.dto.response.AtmInfoDto;
@@ -143,12 +144,12 @@ public class BranchService {
 	}
 
 	// 추천 영업점 알고리즘
-	public List<BranchRecommendationResponse> recommendBranches(double userLat, double userLon, TransportType transportType, SectionType sectionType) {
+	public List<BranchRecommendationData> recommendBranches(double userLat, double userLon, TransportType transportType, SectionType sectionType) {
 		// 최대 거리 설정
 		double maxDistance = transportType == TransportType.WALK ? 3.0 : 15.0;
 
 		// 가중치 설정
-		double distanceWeight = transportType == TransportType.WALK ? 0.7 : 0.6;
+		double distanceWeight = transportType == TransportType.WALK ? 0.8 : 0.2;
 		double categoryWeight = 1.0 - distanceWeight;
 
 		// BranchType이 "BANK"인 데이터만 가져오기
@@ -197,7 +198,7 @@ public class BranchService {
 				Branch branch = bwm.branch();
 				Section section = sectionRepository.findByBranchAndSectionType(branch, sectionType)
 					.orElseThrow(() -> new IllegalStateException("해당 카테고리의 섹션 데이터가 없습니다."));
-				return BranchRecommendationResponse.of(
+				return BranchRecommendationData.of(
 					branch.getId(),
 					branch.getName(),
 					branch.getAddress(),

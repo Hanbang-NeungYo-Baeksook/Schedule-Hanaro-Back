@@ -2,6 +2,7 @@ package com.hanaro.schedule_hanaro.customer.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hanaro.schedule_hanaro.customer.dto.request.BranchListCreateRequest;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchListResponse;
+import com.hanaro.schedule_hanaro.customer.dto.response.BranchRecommendationData;
 import com.hanaro.schedule_hanaro.customer.service.BranchService;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchRecommendationResponse;
@@ -36,7 +38,7 @@ public class BranchController {
 	@Operation(summary = "영업점 정보 목록 조회", description = "영업점의 목록을 조회합니다.")
 	@GetMapping("")
 	public ResponseEntity<BranchListResponse> getBranchList(
-		@RequestParam("longitude") double xPosition,        // 사용자 위도
+		@RequestParam("longitude") double xPosition, // 사용자 위도
 		@RequestParam("latitude") double yPosition,
 		@RequestParam("order_by") String orderBy,
 		@RequestParam(value = "category",required = false) String category,
@@ -64,16 +66,20 @@ public class BranchController {
 
 	@Operation(summary = "추천 영업점 목록 조회", description = "추천 영업점의 목록을 조회합니다.")
 	@GetMapping("/recommend")
-	public ResponseEntity<List<BranchRecommendationResponse>> recommendBranches(
+	public ResponseEntity<BranchRecommendationResponse> recommendBranches(
 		@RequestParam("latitude") double latitude,        // 사용자 위도
 		@RequestParam("longitude") double longitude,      // 사용자 경도
 		@RequestParam("transportType") TransportType transportType, // 이동 방식 (도보/차량)
-		@RequestParam("category") SectionType category         // 카테고리 (예금/개인대출/기업대출)
+		@RequestParam("sectionType") SectionType category         // 카테고리 (예금/개인대출/기업대출)
 	) {
 
-		List<BranchRecommendationResponse> response = branchService.recommendBranches(latitude, longitude, transportType, category);
+		List<BranchRecommendationData> branchRecommendationDataList = branchService.recommendBranches(latitude,
+			longitude,
+			transportType, category);
 
-		return ResponseEntity.ok(response);
+		BranchRecommendationResponse response = BranchRecommendationResponse.of(branchRecommendationDataList);
+
+		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 	//
 	// @PostMapping("/sections")
