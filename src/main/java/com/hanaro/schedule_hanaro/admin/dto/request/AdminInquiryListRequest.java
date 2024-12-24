@@ -19,7 +19,7 @@ public record AdminInquiryListRequest(
 	public static AdminInquiryListRequest from(InquiryStatus inquiryStatus, Category category, String searchContent, Integer page, Integer size) {
 		return AdminInquiryListRequest.builder()
 			.inquiryStatus(Optional.ofNullable(inquiryStatus).orElse(InquiryStatus.PENDING))
-			.category(Optional.ofNullable(category).orElse(Category.SIGNIN))
+			.category(Optional.ofNullable(category).orElse(Category.LOAN))
 			.searchContent(searchContent)
 			.page(Optional.ofNullable(page).orElse(1))
 			.size(Optional.ofNullable(size).orElse(5))
