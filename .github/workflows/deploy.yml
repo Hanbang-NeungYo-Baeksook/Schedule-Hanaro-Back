@@ -69,29 +69,29 @@ jobs:
 #    - name: Docker Hub Push
 #      run: docker push ${{secrets.DOCKERHUB_USERNAME}}/schedule-hanaro-back:1.0.0
 
-  cd:
-    needs: [ci]
-    runs-on: ubuntu-24.04
+  # cd:
+  #   needs: [ci]
+  #   runs-on: ubuntu-24.04
 
-    steps:
-      - name: Setup ssh
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 400 ~/.ssh/id_rsa
-          ssh-keyscan ${{ secrets.WAS }} >> ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/known_hosts
+  #   steps:
+    - name: Setup ssh
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 400 ~/.ssh/id_rsa
+        ssh-keyscan ${{ secrets.WAS }} >> ~/.ssh/known_hosts
+        chmod 600 ~/.ssh/known_hosts
 
-      - name: scp jar to WAS
-        run: |
-          pwd
-          ls -a
-          scp /home/runner/work/Schedule-Hanaro-Back/Schedule-Hanaro-Back/build/libs/*.jar ec2-user@${{ secrets.WAS }}:/home/ubuntu/workspace/
+    - name: scp jar to WAS
+      run: |
+        pwd
+        ls -a
+         scp /home/runner/work/Schedule-Hanaro-Back/Schedule-Hanaro-Back/build/libs/*.jar ec2-user@${{ secrets.WAS }}:/home/ubuntu/workspace/
 
-      - name: restart spring
-        run: |
-          ssh ec2-user@${{ secrets.WAS }}
-          'cd /home/ubuntu/workspace && sudo systemctl restart springboot'
+    - name: restart spring
+      run: |
+        ssh ec2-user@${{ secrets.WAS }}
+        'cd /home/ubuntu/workspace && sudo systemctl restart springboot'
 
 #      - name: Docker Image Pull And Container Run
 #        uses: appleboy/ssh-action@v1.0.0
