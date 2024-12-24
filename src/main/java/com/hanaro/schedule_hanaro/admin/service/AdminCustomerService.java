@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallDto;
@@ -107,7 +108,7 @@ public class AdminCustomerService {
             throw new GlobalException(ErrorCode.WRONG_REQUEST_PARAMETER, "페이지 크기는 1 이상이어야 합니다.");
         }
 
-        Pageable pageable = PageRequest.of(page - 1, size);
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.ASC, "id"));
         Page<Customer> customers = customerRepository.findAll(pageable);
 
         if (customers.isEmpty()) {
