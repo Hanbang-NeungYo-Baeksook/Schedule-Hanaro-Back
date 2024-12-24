@@ -21,7 +21,8 @@ public class CustomAuthenticationEntryPointHandler implements AuthenticationEntr
 	public void commence(HttpServletRequest request, HttpServletResponse response,
 		AuthenticationException authException) throws IOException, ServletException {
 		ErrorCode errorCode = (ErrorCode)request.getAttribute("exception");
-		handleException(response,errorCode);
+		System.out.println(errorCode);
+		handleException(response, errorCode);
 	}
 
 	private void handleException(HttpServletResponse response, ErrorCode errorCode) throws IOException {
