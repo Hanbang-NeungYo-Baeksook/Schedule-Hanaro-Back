@@ -1,7 +1,5 @@
 package com.hanaro.schedule_hanaro.customer.controller;
 
-import java.security.Principal;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -51,7 +49,8 @@ public class VisitController {
 
 	@Operation
 	@DeleteMapping("/{visit-id}")
-	public ResponseEntity<DeleteVisitResponse> deleteVisit(@PathVariable("visit-id") Long visitId) throws InterruptedException {
+	public ResponseEntity<DeleteVisitResponse> deleteVisit(@PathVariable("visit-id") Long visitId) throws
+		InterruptedException {
 		return ResponseEntity.ok().body(visitService.deleteVisitReservation(visitId));
 	}
 

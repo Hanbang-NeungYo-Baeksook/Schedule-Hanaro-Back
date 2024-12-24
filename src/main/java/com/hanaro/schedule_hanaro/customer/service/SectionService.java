@@ -2,8 +2,6 @@ package com.hanaro.schedule_hanaro.customer.service;
 
 import java.util.List;
 
-import org.hibernate.dialect.lock.OptimisticEntityLockException;
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +26,8 @@ public class SectionService {
 
 	@Transactional
 	public void increaseWait(RegisterReservationDto registerReservationDto) {
-		Section section = sectionRepository.findByIdWithOptimisticLock(registerReservationDto.sectionId()).orElseThrow();
+		Section section = sectionRepository.findByIdWithOptimisticLock(registerReservationDto.sectionId())
+			.orElseThrow();
 		section.increase(registerReservationDto.waitTime());
 		sectionRepository.saveAndFlush(section);
 	}

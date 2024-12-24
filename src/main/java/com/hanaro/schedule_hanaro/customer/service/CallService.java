@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,20 +23,18 @@ import com.hanaro.schedule_hanaro.customer.dto.response.CallDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallListResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.CallResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.TimeSlotAvailabilityResponse;
-import com.hanaro.schedule_hanaro.global.auth.info.UserInfo;
-import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
-import com.hanaro.schedule_hanaro.global.exception.GlobalException;
-import com.hanaro.schedule_hanaro.global.repository.CallRepository;
-import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
 import com.hanaro.schedule_hanaro.global.domain.Call;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
+import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
+import com.hanaro.schedule_hanaro.global.exception.GlobalException;
+import com.hanaro.schedule_hanaro.global.repository.CallRepository;
+import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
 import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
 import com.hanaro.schedule_hanaro.global.websocket.handler.WebsocketHandler;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -66,7 +63,6 @@ public class CallService {
 		if (callRepository.isExistReservationsInSlot(customer.getId(), startTime, endTime)) {
 			throw new GlobalException(ErrorCode.CONFLICTING_CALL_RESERVATION, "같은 시간대에 이미 예약한 내역이 존재합니다.");
 		}
-
 
 		while (true) {
 			try {
@@ -134,7 +130,6 @@ public class CallService {
 		return responses;
 	}
 
-
 	@Transactional
 	public void cancelCall(Long callId) {
 		Call call = callRepository.findById(callId)
@@ -154,7 +149,7 @@ public class CallService {
 		int minute = callDateTime.getMinute() < 30 ? 0 : 30;
 		LocalDateTime startTime = callDateTime.withMinute(minute).withSecond(0).withNano(0);
 		LocalDateTime endTime = startTime.plusMinutes(30).minusSeconds(1);
-		return new LocalDateTime[]{startTime, endTime};
+		return new LocalDateTime[] {startTime, endTime};
 	}
 
 	public CallListResponse getCallList(Authentication authentication, String status, int page, int size) {
@@ -179,7 +174,7 @@ public class CallService {
 					call.getStatus(),
 					waitInfo.get("waitNum"),
 					waitInfo.get("estimatedWaitTime")
-					);
+				);
 			})
 			.toList();
 
@@ -202,7 +197,7 @@ public class CallService {
 		Map<String, Integer> waitInfo = calculateWaitInfo(call);
 
 		LocalDateTime[] timeSlotRange = getTimeSlotRange(call.getCallDate());
-		String timeSlot = timeSlotRange[0].toLocalTime() + "-" +timeSlotRange[1].plusSeconds(1).toLocalTime();
+		String timeSlot = timeSlotRange[0].toLocalTime() + "-" + timeSlotRange[1].plusSeconds(1).toLocalTime();
 
 		List<String> tags = call.getTags() != null && !call.getTags().isEmpty()
 			? List.of(call.getTags().split(","))
