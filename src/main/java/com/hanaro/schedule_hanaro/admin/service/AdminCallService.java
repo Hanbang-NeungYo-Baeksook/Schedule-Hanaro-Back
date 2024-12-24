@@ -1,11 +1,8 @@
 package com.hanaro.schedule_hanaro.admin.service;
 
-import static com.hanaro.schedule_hanaro.global.exception.ErrorCode.*;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +17,12 @@ import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallHistoryResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallInfoResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallWaitResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryHistoryResponse;
+import com.hanaro.schedule_hanaro.global.domain.Admin;
+import com.hanaro.schedule_hanaro.global.domain.Call;
+import com.hanaro.schedule_hanaro.global.domain.CallMemo;
+import com.hanaro.schedule_hanaro.global.domain.Customer;
+import com.hanaro.schedule_hanaro.global.domain.enums.Category;
+import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
 import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 import com.hanaro.schedule_hanaro.global.repository.AdminRepository;
@@ -27,16 +30,8 @@ import com.hanaro.schedule_hanaro.global.repository.CallMemoRepository;
 import com.hanaro.schedule_hanaro.global.repository.CallRepository;
 import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
 import com.hanaro.schedule_hanaro.global.repository.InquiryRepository;
-import com.hanaro.schedule_hanaro.global.domain.Admin;
-import com.hanaro.schedule_hanaro.global.domain.Call;
-import com.hanaro.schedule_hanaro.global.domain.CallMemo;
-import com.hanaro.schedule_hanaro.global.domain.Customer;
-import com.hanaro.schedule_hanaro.global.domain.enums.Category;
-import com.hanaro.schedule_hanaro.global.domain.enums.Status;
-import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
 import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
 import com.hanaro.schedule_hanaro.global.websocket.handler.WebsocketHandler;
-import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -52,7 +47,6 @@ public class AdminCallService {
 	private final WebsocketHandler websocketHandler;
 
 	public AdminCallWaitResponse findWaitList() {
-
 
 		// 진행 중
 		AdminCallInfoResponse progressCall = callRepository.findByStatus(Status.PROGRESS)
@@ -145,11 +139,11 @@ public class AdminCallService {
 			callMemoRepository.save(newCallMemo);
 		}
 
-
 		return "Success";
 	}
 
-	public AdminCallHistoryListResponse findFilteredCalls(int page, int size, Status status, LocalDate startedAt, LocalDate endedAt, Category category, String keyword) {
+	public AdminCallHistoryListResponse findFilteredCalls(int page, int size, Status status, LocalDate startedAt,
+		LocalDate endedAt, Category category, String keyword) {
 		Pageable pageable = PageRequest.of(page - 1, size);
 
 		Slice<Call> callSlice = callRepository.findByFiltering(pageable, status, startedAt, endedAt, category, keyword);
@@ -174,11 +168,12 @@ public class AdminCallService {
 			.build();
 	}
 
-	public AdminCallDetailResponse findCall (Long callId) {
+	public AdminCallDetailResponse findCall(Long callId) {
 		Call call = callRepository.findById(callId)
 			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CALL));
 
-		Customer customer = customerRepository.findById(call.getCustomer().getId()).orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CUSTOMER));
+		Customer customer = customerRepository.findById(call.getCustomer().getId())
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CUSTOMER));
 
 		CallMemo callMemo = callMemoRepository.findByCallId(callId);
 

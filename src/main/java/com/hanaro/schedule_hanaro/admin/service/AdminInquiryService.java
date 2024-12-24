@@ -13,19 +13,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.hanaro.schedule_hanaro.admin.dto.request.AdminInquiryListRequest;
-import com.hanaro.schedule_hanaro.admin.dto.request.AdminInquiryResponseRequest;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryDetailResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryListResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryResponse;
-import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
-import com.hanaro.schedule_hanaro.global.exception.GlobalException;
-import com.hanaro.schedule_hanaro.global.repository.InquiryResponseRepository;
-import com.hanaro.schedule_hanaro.global.repository.AdminRepository;
 import com.hanaro.schedule_hanaro.global.domain.Admin;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.Inquiry;
 import com.hanaro.schedule_hanaro.global.domain.InquiryResponse;
+import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
+import com.hanaro.schedule_hanaro.global.exception.GlobalException;
+import com.hanaro.schedule_hanaro.global.repository.AdminRepository;
 import com.hanaro.schedule_hanaro.global.repository.InquiryRepository;
+import com.hanaro.schedule_hanaro.global.repository.InquiryResponseRepository;
 import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
 
 import lombok.RequiredArgsConstructor;
@@ -47,8 +46,6 @@ public class AdminInquiryService {
 			request.searchContent(),
 			pageable
 		);
-
-
 
 		List<AdminInquiryListResponse.InquiryData> inquiryDataList = inquiries.getContent().stream()
 			.map(inquiry -> AdminInquiryListResponse.InquiryData.from(

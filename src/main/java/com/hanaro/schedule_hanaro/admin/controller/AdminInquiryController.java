@@ -18,7 +18,6 @@ import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryResponse;
 import com.hanaro.schedule_hanaro.admin.service.AdminInquiryService;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.InquiryStatus;
-import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

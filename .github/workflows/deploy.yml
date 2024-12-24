@@ -32,7 +32,7 @@ jobs:
       run: |
        # 현위치
        ls -al
-       
+
        mkdir -p src/main/resources
        echo "${{secrets.APPLICATION_SECRET_YML}}" | base64 --decode > src/main/resources/application-secret.yml
        # secret.yml 잘 생성되었는지 확인
@@ -50,32 +50,49 @@ jobs:
     - name: Build with Gradle Wrapper
       run: ./gradlew build
 
-    - name: Docker Image Build
-      run: docker build -t ${{secrets.DOCKERHUB_USERNAME}}/schedule-hanaro-back:1.0.0 .
-
-    - name: DockerHub Login
-      uses: docker/login-action@v2
-      with:
-        username: ${{secrets.DOCKERHUB_ID}}
-        password: ${{secrets.DOCKERHUB_PASSWORD}}
-
-    - name: Docker Hub Push
-      run: docker push ${{secrets.DOCKERHUB_USERNAME}}/schedule-hanaro-back:1.0.0
+#    - name: Docker Image Build
+#      run: docker build -t ${{secrets.DOCKERHUB_USERNAME}}/schedule-hanaro-back:1.0.0 .
+#
+#    - name: DockerHub Login
+#      uses: docker/login-action@v2
+#      with:
+#        username: ${{secrets.DOCKERHUB_ID}}
+#        password: ${{secrets.DOCKERHUB_PASSWORD}}
+#
+#    - name: Docker Hub Push
+#      run: docker push ${{secrets.DOCKERHUB_USERNAME}}/schedule-hanaro-back:1.0.0
 
   cd:
     needs: [ci]
     runs-on: ubuntu-24.04
 
     steps:
-      - name: Docker Image Pull And Container Run
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          host: ${{ secrets.SSH_SERVER_IP }}
-          username: ${{ secrets.SSH_USER }}
-          port: ${{ 22 }}
-          script: |
-            sh /home/ubuntu/deploy.sh
+      - name: Setup ssh
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 400 ~/.ssh/id_rsa
+          ssh-keyscan ${{ secrets.WAS }} >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: scp jar to WAS
+        run: |
+          scp spring/demo/build/libs/*.jar ec2-user@${{ secrets.WAS }}:home/ubuntu/workspace/
+
+      - name: restart spring
+        run: |
+          ssh ec2-user@${{ secrets.WAS }}
+          'cd /home/ubuntu/workspace && sudo systemctl restart springboot'
+
+#      - name: Docker Image Pull And Container Run
+#        uses: appleboy/ssh-action@v1.0.0
+#        with:
+#          key: ${{ secrets.SSH_PRIVATE_KEY }}
+#          host: ${{ secrets.SSH_SERVER_IP }}
+#          username: ${{ secrets.SSH_USER }}
+#          port: ${{ 22 }}
+#          script: |
+#            sh /home/ubuntu/deploy.sh
           
          
 

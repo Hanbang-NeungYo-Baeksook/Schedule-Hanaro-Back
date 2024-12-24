@@ -6,7 +6,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import com.hanaro.schedule_hanaro.customer.dto.response.CustomerInfoResponse;
-import com.hanaro.schedule_hanaro.global.domain.enums.InquiryStatus;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 import com.hanaro.schedule_hanaro.global.repository.CallRepository;
 import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
