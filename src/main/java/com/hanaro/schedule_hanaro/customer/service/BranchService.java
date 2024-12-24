@@ -12,16 +12,17 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.hanaro.schedule_hanaro.customer.dto.response.BranchRecommendationData;
-import com.hanaro.schedule_hanaro.customer.vo.BankVO;
 import com.hanaro.schedule_hanaro.customer.dto.request.BranchListCreateRequest;
 import com.hanaro.schedule_hanaro.customer.dto.response.AtmInfoDto;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchListResponse;
-import com.hanaro.schedule_hanaro.customer.dto.response.BranchRecommendationResponse;
+import com.hanaro.schedule_hanaro.customer.dto.response.BranchRecommendationData;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchWithMetrics;
+import com.hanaro.schedule_hanaro.customer.vo.BankVO;
+import com.hanaro.schedule_hanaro.global.domain.Branch;
 import com.hanaro.schedule_hanaro.global.domain.Section;
 import com.hanaro.schedule_hanaro.global.domain.Visit;
+import com.hanaro.schedule_hanaro.global.domain.enums.BranchType;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.SectionType;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
@@ -29,8 +30,6 @@ import com.hanaro.schedule_hanaro.global.domain.enums.TransportType;
 import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
 import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 import com.hanaro.schedule_hanaro.global.repository.BranchRepository;
-import com.hanaro.schedule_hanaro.global.domain.Branch;
-import com.hanaro.schedule_hanaro.global.domain.enums.BranchType;
 import com.hanaro.schedule_hanaro.global.repository.SectionRepository;
 import com.hanaro.schedule_hanaro.global.repository.VisitRepository;
 import com.hanaro.schedule_hanaro.global.utils.DistanceUtils;
@@ -47,7 +46,7 @@ public class BranchService {
 	private final VisitRepository visitRepository;
 
 	public BranchDetailResponse findBranchById(Long branchId, Authentication authentication) {
-		List<BankVO> results= branchRepository.findBranchByBranch_Id(branchId);
+		List<BankVO> results = branchRepository.findBranchByBranch_Id(branchId);
 		List<Long> reservedList = getReservedList(authentication);
 
 		Map<Long, BranchDetailResponse> dtoMap = createBranchDtoMapFromBankVoList(results, reservedList,0,0);
@@ -65,7 +64,7 @@ public class BranchService {
 
 	private Map<Long, BranchDetailResponse> createBranchDtoMapFromBankVoList(List<BankVO> bankVoList, List<Long> reservedList, double userLat, double userLon) {
 		Map<Long, BranchDetailResponse> dtoMap = new LinkedHashMap<>();
-		System.out.println("예약리스트"+reservedList);
+		System.out.println("예약리스트" + reservedList);
 		bankVoList.forEach(objects -> {
 			dtoMap.computeIfAbsent(objects.branchId(), id -> {
 				boolean reserved = false;
@@ -91,7 +90,8 @@ public class BranchService {
 		return dtoMap;
 	}
 
-	public BranchListResponse listBranch(double userLat, double userLon, String key, String category, Authentication authentication) {
+	public BranchListResponse listBranch(double userLat, double userLon, String key, String category,
+		Authentication authentication) {
 
 		List<Branch> atmList = branchRepository.findAllByBranchTypeOrderByIdAsc(BranchType.ATM);
 		List<BankVO> results = branchRepository.findBranchByBranchType(BranchType.BANK);
@@ -181,11 +181,13 @@ public class BranchService {
 		// Branch 데이터를 처리하여 BranchWithMetrics 리스트 생성
 		List<BranchWithMetrics> branchMetrics = branches.stream()
 			.map(branch -> {
+				// 거리 계산
 				double distance = DistanceUtils.calculateDistance(
 					userLat, userLon,
 					Double.parseDouble(branch.getYPosition()), Double.parseDouble(branch.getXPosition())
 				);
 
+				// Section 데이터 가져오기
 				Section section = sectionRepository.findByBranchAndSectionType(branch, sectionType)
 					.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_SECTION));
 
@@ -247,6 +249,7 @@ public class BranchService {
 			})
 			.collect(Collectors.toList());
 	}
+
 	private double calculateWeight(double distance, int waitAmount, double distanceWeight, double categoryWeight) {
 		return (distance * distanceWeight) + (waitAmount * categoryWeight);
 	}
