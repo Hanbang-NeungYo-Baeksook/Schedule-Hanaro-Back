@@ -33,16 +33,15 @@ public class AdminInquiryController {
 	@Operation(summary = "1:1 상담 목록 조회", description = "1:1 상담 목록을 조회합니다.")
 	@GetMapping
 	public ResponseEntity<?> getInquiryList(
-		@RequestParam(value = "status", required = false, defaultValue = "PENDING") InquiryStatus inquiryStatus,
+		@RequestParam(value = "status", required = false) InquiryStatus inquiryStatus,
 		@RequestParam(required = false) Category category,
 		@RequestParam(value = "search_content", required = false) String searchContent,
 		@RequestParam(defaultValue = "1") Integer page,
 		@RequestParam(defaultValue = "5") Integer size
 	) {
-		Category enumCategory = (category != null) ? category : Category.LOAN;
 
 		AdminInquiryListRequest request = AdminInquiryListRequest.from(
-			inquiryStatus, enumCategory, searchContent, page, size
+			inquiryStatus, category, searchContent, page, size
 		);
 
 		AdminInquiryListResponse response = adminInquiryService.findInquiryList(request);

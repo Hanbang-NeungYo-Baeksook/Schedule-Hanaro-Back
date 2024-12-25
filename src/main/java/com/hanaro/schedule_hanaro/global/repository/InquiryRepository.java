@@ -61,12 +61,12 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
 
 	@Query("SELECT i FROM Inquiry i " +
 		"LEFT JOIN Customer c ON i.customer.id = c.id " +
-		"WHERE (i.inquiryStatus = :status) " +
-		"AND (i.category = :category) " +
+		"WHERE (:status IS NULL OR i.inquiryStatus = :status) " +
+		"AND (:category IS NULL OR i.category = :category) " +
 		"AND (:searchContent IS NULL OR " +
 		"     i.tags LIKE %:searchContent% OR " +
 		"     i.content LIKE %:searchContent% OR " +
-		"     c.name LIKE %:searchContent%)" +
+		"     c.name LIKE %:searchContent%) " +
 		"ORDER BY i.createdAt DESC")
 	Page<Inquiry> findFilteredInquiries(
 		@Param("status") InquiryStatus status,
