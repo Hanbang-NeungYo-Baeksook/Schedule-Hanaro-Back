@@ -13,7 +13,7 @@ public record VisitCreateRequest(
 	@JsonProperty("branch_id")
 	Long branchId,
 	String content,
-	Category category
+	String category
 ) {
 
 }

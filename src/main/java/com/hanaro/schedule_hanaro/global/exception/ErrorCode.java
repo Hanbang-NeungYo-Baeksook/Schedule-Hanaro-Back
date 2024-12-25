@@ -25,6 +25,7 @@ public enum ErrorCode {
 	ALREADY_POST_MEMO(40011, HttpStatus.BAD_REQUEST, "이미 메모가 등록된 상담입니다."),
 	ALREADY_POST_RESPONSE(40012, HttpStatus.BAD_REQUEST, "이미 답변이 등록된 상담입니다."),
 	EMPTY_WAITS(40013, HttpStatus.BAD_REQUEST, "대기 중인 상담이 더이상 없습니다."),
+	INVALID_CATEGORY(40014, HttpStatus.BAD_REQUEST, "잘못된 카테고리 값입니다."),
 
 	// 401
 	EXPIRED_ACCESS_TOKEN(40101, HttpStatus.UNAUTHORIZED, "access 토큰이 만료되었습니다."),

@@ -74,8 +74,15 @@ public class VisitService {
 				visitReservationCreateRequest.branchId())
 			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_BRANCH));
 
+		Category category;
+		try {
+			category = Category.fromCategoryName(visitReservationCreateRequest.category());
+		} catch (IllegalArgumentException e) {
+			throw new GlobalException(ErrorCode.INVALID_CATEGORY, e.getMessage());
+		}
+
 		Section section = sectionRepository.findByBranchAndSectionType(branch,
-				GetSectionByCategory.getSectionTypeByCategory(visitReservationCreateRequest.category()))
+				GetSectionByCategory.getSectionTypeByCategory(category))
 			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_SECTION));
 
 		LocalDateTime now = LocalDateTime.now();
@@ -99,7 +106,7 @@ public class VisitService {
 		while (true) {
 			try {
 				RegisterReservationDto registerReservationDto = RegisterReservationDto.of(csVisitId, section.getId(),
-					visitReservationCreateRequest.category().getWaitTime());
+					category.getWaitTime());
 				totalNum = csVisitService.increaseWait(registerReservationDto);
 				System.out.println("totalNum 갱신:" + totalNum);
 				sectionService.increaseWait(registerReservationDto);
@@ -123,7 +130,7 @@ public class VisitService {
 				.num(totalNum)
 				.content(content)
 				.tags(tags)
-				.category(visitReservationCreateRequest.category())
+				.category(category)
 				.build()
 		);
 		return new CreateVisitResponse(savedVisit.getId());
