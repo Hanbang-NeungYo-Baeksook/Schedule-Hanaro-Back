@@ -99,7 +99,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          source: "/home/runner/work/Schedule-Hanaro-Back/Schedule-Hanaro-Back/build/libs/${{ secrets.DEPLOY }}"
+          source: "./build/libs/schedule_hanaro-0.0.1-SNAPSHOT.jar"
           target: "/home/ubuntu/workspace"
 
       # - name: scp jar to WAS
@@ -111,7 +111,7 @@ jobs:
       - name: restart spring
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_SERVER_IP }}
-          'cd /home/ubuntu/workspace && chmod +x ${{ secrets.DEPLOY }} && nohup -jar ${{ secrets.DEPLOY }}'
+          'cd /home/ubuntu/workspace && chmod +x ${{ secrets.DEPLOY }} && java -jar ${{ secrets.DEPLOY }}'
           
           #      - name: Docker Image Pull And Container Run
           #        uses: appleboy/ssh-action@v1.0.0
