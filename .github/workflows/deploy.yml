@@ -101,7 +101,7 @@ jobs:
 
       - name: restart spring
         run: |
-          ssh ec2-user@${{ secrets.SSH_SERVER_IP }}
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_SERVER_IP }}
           'cd /home/ubuntu/workspace && sudo systemctl restart springboot'
           
           #      - name: Docker Image Pull And Container Run
