@@ -99,7 +99,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          source: "/home/runner/work/Schedule-Hanaro-Back/Schedule-Hanaro-Back/build/libs/*.jar"
+          source: "/home/runner/work/Schedule-Hanaro-Back/Schedule-Hanaro-Back/build/libs/${{ secrets.DEPLOY }}"
           target: "/home/ubuntu/workspace"
 
       # - name: scp jar to WAS
