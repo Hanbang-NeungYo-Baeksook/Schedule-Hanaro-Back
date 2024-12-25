@@ -73,14 +73,14 @@ jobs:
       #   needs: [ci]
       #   runs-on: ubuntu-24.04
 
-      #   steps:
-      - name: Setup ssh
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 400 ~/.ssh/id_rsa
-          ssh-keyscan ${{ secrets.SSH_SERVER_IP }} >> ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/known_hosts
+      # #   steps:
+      # - name: Setup ssh
+      #   run: |
+      #     mkdir -p ~/.ssh
+      #     echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+      #     chmod 400 ~/.ssh/id_rsa
+      #     ssh-keyscan ${{ secrets.SSH_SERVER_IP }} >> ~/.ssh/known_hosts
+      #     chmod 600 ~/.ssh/known_hosts
 
       #      - name: execute remote ssh commands
       #        uses: appleboy/ssh-action@v0.1.10
@@ -102,7 +102,7 @@ jobs:
       - name: restart spring
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_SERVER_IP }}
-          'cd /home/ubuntu/workspace && sudo systemctl restart springboot'
+          'cd /home/ubuntu/workspace && chmod +x *.jar && nohup -jar *.jar'
           
           #      - name: Docker Image Pull And Container Run
           #        uses: appleboy/ssh-action@v1.0.0
