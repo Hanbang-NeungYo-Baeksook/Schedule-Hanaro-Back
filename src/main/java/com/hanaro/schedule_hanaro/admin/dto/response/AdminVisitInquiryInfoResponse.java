@@ -13,6 +13,9 @@ public record AdminVisitInquiryInfoResponse(
         @JsonProperty("visit_id")
         Long visitId,
 
+        @JsonProperty("customer_id")  // JSON 필드명을 프론트엔드와 맞춤
+        Long customerId,   
+
         String category,
 
         String content,
@@ -22,6 +25,7 @@ public record AdminVisitInquiryInfoResponse(
     public static  AdminVisitInquiryInfoResponse from(Visit visit) {
         return  AdminVisitInquiryInfoResponse.builder()
                 .visitId(visit.getId())
+                .customerId(visit.getCustomer().getId()) 
                 .category(visit.getCategory() != null ? visit.getCategory().getCategory() : null)
                 .content(visit.getContent())
                 .tags(Collections.singletonList(visit.getTags()))

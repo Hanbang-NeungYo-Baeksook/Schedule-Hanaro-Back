@@ -17,12 +17,15 @@ import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallHistoryResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallInfoResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallWaitResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryHistoryResponse;
+
 import com.hanaro.schedule_hanaro.global.domain.Admin;
 import com.hanaro.schedule_hanaro.global.domain.Call;
 import com.hanaro.schedule_hanaro.global.domain.CallMemo;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
+
+import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryStatsDto;
 import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
 import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 import com.hanaro.schedule_hanaro.global.repository.AdminRepository;
@@ -195,6 +198,16 @@ public class AdminCallService {
 				.map(AdminInquiryHistoryResponse::from)
 				.toList(),
 			callMemo
+		);
+	}
+
+	public AdminInquiryStatsDto getStatsByAdminId(Long adminId) {
+		Object[] result = callRepository.findStatsByAdminId(adminId).get(0);
+		return AdminInquiryStatsDto.of(
+			((Number) result[0]).intValue(),
+			((Number) result[1]).intValue(),
+			((Number) result[2]).intValue(),
+			((Number) result[3]).intValue()
 		);
 	}
 }

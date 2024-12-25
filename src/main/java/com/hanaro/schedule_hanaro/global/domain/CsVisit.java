@@ -48,12 +48,12 @@ public class CsVisit {
 	@Builder
 	public CsVisit(
 		Branch branch,
-		// int totalNum,
+		int totalNum,
 		LocalDate date
 		// int waitAmount
 	) {
 		this.branch = branch;
-		// this.totalNum = totalNum;
+		this.totalNum = totalNum;
 		this.date = date;
 		// this.waitAmount = waitAmount;
 	}
