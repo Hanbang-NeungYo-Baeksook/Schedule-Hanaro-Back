@@ -133,6 +133,7 @@ public class AdminVisitService {
         
         while (retryCount < maxRetries) {
             try {
+                // 1. 현재 방문 조회
                 Visit currentVisit = visitRepository.findByIdWithPessimisticLock(visitId)
                     .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_VISIT));
 
@@ -140,35 +141,54 @@ public class AdminVisitService {
                     throw new GlobalException(ErrorCode.ALREADY_PROGRESS, "Visit ID: " + visitId);
                 }
 
+                // 2. 섹션 조회
                 Section section = sectionRepository.findByIdWithPessimisticLock(currentVisit.getSection().getId())
                     .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_SECTION));
 
+                // 3. CS 방문 조회
                 CsVisit csVisit = csVisitRepository.findByBranchIdAndDateWithPessimisticLock(
                         section.getBranch().getId(), LocalDate.now())
                     .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CS_VISIT));
 
-                int previousNum = section.getCurrentNum();
-                String previousCategory = currentVisit.getCategory().getCategory();
+                // 4. 이전 상태 저장
+                Visit previousVisit = visitRepository.findPreviousVisit(section.getId(), currentVisit.getNum())
+                    .orElse(null);
+                int previousNum = previousVisit != null ? previousVisit.getNum() : 0;
+                String previousCategory = previousVisit != null ? previousVisit.getCategory().getCategory() : "";
                 
+                // 5. 현재 방문 상태 변경
                 currentVisit.changeStatusToProgress();
                 int estimatedWaitTime = currentVisit.getCategory().getWaitTime();
-                section.updateStatusPendingToProgress(currentVisit.getNum(), estimatedWaitTime);
+
+                // 6. PENDING 상태인 방문 수 계산
+                List<Visit> pendingVisits = visitRepository.findNextPendingVisitsWithPessimisticLock(
+                    section.getId(), 
+                    Status.PENDING
+                );
+                int pendingCount = pendingVisits.size();
+
+                // 7. 섹션 상태 업데이트
+                section.updateStatusPendingToProgress(currentVisit.getNum(), estimatedWaitTime, pendingCount);
                 sectionRepository.save(section);
 
-                Optional<Visit> nextVisitOpt = visitRepository.findNextPendingVisitsWithPessimisticLock(
-                    section.getId(), Status.PENDING)
-                    .stream()
-                    .findFirst();
+                // 8. 다음 대기 방문 조회 (이미 조회한 pendingVisits에서 첫 번째 항목 사용)
+                Optional<Visit> nextVisitOpt = pendingVisits.stream().findFirst();
 
-                int nextNum = nextVisitOpt.map(Visit::getNum).orElse(-1);
+                int nextNum = nextVisitOpt.map(Visit::getNum).orElse(0);
                 String nextCategory = nextVisitOpt.map(visit -> visit.getCategory().getCategory()).orElse("");
 
-                String message = "다음 방문자 대기: [다음 번호: " + nextNum + ", 다음 카테고리: " + nextCategory + "]";
+                // 9. 웹소켓 메시지 전송
+                String message = String.format(
+                    "VISIT_UPDATE:%d",
+                    section.getId()
+                );
                 websocketHandler.notifySubscribers(section.getBranch().getId(), message);
 
+                // 10. CS 방문 업데이트
                 csVisit.increaseTotalNum();
                 csVisitRepository.save(csVisit);
 
+                // 11. 응답 생성
                 AdminVisitStatusUpdateResponse.SectionInfo sectionInfo = AdminVisitStatusUpdateResponse.SectionInfo.builder()
                     .sectionId(section.getId())
                     .sectionType(section.getSectionType().toString())
@@ -194,7 +214,7 @@ public class AdminVisitService {
                     throw new GlobalException(ErrorCode.CONCURRENT_VISIT_UPDATE, "Visit ID: " + visitId);
                 }
                 try {
-                    Thread.sleep(100 * retryCount);  // 재시도 간격을 점점 늘림
+                    Thread.sleep(100 * retryCount);
                 } catch (InterruptedException ie) {
                     Thread.currentThread().interrupt();
                     throw new GlobalException(ErrorCode.CONCURRENT_VISIT_UPDATE, "Visit ID: " + visitId);
@@ -223,8 +243,13 @@ public class AdminVisitService {
                 });
 
         if (currentVisit == null) {
-            Visit nextVisit = visitRepository.findNextPendingVisit(sectionId, Status.PENDING)
-                    .orElse(null);
+            Visit nextVisit = visitRepository.findNextPendingVisit(
+                sectionId, 
+                Status.PENDING
+            ).orElse(null);
+
+            log.info("Section ID: {}, Next Visit: {}", sectionId, 
+                nextVisit != null ? String.format("num=%d, category=%s", nextVisit.getNum(), nextVisit.getCategory()) : "null");
 
             AdminVisitStatusUpdateResponse.SectionInfo sectionInfo = AdminVisitStatusUpdateResponse.SectionInfo.builder()
                     .sectionId(section.getId())
@@ -249,8 +274,13 @@ public class AdminVisitService {
         Visit previousVisit = visitRepository.findPreviousVisit(sectionId, currentVisit.getNum())
                 .orElse(null);
 
-        Visit nextVisit = visitRepository.findNextPendingVisit(sectionId, Status.PENDING)
-                .orElse(null);
+        Visit nextVisit = visitRepository.findNextPendingVisit(
+            sectionId, 
+            Status.PENDING
+        ).orElse(null);
+
+        log.info("Section ID: {}, Next Visit: {}", sectionId, 
+            nextVisit != null ? String.format("num=%d, category=%s", nextVisit.getNum(), nextVisit.getCategory()) : "null");
 
         AdminVisitStatusUpdateResponse.SectionInfo sectionInfo = AdminVisitStatusUpdateResponse.SectionInfo.builder()
                 .sectionId(section.getId())

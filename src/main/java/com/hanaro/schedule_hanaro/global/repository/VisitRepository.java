@@ -61,35 +61,22 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
 	List<Visit> findNextPendingVisitsWithPessimisticLock(@Param("sectionId") Long sectionId, @Param("status") Status status);
 
 	// JPQL 쿼리 사용 (권장)
-@Query("SELECT v FROM Visit v " +
-"WHERE v.section.id = :sectionId " +
-"AND v.status = :status " +
-"ORDER BY v.num ASC")
-List<Visit> findCurrentProgressVisits(@Param("sectionId") Long sectionId, @Param("status") Status status);
-
-	@Query("SELECT v FROM Visit v " +
-	       "WHERE v.section.id = :sectionId " +
-	       "AND v.visitDate = CURRENT_DATE " +
-	       "AND v.num < :currentNum " +
-	       "AND v.status IN (:completedStatus, :progressStatus) " +
-	       "ORDER BY v.num DESC " +
-	       "LIMIT 1")
-	Optional<Visit> findPreviousVisit(
-		@Param("sectionId") Long sectionId, 
-		@Param("currentNum") int currentNum,
-		@Param("completedStatus") Status completedStatus,
-		@Param("progressStatus") Status progressStatus
-	);
 
 	@Query("SELECT v FROM Visit v " +
 	       "WHERE v.section.id = :sectionId " +
 	       "AND v.status = :status " +
-	       "ORDER BY v.num ASC")
-	Optional<Visit> findCurrentProgressVisit(@Param("sectionId") Long sectionId, @Param("status") Status status);
+	       "AND v.visitDate = CURRENT_DATE " +
+	       "ORDER BY v.num DESC " +
+	       "LIMIT 1")
+	Optional<Visit> findCurrentProgressVisit(
+		@Param("sectionId") Long sectionId, 
+		@Param("status") Status status
+	);
 
 	// 현재 방문의 이전 방문을 찾는 쿼리 추가
 	@Query("SELECT v FROM Visit v " +
 	       "WHERE v.section.id = :sectionId " +
+		   "AND v.visitDate = CURRENT_DATE " +
 	       "AND v.num < :currentNum " +
 	       "ORDER BY v.num DESC " +
 	       "LIMIT 1")

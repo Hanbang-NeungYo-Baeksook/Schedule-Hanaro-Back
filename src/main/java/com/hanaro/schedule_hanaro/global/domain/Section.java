@@ -76,15 +76,16 @@ public class Section {
 		this.waitTime -= amount;
 	}
 
-	public void updateStatusPendingToProgress(int currentNum, int waitTime) {
+	public void updateStatusPendingToProgress(int currentNum, int waitTime,int pendingCount) {
 		this.currentNum = currentNum;
 		this.waitTime = waitTime;
 		
-		// waitAmount가 0보다 작거나 INT 최대값을 초과하지 않도록 체크
-		if (this.waitAmount != null && this.waitAmount > 0) {
-			this.waitAmount = Math.min(Integer.MAX_VALUE, Math.max(0, this.waitAmount - 1));
-		} else {
-			this.waitAmount = 0;
-		}
+//		// waitAmount가 0보다 작거나 INT 최대값을 초과하지 않도록 체크
+//		if (this.waitAmount != null && this.waitAmount > 0) {
+//			this.waitAmount = Math.min(Integer.MAX_VALUE, Math.max(0, this.waitAmount - 1));
+//		} else {
+//			this.waitAmount = 0;
+//		}
+		this.waitAmount = Math.max(0, pendingCount);
 	}
 }
