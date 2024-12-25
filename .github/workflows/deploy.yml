@@ -111,7 +111,7 @@ jobs:
       - name: restart spring
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_SERVER_IP }}
-          'cd /home/ubuntu/workspace && chmod +x *.jar && nohup -jar *.jar'
+          'cd /home/ubuntu/workspace && chmod +x ${{ secrets.DEPLOY }} && nohup -jar ${{ secrets.DEPLOY }}'
           
           #      - name: Docker Image Pull And Container Run
           #        uses: appleboy/ssh-action@v1.0.0
