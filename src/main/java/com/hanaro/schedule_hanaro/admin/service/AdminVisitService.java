@@ -178,11 +178,13 @@ public class AdminVisitService {
                 String nextCategory = nextVisitOpt.map(visit -> visit.getCategory().getCategory()).orElse("");
 
                 // 9. 웹소켓 메시지 전송
-                String message = String.format(
-                    "VISIT_UPDATE:%d",
-                    section.getId()
-                );
-                websocketHandler.notifySubscribers(section.getBranch().getId(), message);
+                System.err.println("\n===== WebSocket Message =====");
+                System.err.println("Section ID: " + section.getId());
+                System.err.println("Message: VISIT_UPDATE:" + section.getId());
+                System.err.println("=========================\n");
+
+                websocketHandler.notifySubscribers(section.getId(), 
+                    String.format("VISIT_UPDATE:%d", section.getId()));
 
                 // 10. CS 방문 업데이트
                 csVisit.increaseTotalNum();
