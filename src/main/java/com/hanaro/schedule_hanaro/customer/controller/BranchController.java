@@ -66,13 +66,13 @@ public class BranchController {
 	@Operation(summary = "추천 영업점 목록 조회", description = "추천 영업점의 목록을 조회합니다.")
 	@GetMapping("/recommend")
 	public ResponseEntity<BranchRecommendationResponse> recommendBranches(
-		@RequestParam("latitude") double latitude, // 사용자 경도
-		@RequestParam("longitude") double longitude, // 사용자 위도
-		@RequestParam("transportType") TransportType transportType, // 이동 방식 (도보/차량)
-		@RequestParam("sectionType") SectionType category         // 카테고리 (예금/개인대출/기업대출)
+		@RequestParam("latitude") double latitude, // 사용자 위도
+		@RequestParam("longitude") double longitude, // 사용자 경도
+		@RequestParam("transportType") TransportType transportType, // 이동방식 (도보/차량)
+		@RequestParam("sectionType") SectionType category // 카테고리 (예금/개인대출/기타)
 	) {
 
-		List<BranchRecommendationData> branchRecommendationDataList = branchService.recommendBranches(longitude, latitude, transportType, category);
+		List<BranchRecommendationData> branchRecommendationDataList = branchService.recommendBranches(latitude, longitude, transportType, category);
 
 		BranchRecommendationResponse response = BranchRecommendationResponse.of(branchRecommendationDataList);
 
