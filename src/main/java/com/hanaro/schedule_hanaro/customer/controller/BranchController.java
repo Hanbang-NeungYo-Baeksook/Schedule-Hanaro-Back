@@ -40,7 +40,7 @@ public class BranchController {
 	public ResponseEntity<BranchListResponse> getBranchList(
 		@RequestParam("longitude") double xPosition, // 사용자 위도
 		@RequestParam("latitude") double yPosition,
-		@RequestParam("order_by") String orderBy,
+		@RequestParam(value = "order_by",defaultValue = "distance") String orderBy,
 		@RequestParam(value = "category",required = false) String category,
 		Authentication authentication
 	) {

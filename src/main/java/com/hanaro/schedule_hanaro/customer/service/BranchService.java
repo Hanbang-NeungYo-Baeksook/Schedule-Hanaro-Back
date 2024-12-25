@@ -102,15 +102,18 @@ public class BranchService {
 		List<BranchDetailResponse> bankList = new ArrayList<>(dtoMap.values());
 		System.out.println(bankList.get(2).branchName());
 
-		if (key.equals("거리순")) {
+		if (key.equals("distance")) {
 			bankList.sort(Comparator.comparing(BranchDetailResponse::distance));
 			System.out.println("거리정렬완료");
-		} else {
+		} else if (key.equals("wait")) {
 			SectionType sectionType = GetSectionByCategory.getSectionTypeByCategory(Category.valueOf(category));
 			bankList.sort(
 				Comparator.comparing(branchDetailResponse -> branchDetailResponse.waitTime()
 					.get(branchDetailResponse.sectionTypes().indexOf(sectionType.getType()))));
+		} else {
+			throw new GlobalException(ErrorCode.WRONG_REQUEST_PARAMETER);
 		}
+
 		List<AtmInfoDto> atmInfoDtoList = new ArrayList<>(atmList.stream()
 			.map(atm -> AtmInfoDto.of(
 				atm.getId(),
