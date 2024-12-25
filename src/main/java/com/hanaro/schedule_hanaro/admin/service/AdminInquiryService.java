@@ -40,12 +40,12 @@ public class AdminInquiryService {
 	private final InquiryRepository inquiryRepository;
 
 	public AdminInquiryListResponse findInquiryList(AdminInquiryListRequest request) {
-		Pageable pageable = PageRequest.of(request.page() - 1, request.size(), Sort.by(Sort.Direction.ASC, "id"));
+		Pageable pageable = PageRequest.of(request.page() - 1, request.size());
 
 
 		Page<Inquiry> inquiries = inquiryRepository.findFilteredInquiries(
-			request.inquiryStatus(),
-			request.category(),
+			request.inquiryStatus() == null ? null : request.inquiryStatus(),
+			request.category() == null ? null : request.category(),
 			request.searchContent(),
 			pageable
 		);
