@@ -74,29 +74,30 @@ jobs:
       #   runs-on: ubuntu-24.04
 
       #   steps:
-      #    - name: Setup ssh
-      #      run: |
-      #        mkdir -p ~/.ssh
-      #        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-      #        chmod 400 ~/.ssh/id_rsa
-      #        ssh-keyscan ${{ secrets.WAS }} >> ~/.ssh/known_hosts
-      #        chmod 600 ~/.ssh/known_hosts
-      - name: execute remote ssh commands
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.SSH_SERVER_IP }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
-          script: |
-            whoami
-            ls -al
+      - name: Setup ssh
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 400 ~/.ssh/id_rsa
+          ssh-keyscan ${{ secrets.WAS }} >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      #      - name: execute remote ssh commands
+      #        uses: appleboy/ssh-action@v0.1.10
+      #        with:
+      #          host: ${{ secrets.SSH_SERVER_IP }}
+      #          username: ${{ secrets.SSH_USER }}
+      #          key: ${{ secrets.SSH_PRIVATE_KEY }}
+      #          port: 22
+      #          script: |
+      #            whoami
+      #            ls -al
 
       - name: scp jar to WAS
         run: |
           pwd
           ls -a
-           scp /home/runner/work/Schedule-Hanaro-Back/Schedule-Hanaro-Back/build/libs/*.jar ec2-user@${{ secrets.WAS }}:/home/ubuntu/workspace/
+           scp /home/runner/work/Schedule-Hanaro-Back/Schedule-Hanaro-Back/build/libs/*.jar ec2-user@${{ secrets.SSH_SERVER_IP }}:/home/ubuntu/workspace/
 
       - name: restart spring
         run: |
