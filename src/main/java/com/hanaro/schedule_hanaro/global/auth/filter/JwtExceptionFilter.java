@@ -5,9 +5,11 @@ import java.io.IOException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
+import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,6 +32,22 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
 		} catch (ExpiredJwtException e) {
 			logger.error("JwtExceptionFilter throw Expired Jwt Exception : ");
 			request.setAttribute("exception", ErrorCode.EXPIRED_ACCESS_TOKEN);
+			filterChain.doFilter(request, response);
+		} catch (UnsupportedJwtException e) {
+			logger.error("JwtExceptionFilter throw Unsupported Jwt Exception : ");
+			request.setAttribute("exception", ErrorCode.UNSUPPORTED_TOKEN);
+			filterChain.doFilter(request, response);
+		} catch (IllegalArgumentException e) {
+			logger.error("JwtExceptionFilter throw Illegal Argument Exception : ");
+			request.setAttribute("exception", ErrorCode.UNSUPPORTED_TOKEN);
+			filterChain.doFilter(request, response);
+		} catch (GlobalException e) {
+			logger.error("JwtExceptionFilter throw Illegal Argument Exception : ");
+			request.setAttribute("exception", e.getErrorCode());
+			filterChain.doFilter(request, response);
+		} catch (Exception e) {
+			logger.error("JwtExceptionFilter throw Illegal Argument Exception : ");
+			// request.setAttribute("exception",);
 			filterChain.doFilter(request, response);
 		}
 	}

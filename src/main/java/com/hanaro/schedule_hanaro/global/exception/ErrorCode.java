@@ -26,13 +26,15 @@ public enum ErrorCode {
 	ALREADY_POST_RESPONSE(40012, HttpStatus.BAD_REQUEST, "이미 답변이 등록된 상담입니다."),
 	EMPTY_WAITS(40013, HttpStatus.BAD_REQUEST, "대기 중인 상담이 더이상 없습니다."),
 	INVALID_CATEGORY(40014, HttpStatus.BAD_REQUEST, "잘못된 카테고리 값입니다."),
+	METHOD_MISMATCH(40015, HttpStatus.BAD_REQUEST, "메소드 타입이 올바르지 않습니다."),
 
 	// 401
-	EXPIRED_ACCESS_TOKEN(40101, HttpStatus.UNAUTHORIZED, "access 토큰이 만료되었습니다."),
+	EXPIRED_ACCESS_TOKEN(40101, HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다."),
+	UNSUPPORTED_TOKEN(40102, HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
+	MALFORMED_ACCESS_TOKEN(40103, HttpStatus.BAD_REQUEST, "토큰이 올바르지 않습니다."),
 
 	// 403
 	FORBIDDEN_REQUEST(40300, HttpStatus.FORBIDDEN, "권한이 존재하지 않습니다."),
-	MALFORMED_ACCESS_TOKEN(40301, HttpStatus.BAD_REQUEST, "access 토큰이 올바르지 않습니다."),
 	NOT_FOUND_REFRESH_TOKEN(40301, HttpStatus.FORBIDDEN, "refresh 토큰을 찾을 수 없습니다."),
 	NOT_MATCHED_REFRESH_TOKEN(40302, HttpStatus.FORBIDDEN, "refresh 토큰이 일치하지 않습니다."),
 
