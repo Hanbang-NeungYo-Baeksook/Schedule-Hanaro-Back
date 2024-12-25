@@ -97,7 +97,7 @@ jobs:
         run: |
           pwd
           ls -a
-           scp /home/runner/work/Schedule-Hanaro-Back/Schedule-Hanaro-Back/build/libs/*.jar ${{ secrets.SSH_USER }}@${{ secrets.SSH_SERVER_IP }}:/home/ubuntu/workspace/
+           scp -v /home/runner/work/Schedule-Hanaro-Back/Schedule-Hanaro-Back/build/libs/*.jar ${{ secrets.SSH_USER }}@${{ secrets.SSH_SERVER_IP }}:/home/ubuntu/workspace/
 
       - name: restart spring
         run: |
