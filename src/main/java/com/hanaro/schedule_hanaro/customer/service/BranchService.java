@@ -50,7 +50,7 @@ public class BranchService {
 		List<BankVO> results= branchRepository.findBranchByBranch_Id(branchId);
 		List<Long> reservedList = getReservedList(authentication);
 
-		Map<Long, BranchDetailResponse> dtoMap = createBranchDtoMapFromBankVoList(results, reservedList);
+		Map<Long, BranchDetailResponse> dtoMap = createBranchDtoMapFromBankVoList(results, reservedList,0,0);
 
 		return dtoMap.get(branchId);
 	}
@@ -63,7 +63,7 @@ public class BranchService {
 			.toList();
 	}
 
-	private Map<Long, BranchDetailResponse> createBranchDtoMapFromBankVoList(List<BankVO> bankVoList, List<Long> reservedList) {
+	private Map<Long, BranchDetailResponse> createBranchDtoMapFromBankVoList(List<BankVO> bankVoList, List<Long> reservedList, double userLat, double userLon) {
 		Map<Long, BranchDetailResponse> dtoMap = new LinkedHashMap<>();
 		System.out.println("예약리스트"+reservedList);
 		bankVoList.forEach(objects -> {
@@ -78,7 +78,9 @@ public class BranchService {
 				return new BranchDetailResponse(
 					objects.branchId(), objects.name(), objects.xPosition(), objects.yPosition(), objects.address(),
 					objects.tel(), objects.businessHours(), objects.branchType().getBranchType(),
-					reserved, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), 0
+					reserved, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
+					DistanceUtils.calculateDistance(Double.parseDouble(objects.yPosition()),
+						Double.parseDouble(objects.xPosition()), userLat, userLon)
 				);
 			});
 			BranchDetailResponse dto = dtoMap.get(objects.branchId());
@@ -96,19 +98,20 @@ public class BranchService {
 
 		List<Long> reservedList = getReservedList(authentication);
 
-		Map<Long, BranchDetailResponse> dtoMap = createBranchDtoMapFromBankVoList(results, reservedList);
+		Map<Long, BranchDetailResponse> dtoMap = createBranchDtoMapFromBankVoList(results, reservedList, userLat, userLon);
 		List<BranchDetailResponse> bankList = new ArrayList<>(dtoMap.values());
+		System.out.println(bankList.get(2).branchName());
 
-		SectionType sectionType = GetSectionByCategory.getSectionTypeByCategory(Category.valueOf(category));
 		if (key.equals("거리순")) {
 			bankList.sort(Comparator.comparing(BranchDetailResponse::distance));
+			System.out.println("거리정렬완료");
 		} else {
+			SectionType sectionType = GetSectionByCategory.getSectionTypeByCategory(Category.valueOf(category));
 			bankList.sort(
 				Comparator.comparing(branchDetailResponse -> branchDetailResponse.waitTime()
 					.get(branchDetailResponse.sectionTypes().indexOf(sectionType.getType()))));
 		}
-
-		List<AtmInfoDto> atmInfoDtoList = atmList.stream()
+		List<AtmInfoDto> atmInfoDtoList = new ArrayList<>(atmList.stream()
 			.map(atm -> AtmInfoDto.of(
 				atm.getId(),
 				atm.getName(),
@@ -117,12 +120,12 @@ public class BranchService {
 				atm.getAddress(),
 				atm.getBusinessTime(),
 				atm.getBranchType().toString(),
-				Math.round(DistanceUtils.calculateDistance(userLat, userLon, Double.parseDouble(atm.getYPosition()),
-					Double.parseDouble(atm.getXPosition())) * 1000)
+				DistanceUtils.calculateDistance(userLat, userLon, Double.parseDouble(atm.getYPosition()),
+					Double.parseDouble(atm.getXPosition()))
 			))
-			.toList();
-
-		return BranchListResponse.of(new ArrayList<>(dtoMap.values()), atmInfoDtoList);
+			.toList());
+		atmInfoDtoList.sort(Comparator.comparing(AtmInfoDto::distance));
+		return BranchListResponse.of(bankList, atmInfoDtoList);
 	}
 
 	@Transactional
