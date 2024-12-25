@@ -44,7 +44,6 @@ public class BranchController {
 		@RequestParam(value = "category",required = false) String category,
 		Authentication authentication
 	) {
-		category = category == null ? "" : category;
 		return ResponseEntity.ok()
 			.body(branchService.listBranch(yPosition, xPosition, orderBy, category, authentication));
 	}
