@@ -108,9 +108,6 @@ jobs:
       #     ls -a
       #      scp -v /home/runner/work/Schedule-Hanaro-Back/Schedule-Hanaro-Back/build/libs/*.jar ${{ secrets.SSH_USER }}@${{ secrets.SSH_SERVER_IP }}:/home/ubuntu/workspace/
 
-      - name: Log in to Docker
-        run: |
-          echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
       - name: Docker Image Pull And Container Run
         uses: appleboy/ssh-action@v1.0.0
@@ -122,6 +119,7 @@ jobs:
           script: |
             sudo docker ps
             sudo docker rm -f $(docker ps -qa)
+            echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
             sudo docker pull ${{secrets.DOCKERHUB_USERNAME}}/schedule-hanaro-back:1.0.0
             sudo docker run -d -p 8080:8080 ${{secrets.DOCKERHUB_USERNAME}}/schedule-hanaro-back:1.0.0
             sudo docker image prune -f
