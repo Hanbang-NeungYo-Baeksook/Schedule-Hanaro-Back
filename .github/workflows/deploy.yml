@@ -108,6 +108,16 @@ jobs:
       #     ls -a
       #      scp -v /home/runner/work/Schedule-Hanaro-Back/Schedule-Hanaro-Back/build/libs/*.jar ${{ secrets.SSH_USER }}@${{ secrets.SSH_SERVER_IP }}:/home/ubuntu/workspace/
 
+      - name: Docker login check
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.SSH_SERVER_IP }}
+          username: ${{ secrets.SSH_USER }}
+          port: ${{ 22 }}
+          script: |
+            curl -u "${DOCKERHUB_USERNAME}:${DOCKERHUB_PASSWORD}" https://index.docker.io/v1/repositories/${DOCKERHUB_USERNAME}/schedule-hanaro-back/tags
+
 
       - name: Docker Image Pull And Container Run
         uses: appleboy/ssh-action@v1.0.0
