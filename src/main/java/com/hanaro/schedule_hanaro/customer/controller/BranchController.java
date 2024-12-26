@@ -19,7 +19,6 @@ import com.hanaro.schedule_hanaro.customer.dto.response.BranchListResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchRecommendationData;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchRecommendationResponse;
 import com.hanaro.schedule_hanaro.customer.service.BranchService;
-import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.SectionType;
 import com.hanaro.schedule_hanaro.global.domain.enums.TransportType;
 
@@ -33,7 +32,6 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/branches")
 public class BranchController {
 	private final BranchService branchService;
-	// private final SectionService sectionService;
 
 	@Operation(summary = "영업점 정보 목록 조회", description = "영업점의 목록을 조회합니다.")
 	@GetMapping("")
@@ -41,12 +39,11 @@ public class BranchController {
 		@RequestParam("longitude") double xPosition, // 사용자 위도
 		@RequestParam("latitude") double yPosition,
 		@RequestParam(value = "order_by", defaultValue = "distance") String orderBy,
-		@RequestParam(value = "category", required = false) String category,
+		@RequestParam(value = "category", required = false, defaultValue = "") String category,
 		Authentication authentication
 	) {
 		return ResponseEntity.ok()
-			.body(branchService.listBranch(yPosition, xPosition, orderBy, Category.fromCategoryName(category),
-				authentication));
+			.body(branchService.listBranch(yPosition, xPosition, orderBy, category, authentication));
 	}
 
 	@Operation(summary = "영업점 상세 정보 조회", description = "특정 영업점의 지점정보와 대기 현황 정보를 조회합니다.")
@@ -80,7 +77,7 @@ public class BranchController {
 
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
-	//
+
 	// @PostMapping("/sections")
 	// public ResponseEntity<String> createSection() throws Exception {
 	// 	try {

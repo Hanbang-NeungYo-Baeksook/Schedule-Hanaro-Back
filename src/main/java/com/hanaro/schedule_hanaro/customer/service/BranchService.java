@@ -91,7 +91,7 @@ public class BranchService {
 		return dtoMap;
 	}
 
-	public BranchListResponse listBranch(double userLat, double userLon, String key, Category category,
+	public BranchListResponse listBranch(double userLat, double userLon, String key, String category,
 		Authentication authentication) {
 
 		List<Branch> atmList = branchRepository.findAllByBranchTypeOrderByIdAsc(BranchType.ATM);
@@ -108,7 +108,8 @@ public class BranchService {
 			bankList.sort(Comparator.comparing(BranchDetailResponse::distance));
 			System.out.println("거리정렬완료");
 		} else if (key.equals("wait")) {
-			SectionType sectionType = GetSectionByCategory.getSectionTypeByCategory(category);
+			SectionType sectionType = GetSectionByCategory.getSectionTypeByCategory(
+				Category.fromCategoryName(category));
 			bankList.sort(
 				Comparator.comparing(branchDetailResponse -> branchDetailResponse.waitTime()
 					.get(branchDetailResponse.sectionTypes().indexOf(sectionType.getType()))));
