@@ -116,8 +116,12 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           port: ${{ 22 }}
           script: |
-            sh /home/ubuntu/deploy.sh
-
+            sudo docker ps
+            sudo docker rm -f $(docker ps -qa)
+            sudo docker pull ${{secrets.DOCKERHUB_USERNAME}}/schedule-hanaro-back:1.0.0
+            sudo docker run -d -p 8080:8080 ${{secrets.DOCKERHUB_USERNAME}}/schedule-hanaro-back:1.0.0
+            sudo docker image prune -f
+    
     #      - name: restart spring
     #        run: |
     #          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_SERVER_IP }}
