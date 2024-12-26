@@ -2,6 +2,7 @@ package com.hanaro.schedule_hanaro.admin.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 import org.springframework.data.domain.PageRequest;
@@ -33,6 +34,12 @@ import com.hanaro.schedule_hanaro.global.repository.CallMemoRepository;
 import com.hanaro.schedule_hanaro.global.repository.CallRepository;
 import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
 import com.hanaro.schedule_hanaro.global.repository.InquiryRepository;
+import com.hanaro.schedule_hanaro.global.domain.Admin;
+import com.hanaro.schedule_hanaro.global.domain.Call;
+import com.hanaro.schedule_hanaro.global.domain.CallMemo;
+import com.hanaro.schedule_hanaro.global.domain.Customer;
+import com.hanaro.schedule_hanaro.global.domain.enums.Category;
+import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
 import com.hanaro.schedule_hanaro.global.websocket.handler.WebsocketHandler;
 
@@ -49,19 +56,42 @@ public class AdminCallService {
 
 	private final WebsocketHandler websocketHandler;
 
-	public AdminCallWaitResponse findWaitList() {
+	public AdminCallWaitResponse findWaitList(String date, String time, Authentication authentication) {
+
+		Admin admin = adminRepository.findById(PrincipalUtils.getId(authentication))
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_ADMIN));
 
 		// 진행 중
-		AdminCallInfoResponse progressCall = callRepository.findByStatus(Status.PROGRESS)
+		AdminCallInfoResponse progressCall = callRepository.findByStatusAndAdminId(Status.PROGRESS, admin.getId())
 			.stream()
-			.map(this::getCallInfo)
 			.findFirst()
+			.map((call) -> {
+				System.out.println(call.getId());
+				return AdminCallInfoResponse.from(call, callMemoRepository.findByCallId(call.getId()));
+			})
 			.orElse(null);
 
+		// 시간대 구하기
+		LocalDateTime targetDateTimeStart = null;
+		LocalDateTime targetDateTimeEnd = null;
+
+		if (date != null) {
+			LocalDate targetDate = LocalDate.parse(date);
+
+			if (time != null) {
+				LocalTime targetTime = LocalTime.parse(time);
+				targetDateTimeStart = LocalDateTime.of(targetDate, targetTime);
+				targetDateTimeEnd = targetDateTimeStart.plusMinutes(30);
+			} else {
+				targetDateTimeStart = targetDate.atStartOfDay();
+				targetDateTimeEnd = targetDate.plusDays(1).atStartOfDay();
+			}
+		}
+
 		// 대기 중
-		List<AdminCallInfoResponse> pendingCalls = callRepository.findByStatus(Status.PENDING)
+		List<AdminCallInfoResponse> pendingCalls = callRepository.findPendingCallsByDateTimeRange(targetDateTimeStart, targetDateTimeEnd)
 			.stream()
-			.map(this::getCallInfo)
+			.map(call -> AdminCallInfoResponse.from(call, callMemoRepository.findByCallId(call.getId())))
 			.toList();
 
 		return AdminCallWaitResponse.of(progressCall, pendingCalls);
@@ -70,8 +100,16 @@ public class AdminCallService {
 	@Transactional
 	public Long changeCallStatusProgress(Authentication authentication) {
 		// 상담 진행 중으로 변경
+
 		Admin admin = adminRepository.findById(PrincipalUtils.getId(authentication))
 			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_ADMIN));
+
+		// 진행 중인 상담 없는지 확인
+		List<Call> calls = callRepository.findByStatusAndAdminId(Status.PROGRESS, admin.getId());
+
+		if (!calls.isEmpty()) {
+			throw new GlobalException(ErrorCode.ALREADY_PROGRESS_COUNSLATION);
+		}
 
 		// 대기 번호가 가장 빠른 상담 조회 (비관적 락)
 		Call call = callRepository.findFirstByStatusOrderByCallNumAsc(Status.PENDING)
@@ -94,14 +132,14 @@ public class AdminCallService {
 	}
 
 	@Transactional
-	public String changeCallStatusComplete(Long callId) {
+	public Long changeCallStatusComplete(Long callId) {
 		// 상담 완료로 변경
 		Call call = callRepository.findById(callId)
 			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CALL));
 
 		if (call.getStatus().equals(Status.PROGRESS)) {
 			callRepository.updateStatusWithEndedAt(callId, Status.COMPLETE, LocalDateTime.now());
-			return "상담 완료 처리되었습니다.";
+			return callId;
 		} else {
 			throw new GlobalException(ErrorCode.WRONG_CALL_STATUS);
 		}
@@ -109,7 +147,7 @@ public class AdminCallService {
 	}
 
 	@Transactional
-	public String saveCallMemo(Authentication authentication, Long callId, String content) {
+	public Long saveCallMemo(Authentication authentication, Long callId, String content) {
 		Call call = callRepository.findById(callId)
 			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CALL));
 
@@ -128,7 +166,6 @@ public class AdminCallService {
 				.build();
 
 			callMemoRepository.save(updatedCallMemo);
-
 		} else {
 			Admin admin = adminRepository.findById(PrincipalUtils.getId(authentication))
 				.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_ADMIN));
@@ -142,12 +179,13 @@ public class AdminCallService {
 			callMemoRepository.save(newCallMemo);
 		}
 
-		return "Success";
+
+		return callId;
 	}
 
-	public AdminCallHistoryListResponse findFilteredCalls(int page, int size, Status status, LocalDate startedAt,
-		LocalDate endedAt, Category category, String keyword) {
+	public AdminCallHistoryListResponse findFilteredCalls(int page, int size, Status status, LocalDateTime startedAt, LocalDateTime endedAt, Category category, String keyword) {
 		Pageable pageable = PageRequest.of(page - 1, size);
+
 
 		Slice<Call> callSlice = callRepository.findByFiltering(pageable, status, startedAt, endedAt, category, keyword);
 
@@ -155,7 +193,7 @@ public class AdminCallService {
 			.map(call -> AdminCallHistoryResponse.builder()
 				.id(call.getId())
 				.content(call.getContent())
-				.category(call.getCategory())
+				.category(call.getCategory().toString())
 				.build())
 			.toList();
 
@@ -166,6 +204,7 @@ public class AdminCallService {
 			.build();
 
 		return AdminCallHistoryListResponse.builder()
+			.totalItems(callDataList.size())
 			.data(callDataList)
 			.pagination(pagination)
 			.build();
@@ -180,26 +219,13 @@ public class AdminCallService {
 
 		CallMemo callMemo = callMemoRepository.findByCallId(callId);
 
+		if (callMemo == null) {
+			return AdminCallDetailResponse.from(call, customer, null);
+		}
+
 		return AdminCallDetailResponse.from(call, customer, callMemo);
 	}
 
-	public AdminCallInfoResponse getCallInfo(Call call) {
-		CallMemo callMemo = callMemoRepository.findByCallId(call.getId());
-
-		return AdminCallInfoResponse.from(
-			call,
-			call.getCustomer(),
-			callRepository.findByCustomerIdAndIdNotAndStatus(call.getCustomer().getId(), call.getId(), Status.COMPLETE)
-				.stream()
-				.map(AdminCallHistoryResponse::from)
-				.toList(),
-			inquiryRepository.findByCustomerId(call.getCustomer().getId())
-				.stream()
-				.map(AdminInquiryHistoryResponse::from)
-				.toList(),
-			callMemo
-		);
-	}
 
 	public AdminInquiryStatsDto getStatsByAdminId(Long adminId) {
 		Object[] result = callRepository.findStatsByAdminId(adminId).get(0);

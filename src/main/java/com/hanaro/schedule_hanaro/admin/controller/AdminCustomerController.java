@@ -27,7 +27,7 @@ public class AdminCustomerController {
     @Operation(summary = "고객 목록 조회", description = "전체 고객 목록을 조회합니다.")
     @GetMapping
     public ResponseEntity<AdminCustomerListResponse> getCustomerList(
-        @RequestParam(defaultValue = "1") int page,
+        @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size
     ) {
         AdminCustomerListResponse response = adminCustomerService.getCustomerList(page, size);

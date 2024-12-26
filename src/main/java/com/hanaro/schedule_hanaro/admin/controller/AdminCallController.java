@@ -1,7 +1,9 @@
 package com.hanaro.schedule_hanaro.admin.controller;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -34,9 +36,12 @@ public class AdminCallController {
 
 	@Operation(summary = "전화 상담 대기 목록 조회", description = "전화 상담을 대기 중인 목록을 조회합니다.")
 	@GetMapping("/wait")
-	public ResponseEntity<AdminCallWaitResponse> getCallWaitList() {
+	public ResponseEntity<AdminCallWaitResponse> getCallWaitList(
+		@RequestParam(required = false) String date,
+		@RequestParam(required = false) String time,
+		Authentication authentication) {
 		// 전화 상담 대기 목록
-		return ResponseEntity.ok(callService.findWaitList());
+		return ResponseEntity.ok().body(callService.findWaitList(date, time, authentication));
 	}
 
 	@Operation(summary = "전화 상담 시작", description = "특정 전화 상담 항목의 상태를 진행 중으로 변경합니다. (전화 상담 대기)")
@@ -44,7 +49,7 @@ public class AdminCallController {
 	public ResponseEntity<?> patchCallStatusProgress(Authentication authentication) {
 		// 전화 상담 상태 변경
 		try {
-			return ResponseEntity.ok(callService.changeCallStatusProgress(authentication));
+			return ResponseEntity.ok().body(callService.changeCallStatusProgress(authentication));
 		} catch (IllegalArgumentException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 		} catch (IllegalStateException e) {
@@ -54,10 +59,10 @@ public class AdminCallController {
 
 	@Operation(summary = "전화 상담 완료", description = "특정 전화 상담 항목의 상태를 완료로 변경합니다. (전화 상담 완료)")
 	@PatchMapping("/{call-id}")
-	public ResponseEntity<String> patchCallStatusComplete(@PathVariable("call-id") Long callId) {
+	public ResponseEntity<?> patchCallStatusComplete(@PathVariable("call-id") Long callId) {
 		// 전화 상담 상태 변경
 		try {
-			return ResponseEntity.ok(callService.changeCallStatusComplete(callId));
+			return ResponseEntity.ok().body(callService.changeCallStatusComplete(callId));
 		} catch (IllegalArgumentException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 		} catch (IllegalStateException e) {
@@ -67,9 +72,9 @@ public class AdminCallController {
 
 	@Operation(summary = "전화 상담 메모 등록", description = "특정 전화 상담의 메모를 작성 후 등록합니다.")
 	@PostMapping("/{call-id}")
-	public ResponseEntity<String> postCallMemo(@PathVariable("call-id") Long callId, @RequestBody AdminCallMemoRequest request, Authentication authentication) {
+	public ResponseEntity<?> postCallMemo(@PathVariable("call-id") Long callId, @RequestBody AdminCallMemoRequest request, Authentication authentication) {
 		// 전화 상담 메모 등록
-		return ResponseEntity.ok(callService.saveCallMemo(authentication, callId, request.content()));
+		return ResponseEntity.ok().body(callService.saveCallMemo(authentication, callId, request.content()));
 	}
 
 	@Operation(summary = "전화 상담 목록 조회", description = "전화 상담 목록을 내용, 카테고리, 날짜 등으로 필터링해 조회합니다.")
@@ -78,13 +83,13 @@ public class AdminCallController {
 		@RequestParam(value = "status", defaultValue = "pending") Status status,
 		@RequestParam(value = "page", defaultValue = "1") int page,
 		@RequestParam(value = "size", defaultValue = "5") int size,
-		@RequestParam(required = false) LocalDate startedAt,
-		@RequestParam(required = false) LocalDate endedAt,
+		@RequestParam(required = false) LocalDateTime startedAt,
+		@RequestParam(required = false) LocalDateTime endedAt,
 		@RequestParam(required = false) Category category,
 		@RequestParam(required = false) String keyword
 	) {
 		// 전화 상담 목록 조회
-		return ResponseEntity.ok(callService.findFilteredCalls(page, size, status, startedAt, endedAt, category, keyword));
+		return ResponseEntity.ok().body(callService.findFilteredCalls(page, size, status, startedAt, endedAt, category, keyword));
 	}
 
 	@Operation(summary = "전화 상담 상세 조회", description = "특정 전화 상담 항목의 상세 정보를 조회합니다.")
@@ -94,7 +99,7 @@ public class AdminCallController {
 	) {
 		// 전화 상담 상세 조회
 		try {
-			return ResponseEntity.ok(callService.findCall(callId));
+			return ResponseEntity.ok().body(callService.findCall(callId));
 		} catch (IllegalArgumentException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 		} catch (IllegalStateException e) {

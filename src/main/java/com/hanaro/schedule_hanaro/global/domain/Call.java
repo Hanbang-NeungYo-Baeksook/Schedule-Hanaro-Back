@@ -40,7 +40,7 @@ public class Call {
 	@JoinColumn(name = "customer_id", nullable = false)
 	private Customer customer;
 
-	@Column(name = "call_date", nullable = false)
+	@Column(name = "call_date", nullable = false, columnDefinition = "DATETIME")
 	private LocalDateTime callDate;
 
 	@Column(name = "call_num", nullable = false)
@@ -59,10 +59,10 @@ public class Call {
 	@Column(name = "content", length = 500, nullable = false)
 	private String content;
 
-	@Column(name = "started_at")
+	@Column(name = "started_at", columnDefinition = "DATETIME")
 	private LocalDateTime startedAt;
 
-	@Column(name = "ended_at")
+	@Column(name = "ended_at", columnDefinition = "DATETIME")
 	private LocalDateTime endedAt;
 
 	@Column(name = "tags", nullable = false)

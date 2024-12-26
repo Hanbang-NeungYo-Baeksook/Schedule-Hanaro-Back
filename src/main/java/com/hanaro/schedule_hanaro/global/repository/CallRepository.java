@@ -12,12 +12,10 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryStatsDto;
 import com.hanaro.schedule_hanaro.global.domain.Call;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
-import com.hanaro.schedule_hanaro.global.domain.Visit;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 
@@ -41,8 +39,6 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 
 	Slice<Call> findByCustomerIdAndStatus(Long customerId, Status status, Pageable pageable);
 
-	List<Call> findByStatus(Status status);
-
 	@Modifying
 	@Query("UPDATE Call c SET c.status = :status, c.endedAt = :endedAt WHERE c.id = :callId")
 	void updateStatusWithEndedAt(@Param("callId") Long callId, @Param("status") Status status, @Param("endedAt") LocalDateTime endedAt);
@@ -50,9 +46,6 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 	@Modifying
 	@Query("UPDATE Call c SET c.status = :status, c.startedAt = :startedAt WHERE c.id = :callId")
 	void updateStatusWithStartedAt(@Param("callId") Long callId, @Param("status") Status status, @Param("startedAt") LocalDateTime startedAt);
-
-
-	List<Call> findByCustomerIdAndIdNotAndStatus(Long customerId, Long callId, Status status);
 
 
 	@Query("SELECT c FROM Call c " +
@@ -64,8 +57,8 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 	Slice<Call> findByFiltering(
 		Pageable pageable,
 		Status status,
-		@Param("startedAt") LocalDate startedAt,
-		@Param("endedAt") LocalDate endedAt,
+		@Param("startedAt") LocalDateTime startedAt,
+		@Param("endedAt") LocalDateTime endedAt,
 		@Param("category") Category category,
 		@Param("keyword") String keyword
 	);
@@ -89,5 +82,26 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 	List<Object[]> findStatsByAdminId(@Param("adminId") Long adminId);
 
 	Integer countCallsByCustomer(Customer customer);
+
+	@Query("SELECT c " +
+		"FROM Call c " +
+		"JOIN CallMemo cm ON cm.call.id = c.id " +
+		"WHERE cm.admin.id = :adminId " +
+		"AND c.status = :status ")
+	List<Call> findByStatusAndAdminId(
+		@Param("status") Status status,
+		@Param("adminId") Long adminId
+	);
+
+
+	@Query("SELECT c FROM Call c " +
+		"WHERE c.status = 'PENDING' " +
+		"AND (:startDateTime IS NULL OR c.callDate >= :startDateTime) " +
+		"AND (:endDateTime IS NULL OR c.callDate < :endDateTime)")
+	List<Call> findPendingCallsByDateTimeRange(
+		@Param("startDateTime") LocalDateTime startDateTime,
+		@Param("endDateTime") LocalDateTime endDateTime
+	);
+
 
 }
