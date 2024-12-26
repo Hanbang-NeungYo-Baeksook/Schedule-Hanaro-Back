@@ -100,4 +100,9 @@ public class Visit {
 		this.status = Status.PROGRESS;
 		this.startedAt = LocalDateTime.now();
 	}
+
+	public void changeStatusToCompleted() {
+		this.status = Status.COMPLETE;
+		this.endedAt = LocalDateTime.now();
+	}
 }
