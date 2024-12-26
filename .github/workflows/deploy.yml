@@ -121,7 +121,7 @@ jobs:
       - name: restart spring
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_SERVER_IP }}
-          'cd /home/ubuntu/workspace/build/libs && chmod +x ${{ secrets.DEPLOY }} && java -jar ${{ secrets.DEPLOY }}'
+          'cd /home/ubuntu/workspace/build/libs && chmod +x schedule_hanaro-0.0.1-SNAPSHOT.jar && java -jar schedule_hanaro-0.0.1-SNAPSHOT.jar'
     
     
     # NOTE: The Gradle Wrapper is the default and recommended way to run Gradle (https://docs.gradle.org/current/userguide/gradle_wrapper.html).
