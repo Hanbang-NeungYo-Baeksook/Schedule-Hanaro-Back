@@ -122,6 +122,10 @@ public class AdminInquiryService {
 			throw new GlobalException(ErrorCode.ALREADY_POST_RESPONSE);
 		}
 
+		// inquiry 상태 변경
+		inquiryRepository.changeStatusById(inquiry.getId());
+
+		// 답변 저장
 		InquiryResponse inquiryResponse = InquiryResponse.builder()
 			.inquiry(inquiry)
 			.admin(admin)
@@ -130,9 +134,6 @@ public class AdminInquiryService {
 			.build();
 
 		InquiryResponse savedResponse = inquiryResponseRepository.save(inquiryResponse);
-
-		inquiry.setStatus(InquiryStatus.REGISTRATIONCOMPLETE);
-		inquiryRepository.save(inquiry);
 
 		return AdminInquiryResponse.of(
 			savedResponse.getInquiry().getId(),

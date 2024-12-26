@@ -14,7 +14,7 @@ public record AdminCallInfoResponse(
 	Long id,
 	@JsonProperty("waiting_num")
 	int waitingNum,
-	Category category,
+	String category,
 	String tags,
 	String content,
 	@JsonProperty("reservation_time")
@@ -32,7 +32,7 @@ public record AdminCallInfoResponse(
 		return new AdminCallInfoResponse(
 			call.getId(),
 			call.getCallNum(),
-			call.getCategory(),
+			call.getCategory().toString(),
 			call.getTags(),
 			call.getContent(),
 			call.getCallDate(),

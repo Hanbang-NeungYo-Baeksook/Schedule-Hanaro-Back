@@ -9,13 +9,13 @@ import lombok.Builder;
 public record AdminCallHistoryResponse(
 	Long id,
 	String content,
-	Category category
+	String category
 ) {
 	public static AdminCallHistoryResponse from(final Call call) {
 		return new AdminCallHistoryResponse(
 			call.getId(),
 			call.getContent(),
-			call.getCategory()
+			call.getCategory().toString()
 		);
 	}
 }

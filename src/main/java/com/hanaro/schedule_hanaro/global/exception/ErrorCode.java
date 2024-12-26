@@ -21,12 +21,11 @@ public enum ErrorCode {
 	INVALID_VISIT_NUMBER(40010, HttpStatus.BAD_REQUEST, "잘못된 방문 번호입니다."),
 	INVALID_TOTAL_VISITOR_COUNT(40011, HttpStatus.BAD_REQUEST, "잘못된 방문자 수입니다."),
 	VISIT_TIME_EXPIRED(40012, HttpStatus.BAD_REQUEST, "방문 시간이 만료되었습니다."),
-	ALREADY_COMPLETE(40010, HttpStatus.BAD_REQUEST, "이미 완료된 상담입니다."),
-	ALREADY_POST_MEMO(40011, HttpStatus.BAD_REQUEST, "이미 메모가 등록된 상담입니다."),
-	ALREADY_POST_RESPONSE(40012, HttpStatus.BAD_REQUEST, "이미 답변이 등록된 상담입니다."),
-	EMPTY_WAITS(40013, HttpStatus.BAD_REQUEST, "대기 중인 상담이 더이상 없습니다."),
-	INVALID_CATEGORY(40014, HttpStatus.BAD_REQUEST, "잘못된 카테고리 값입니다."),
-	METHOD_MISMATCH(40015, HttpStatus.BAD_REQUEST, "메소드 타입이 올바르지 않습니다."),
+	ALREADY_COMPLETE(40013, HttpStatus.BAD_REQUEST, "이미 완료된 상담입니다."),
+	ALREADY_POST_MEMO(40014, HttpStatus.BAD_REQUEST, "이미 메모가 등록된 상담입니다."),
+	ALREADY_POST_RESPONSE(40015, HttpStatus.BAD_REQUEST, "이미 답변이 등록된 상담입니다."),
+	EMPTY_WAITS(40016, HttpStatus.BAD_REQUEST, "대기 중인 상담이 더이상 없습니다."),
+	ALREADY_PROGRESS_COUNSLATION(40017, HttpStatus.BAD_REQUEST, "이미 진행 중인 상담이 있습니다."),
 
 	// 401
 	EXPIRED_ACCESS_TOKEN(40101, HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다."),

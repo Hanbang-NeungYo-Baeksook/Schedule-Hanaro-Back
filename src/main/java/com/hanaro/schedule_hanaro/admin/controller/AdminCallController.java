@@ -1,7 +1,9 @@
 package com.hanaro.schedule_hanaro.admin.controller;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -34,9 +36,12 @@ public class AdminCallController {
 
 	@Operation(summary = "전화 상담 대기 목록 조회", description = "전화 상담을 대기 중인 목록을 조회합니다.")
 	@GetMapping("/wait")
-	public ResponseEntity<AdminCallWaitResponse> getCallWaitList() {
+	public ResponseEntity<AdminCallWaitResponse> getCallWaitList(
+		@RequestParam(required = false) String date,
+		@RequestParam(required = false) String time,
+		Authentication authentication) {
 		// 전화 상담 대기 목록
-		return ResponseEntity.ok().body(callService.findWaitList());
+		return ResponseEntity.ok().body(callService.findWaitList(date, time, authentication));
 	}
 
 	@Operation(summary = "전화 상담 시작", description = "특정 전화 상담 항목의 상태를 진행 중으로 변경합니다. (전화 상담 대기)")
@@ -78,8 +83,8 @@ public class AdminCallController {
 		@RequestParam(value = "status", defaultValue = "pending") Status status,
 		@RequestParam(value = "page", defaultValue = "1") int page,
 		@RequestParam(value = "size", defaultValue = "5") int size,
-		@RequestParam(required = false) LocalDate startedAt,
-		@RequestParam(required = false) LocalDate endedAt,
+		@RequestParam(required = false) LocalDateTime startedAt,
+		@RequestParam(required = false) LocalDateTime endedAt,
 		@RequestParam(required = false) Category category,
 		@RequestParam(required = false) String keyword
 	) {

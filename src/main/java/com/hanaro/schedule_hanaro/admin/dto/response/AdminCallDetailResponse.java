@@ -15,7 +15,7 @@ public record AdminCallDetailResponse(
 	@JsonProperty("call_id")
 	Long callId,
 	String content,
-	Category category,
+	String category,
 	String tags,
 	@JsonProperty("call_at")
 	LocalDateTime callDate,
@@ -37,14 +37,14 @@ public record AdminCallDetailResponse(
 		return AdminCallDetailResponse.builder()
 			.callId(call.getId())
 			.content(call.getContent())
-			.category(call.getCategory())
+			.category(call.getCategory().toString())
 			.tags(call.getTags())
 			.callDate(call.getCallDate())
 			.startedAt(call.getStartedAt())
 			.endedAt(call.getEndedAt())
 			.customerName(customer.getName())
 			.mobile(customer.getPhoneNum())
-			.replyContent(callMemo.getContent())
+			.replyContent(callMemo != null ? callMemo.getContent() : null)
 			.build();
 	}
 }

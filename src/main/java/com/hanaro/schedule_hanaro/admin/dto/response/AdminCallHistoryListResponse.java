@@ -9,6 +9,7 @@ import lombok.Builder;
 
 @Builder
 public record AdminCallHistoryListResponse(
+	int totalItems,
 	List<AdminCallHistoryResponse> data,
 	Pagination pagination
 ) {

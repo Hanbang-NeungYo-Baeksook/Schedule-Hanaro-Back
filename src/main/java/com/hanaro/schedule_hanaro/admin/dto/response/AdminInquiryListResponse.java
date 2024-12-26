@@ -4,12 +4,13 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hanaro.schedule_hanaro.global.domain.Inquiry;
+import com.hanaro.schedule_hanaro.global.domain.enums.InquiryStatus;
 
 import lombok.Builder;
 
 @Builder
 public record AdminInquiryListResponse(
-	@JsonProperty("inquiry_list")
+	@JsonProperty("data")
 	List<InquiryData> inquiryList, // 문의 목록 데이터
 
 	@JsonProperty("current_page")
@@ -40,7 +41,7 @@ public record AdminInquiryListResponse(
 		Long inquiryId,
 
 		@JsonProperty("status")
-		String status,
+		InquiryStatus status,
 
 		@JsonProperty("category")
 		String category,
@@ -60,7 +61,7 @@ public record AdminInquiryListResponse(
 		public static InquiryData from(Inquiry inquiry, String customerName) {
 			return InquiryData.builder()
 				.inquiryId(inquiry.getId())
-				.status(inquiry.getInquiryStatus().toString())
+				.status(inquiry.getInquiryStatus())
 				.category(inquiry.getCategory().toString())
 				.content(inquiry.getContent())
 				.tags(inquiry.getTags() != null ? List.of(inquiry.getTags().split(",")) : List.of())
