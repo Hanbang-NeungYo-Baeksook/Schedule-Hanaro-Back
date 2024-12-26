@@ -50,9 +50,11 @@ public class BranchController {
 	@GetMapping("/{branch-id}")
 	public ResponseEntity<BranchDetailResponse> getBranchDetail(
 		@PathVariable("branch-id") Long branchId,
+		@RequestParam("longitude") double xPosition, // 사용자 위도
+		@RequestParam("latitude") double yPosition,
 		Authentication authentication
 	) {
-		return ResponseEntity.ok().body(branchService.findBranchById(branchId, authentication));
+		return ResponseEntity.ok().body(branchService.findBranchById(branchId, xPosition, yPosition, authentication));
 	}
 
 	// 형석이 테스트용...

@@ -36,7 +36,7 @@ public record BranchDetailResponse(
 	List<Integer> waitTime,
 
 	@JsonProperty("distance")
-	double distance
+	int distance
 ) {
 	public static BranchDetailResponse of(Long id, String branchName, String xPosition, String yPosition,
 		String address) {
