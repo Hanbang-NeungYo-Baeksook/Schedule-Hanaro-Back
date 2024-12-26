@@ -26,6 +26,9 @@ public record BranchDetailResponse(
 	@JsonProperty("reserved")
 	boolean reserved,
 
+	@JsonProperty("visit_id")
+	Long visitId,
+
 	@JsonProperty("section_types")
 	List<String> sectionTypes,
 
