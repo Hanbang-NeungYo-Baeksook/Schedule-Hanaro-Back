@@ -45,11 +45,13 @@ public class BranchService {
 	private final SectionRepository sectionRepository;
 	private final VisitRepository visitRepository;
 
-	public BranchDetailResponse findBranchById(Long branchId, Authentication authentication) {
+	public BranchDetailResponse findBranchById(Long branchId, double xPosition, double yPosition,
+		Authentication authentication) {
 		List<BankVO> results = branchRepository.findBranchByBranch_Id(branchId);
 		List<Long> reservedList = getReservedList(authentication);
 
-		Map<Long, BranchDetailResponse> dtoMap = createBranchDtoMapFromBankVoList(results, reservedList, 0, 0);
+		Map<Long, BranchDetailResponse> dtoMap = createBranchDtoMapFromBankVoList(results, reservedList, yPosition,
+			xPosition);
 
 		return dtoMap.get(branchId);
 	}
@@ -79,8 +81,8 @@ public class BranchService {
 					objects.branchId(), objects.name(), objects.xPosition(), objects.yPosition(), objects.address(),
 					objects.tel(), objects.businessHours(), objects.branchType().getBranchType(),
 					reserved, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
-					DistanceUtils.calculateDistance(Double.parseDouble(objects.yPosition()),
-						Double.parseDouble(objects.xPosition()), userLat, userLon)
+					(int)(DistanceUtils.calculateDistance(Double.parseDouble(objects.yPosition()),
+						Double.parseDouble(objects.xPosition()), userLat, userLon) * 1000)
 				);
 			});
 			BranchDetailResponse dto = dtoMap.get(objects.branchId());
