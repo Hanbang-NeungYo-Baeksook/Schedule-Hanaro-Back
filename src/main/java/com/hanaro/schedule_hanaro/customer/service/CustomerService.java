@@ -27,7 +27,7 @@ public class CustomerService {
 	public CustomerInfoResponse findCustomer(Authentication authentication) {
 		Long id = PrincipalUtils.getId(authentication);
 		Customer customer = customerRepository.findById(id).orElseThrow();
-		Integer callAmount = callRepository.countCallsByCustomerAndStatusNotIn(customer, Status.CANCELED);
+		Integer callAmount = callRepository.countCallsByCustomerAndStatusNot(customer, Status.CANCELED);
 		Integer inquiryAmount = inquiryRepository.countInquiryByCustomer(customer);
 		Integer visitAmount = visitRepository.countByCustomerAndVisitDateAndStatus(customer, LocalDate.now(),
 			Status.PENDING);

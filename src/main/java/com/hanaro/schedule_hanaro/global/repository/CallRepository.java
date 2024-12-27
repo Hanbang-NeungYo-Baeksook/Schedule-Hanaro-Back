@@ -90,7 +90,7 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 		""")
 	List<Object[]> findStatsByAdminId(@Param("adminId") Long adminId);
 
-	Integer countCallsByCustomerAndStatusNotIn(Customer customer, Status status);
+	Integer countCallsByCustomerAndStatusNot(Customer customer, Status status);
 
 	@Query("SELECT c " +
 		"FROM Call c " +
