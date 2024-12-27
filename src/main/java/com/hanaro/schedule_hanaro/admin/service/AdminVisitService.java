@@ -62,15 +62,17 @@ public class AdminVisitService {
         CsVisit csVisit = csVisitRepository.findByBranchIdAndDateWithPessimisticLock(
                 section.getBranch().getId(), LocalDate.now())
             .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CS_VISIT));
-
+        
         // 4. 이전 상태 저장
-        Visit previousVisit = visitRepository.findPreviousVisit(section.getId(), currentVisit.getNum())
+        Visit previousVisit = visitRepository.findPreviousVisit(currentVisit.getNum())
             .orElse(null);
         int previousNum = previousVisit != null ? previousVisit.getNum() : 0;
         String previousCategory = previousVisit != null ? previousVisit.getCategory().getCategory() : "";
 
-        assert previousVisit != null;
-        previousVisit.changeStatusToCompleted();
+        if(previousVisit != null) {
+            previousVisit.changeStatusToCompleted();
+            visitRepository.save(previousVisit);
+        }
 
         // 5. 현재 방문 상태 변경
         currentVisit.changeStatusToProgress();
@@ -78,7 +80,7 @@ public class AdminVisitService {
 
         // 6. PENDING 상태인 방문 수 계산
         List<Visit> pendingVisits = visitRepository.findNextPendingVisitsWithPessimisticLock(
-            section.getId(), 
+            section.getId(),
             Status.PENDING
         );
         int pendingCount = pendingVisits.size();
@@ -87,12 +89,15 @@ public class AdminVisitService {
         section.updateStatusPendingToProgress(currentVisit.getNum(), estimatedWaitTime, pendingCount);
         sectionRepository.save(section);
 
+    
         // 8. 다음 대기 방문 조회 (이미 조회한 pendingVisits에서 첫 번째 항목 사용)
-        Optional<Visit> nextVisitOpt = pendingVisits.stream().findFirst();
+        Optional<Visit> nextVisitOpt = visitRepository.findNextPendingVisit(section.getId(), Status.PENDING);
 
         int nextNum = nextVisitOpt.map(Visit::getNum).orElse(0);
         String nextCategory = nextVisitOpt.map(visit -> visit.getCategory().getCategory()).orElse("");
 
+
+        
         // 9. 웹소켓 메시지 전송
         log.debug("===== WebSocket Message =====");
         log.debug("Section ID: {}", section.getId());
@@ -138,11 +143,12 @@ public class AdminVisitService {
                 .build();
     }
 
+    @Transactional
     public AdminVisitStatusUpdateResponse getCurrentVisit(Long sectionId) {
         Section section = sectionRepository.findById(sectionId)
                 .orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_SECTION));
 
-        Visit currentVisit = visitRepository.findCurrentProgressVisit(sectionId, Status.PROGRESS)
+        Visit currentVisit = visitRepository.findCurrentProgressVisitByDate(Status.PROGRESS)
                 .orElse(null);
 
         CsVisit csVisit = csVisitRepository.findByBranchIdAndDate(section.getBranch().getId(), LocalDate.now())
@@ -154,46 +160,35 @@ public class AdminVisitService {
                     return csVisitRepository.save(newCsVisit);
                 });
 
-        if (currentVisit == null) {
-            Visit nextVisit = visitRepository.findNextPendingVisit(
-                sectionId, 
-                Status.PENDING
-            ).orElse(null);
-
-            log.info("Section ID: {}, Next Visit: {}", sectionId, 
-                nextVisit != null ? String.format("num=%d, category=%s", nextVisit.getNum(), nextVisit.getCategory()) : "null");
-
-            AdminVisitStatusUpdateResponse.SectionInfo sectionInfo = createSectionInfo(section, csVisit);
-
-            return AdminVisitStatusUpdateResponse.builder()
-                    .previousNum(0)
-                    .previousCategory("")
-                    .currentNum(0)
-                    .currentCategory("")
-                    .nextNum(nextVisit != null ? nextVisit.getNum() : 0)
-                    .nextCategory(nextVisit != null ? nextVisit.getCategory().getCategory() : "")
-                    .sectionInfo(sectionInfo)
-                    .build();
-        }
-
-        Visit previousVisit = visitRepository.findPreviousVisit(sectionId, currentVisit.getNum())
-                .orElse(null);
-
-        Visit nextVisit = visitRepository.findNextPendingVisit(
+        List<Visit> pendingVisits = visitRepository.findNextPendingVisitsWithPessimisticLock(
             sectionId, 
             Status.PENDING
-        ).orElse(null);
+        );
+        int pendingCount = pendingVisits.size();
+        
+        int estimatedWaitTime = currentVisit != null ? 
+            currentVisit.getCategory().getWaitTime() : 0;
 
-        log.info("Section ID: {}, Next Visit: {}", sectionId, 
-            nextVisit != null ? String.format("num=%d, category=%s", nextVisit.getNum(), nextVisit.getCategory()) : "null");
+        section.updateStatusPendingToProgress(
+            currentVisit != null ? currentVisit.getNum() : 0,
+            estimatedWaitTime,
+            pendingCount
+        );
+        sectionRepository.save(section);
+
+        Visit previousVisit = visitRepository.findPreviousVisitByDate(currentVisit.getNum())
+                .orElse(null);
+
+        Visit nextVisit = visitRepository.findNextPendingVisitByDate(Status.PENDING)
+            .orElse(null);
 
         AdminVisitStatusUpdateResponse.SectionInfo sectionInfo = createSectionInfo(section, csVisit);
 
         return AdminVisitStatusUpdateResponse.builder()
                 .previousNum(previousVisit != null ? previousVisit.getNum() : 0)
                 .previousCategory(previousVisit != null ? previousVisit.getCategory().getCategory() : "")
-                .currentNum(currentVisit.getNum())
-                .currentCategory(currentVisit.getCategory().getCategory())
+                .currentNum(currentVisit != null ? currentVisit.getNum() : 0)
+                .currentCategory(currentVisit != null ? currentVisit.getCategory().getCategory() : "")
                 .nextNum(nextVisit != null ? nextVisit.getNum() : 0)
                 .nextCategory(nextVisit != null ? nextVisit.getCategory().getCategory() : "")
                 .sectionInfo(sectionInfo)
