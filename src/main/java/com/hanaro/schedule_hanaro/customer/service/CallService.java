@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallInfoResponse;
 import com.hanaro.schedule_hanaro.admin.service.AdminCallService;
 import com.hanaro.schedule_hanaro.customer.dto.request.CallRequest;
 import com.hanaro.schedule_hanaro.customer.dto.request.TimeSlotAvailabilityRequest;
@@ -32,10 +30,6 @@ import com.hanaro.schedule_hanaro.global.domain.Call;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
-import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
-import com.hanaro.schedule_hanaro.global.exception.GlobalException;
-import com.hanaro.schedule_hanaro.global.repository.CallRepository;
-import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
 import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
 import com.hanaro.schedule_hanaro.global.websocket.handler.WebsocketHandler;
 
@@ -118,6 +112,16 @@ public class CallService {
 
 		LocalDateTime startOfDay = date.atTime(9, 0);
 		LocalDateTime endOfDay = date.atTime(18, 0);
+
+		LocalDateTime now = LocalDateTime.now();
+
+		if (date.isEqual(LocalDate.now())) {
+			startOfDay = now.isAfter(startOfDay) ? now : startOfDay;
+			startOfDay = startOfDay.withMinute((startOfDay.getMinute() / 30) * 30).withSecond(0).withNano(0);
+			if (startOfDay.getMinute() % 30 != 0) {
+				startOfDay = startOfDay.plusMinutes(30 - startOfDay.getMinute() % 30);
+			}
+		}
 
 		while (!startOfDay.isAfter(endOfDay)) {
 			LocalDateTime[] timeSlotRange = getTimeSlotRange(startOfDay);
