@@ -96,7 +96,7 @@ public class VisitService {
 		isClosed(branch, now);
 
 		String content = visitReservationCreateRequest.content();
-		String tags = recommendTagsForQuery(content);
+		List<String> tags = recommendTagsForQuery(content);
 
 		Long csVisitId = csVisitRepository.findByBranchIdAndDate(
 				branch.getId(),
@@ -131,7 +131,7 @@ public class VisitService {
 				.visitDate(now.toLocalDate())
 				.num(totalNum)
 				.content(content)
-				.tags(tags)
+				.tags(String.join(",", tags))
 				.category(category)
 				.build()
 		);

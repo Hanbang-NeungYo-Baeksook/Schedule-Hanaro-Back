@@ -272,9 +272,9 @@ public class TagRecommender {
         ));
     }};
 
-    public static String recommendTagsForQuery(String query) {
+    public static List<String> recommendTagsForQuery(String query) {
         if (query == null || query.trim().isEmpty()) {
-            return "";
+            return new ArrayList<>();
         }
 
         // 질문 토큰화
@@ -288,7 +288,7 @@ public class TagRecommender {
                 .sorted((e1, e2) -> Double.compare(e2.getValue(), e1.getValue()))
                 .limit(3)
                 .map(Map.Entry::getKey)
-                .collect(Collectors.joining(","));
+                .collect(Collectors.toList());
     }
 
     private static Map<String, Double> calculateTagScores(List<String> tokens) {

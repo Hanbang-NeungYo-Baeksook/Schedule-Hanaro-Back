@@ -48,7 +48,7 @@ public class InquiryService {
 		// 번호 추가
 		int newInquiryNum = maxInquiryNum + 1;
 
-		String tags= recommendTagsForQuery(request.content());
+		List<String> tags = recommendTagsForQuery(request.content());
 
 		Inquiry inquiry = Inquiry.builder()
 			.customer(customer)
@@ -56,7 +56,7 @@ public class InquiryService {
 			.inquiryNum(newInquiryNum)
 			.category(category)
 			.status(InquiryStatus.PENDING)
-			.tags(tags)
+			.tags(String.join(",", tags))
 			.build();
 
 		Inquiry savedInquiry = inquiryRepository.save(inquiry);

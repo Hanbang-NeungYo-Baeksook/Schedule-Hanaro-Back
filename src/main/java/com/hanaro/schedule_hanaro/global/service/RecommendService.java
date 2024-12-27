@@ -40,7 +40,7 @@ public class RecommendService {
 		Map<String, Double> idfMap = calculateIDF(questions);
 
 		RealVector queryVector = TFIDFVectorizer.createTFIDFVectorForNewQuestion(query, idfMap, allTokens);
-		String recommendedTags = TagRecommender.recommendTagsForQuery(query);
+		List<String> recommendedTags = TagRecommender.recommendTagsForQuery(query);
 
 		if (recommendedTags == null) {
 			throw new GlobalException(ErrorCode.MISSING_REQUEST_PARAMETER, "Failed to recommend tags.");

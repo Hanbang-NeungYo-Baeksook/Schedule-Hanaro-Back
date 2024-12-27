@@ -71,7 +71,7 @@ public class CallService {
 			throw new GlobalException(ErrorCode.CONFLICTING_CALL_RESERVATION, "같은 시간대에 이미 예약한 내역이 존재합니다.");
 		}
 
-		String tags= recommendTagsForQuery(request.content());
+		List<String> tags = recommendTagsForQuery(request.content());
 
 		while (true) {
 			try {
@@ -87,7 +87,7 @@ public class CallService {
 					.callNum(newCallNum)
 					.category(category)
 					.content(request.content())
-					.tags(tags)
+					.tags(String.join(",", tags))
 					.build();
 
 				Call savedCall = callRepository.save(newCall);
