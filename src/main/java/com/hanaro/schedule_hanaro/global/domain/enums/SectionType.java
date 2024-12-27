@@ -1,7 +1,5 @@
 package com.hanaro.schedule_hanaro.global.domain.enums;
 
-import java.util.Arrays;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

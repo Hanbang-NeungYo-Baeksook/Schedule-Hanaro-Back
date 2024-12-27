@@ -39,11 +39,11 @@ public class BranchController {
 		@RequestParam("longitude") double xPosition, // 사용자 위도
 		@RequestParam("latitude") double yPosition,
 		@RequestParam(value = "order_by", defaultValue = "distance") String orderBy,
-		@RequestParam(value = "category", required = false, defaultValue = "") String category,
+		@RequestParam(value = "sectionType", required = false, defaultValue = "") String sectionType,
 		Authentication authentication
 	) {
 		return ResponseEntity.ok()
-			.body(branchService.listBranch(yPosition, xPosition, orderBy, category, authentication));
+			.body(branchService.listBranch(yPosition, xPosition, orderBy, sectionType, authentication));
 	}
 
 	@Operation(summary = "영업점 상세 정보 조회", description = "특정 영업점의 지점정보와 대기 현황 정보를 조회합니다.")

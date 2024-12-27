@@ -24,7 +24,6 @@ import com.hanaro.schedule_hanaro.global.domain.Branch;
 import com.hanaro.schedule_hanaro.global.domain.Section;
 import com.hanaro.schedule_hanaro.global.domain.Visit;
 import com.hanaro.schedule_hanaro.global.domain.enums.BranchType;
-import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.SectionType;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 import com.hanaro.schedule_hanaro.global.domain.enums.TransportType;
@@ -34,7 +33,6 @@ import com.hanaro.schedule_hanaro.global.repository.BranchRepository;
 import com.hanaro.schedule_hanaro.global.repository.SectionRepository;
 import com.hanaro.schedule_hanaro.global.repository.VisitRepository;
 import com.hanaro.schedule_hanaro.global.utils.DistanceUtils;
-import com.hanaro.schedule_hanaro.global.utils.GetSectionByCategory;
 import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
 
 import lombok.RequiredArgsConstructor;
@@ -97,7 +95,7 @@ public class BranchService {
 		return dtoMap;
 	}
 
-	public BranchListResponse listBranch(double userLat, double userLon, String key, String category,
+	public BranchListResponse listBranch(double userLat, double userLon, String key, String sectionType,
 		Authentication authentication) {
 
 		List<Branch> atmList = branchRepository.findAllByBranchTypeOrderByIdAsc(BranchType.ATM);
@@ -114,11 +112,10 @@ public class BranchService {
 			bankList.sort(Comparator.comparing(BranchDetailResponse::distance));
 			System.out.println("거리정렬완료");
 		} else if (key.equals("wait")) {
-			SectionType sectionType = GetSectionByCategory.getSectionTypeByCategory(
-				Category.fromCategoryName(category));
+			SectionType section = SectionType.valueOf(sectionType);
 			bankList.sort(
 				Comparator.comparing(branchDetailResponse -> branchDetailResponse.waitTime()
-					.get(branchDetailResponse.sectionTypes().indexOf(sectionType.getType()))));
+					.get(branchDetailResponse.sectionTypes().indexOf(section.getType()))));
 		} else {
 			throw new GlobalException(ErrorCode.WRONG_REQUEST_PARAMETER);
 		}

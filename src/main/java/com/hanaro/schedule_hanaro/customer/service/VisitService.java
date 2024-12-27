@@ -17,8 +17,12 @@ import com.hanaro.schedule_hanaro.customer.dto.response.CreateVisitResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.DeleteVisitResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.VisitDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.VisitListResponse;
+import com.hanaro.schedule_hanaro.global.domain.Branch;
+import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.Section;
+import com.hanaro.schedule_hanaro.global.domain.Visit;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
+import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
 import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 import com.hanaro.schedule_hanaro.global.repository.BranchRepository;
@@ -26,10 +30,6 @@ import com.hanaro.schedule_hanaro.global.repository.CsVisitRepository;
 import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
 import com.hanaro.schedule_hanaro.global.repository.SectionRepository;
 import com.hanaro.schedule_hanaro.global.repository.VisitRepository;
-import com.hanaro.schedule_hanaro.global.domain.Branch;
-import com.hanaro.schedule_hanaro.global.domain.Customer;
-import com.hanaro.schedule_hanaro.global.domain.Visit;
-import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 import com.hanaro.schedule_hanaro.global.utils.GetSectionByCategory;
 import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
 
@@ -172,7 +172,7 @@ public class VisitService {
 
 		List<Category> categoryList = visitRepository.findCategoryBySectionIdAndNumBeforeAndStatus(
 			visit.getSection().getId(), visit.getNum(), Status.PENDING);
-		int waitingAmount=categoryList.size();
+		int waitingAmount = categoryList.size();
 		int waitingTime = calculateWaitingTime(categoryList);
 
 		return VisitDetailResponse.of(
@@ -202,7 +202,7 @@ public class VisitService {
 		List<VisitListResponse.VisitData> visitDataList = visitSlice.getContent().stream()
 			.map(visit -> {
 				List<Category> categoryList = visitRepository.findCategoryBySectionIdAndNumBeforeAndStatus(
-					visit.getSection().getId(),visit.getNum(),Status.PENDING
+					visit.getSection().getId(), visit.getNum(), Status.PENDING
 				);
 				return VisitListResponse.VisitData.builder()
 					.visitId(visit.getId())
@@ -233,7 +233,7 @@ public class VisitService {
 		if (visit.getStatus().equals(Status.COMPLETE) || visit.getStatus().equals(Status.CANCELED)) {
 			throw new GlobalException(ErrorCode.ALREADY_COMPLETE);
 		}
-		int tryCount=0;
+		int tryCount = 0;
 		while (true) {
 			try {
 				if (tryCount >= 10) {
