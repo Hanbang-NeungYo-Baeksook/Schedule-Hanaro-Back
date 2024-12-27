@@ -178,7 +178,7 @@ public class BranchService {
 				Section section = sectionRepository.findByBranchAndSectionType(branch, sectionType)
 					.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_SECTION));
 
-				int waitAmount = section.getWaitAmount();
+				int waitAmount = section.getWaitAmount() == 0 ? 1 : section.getWaitAmount();
 
 				return BranchWithMetrics.of(branch, distance, waitAmount);
 			})
