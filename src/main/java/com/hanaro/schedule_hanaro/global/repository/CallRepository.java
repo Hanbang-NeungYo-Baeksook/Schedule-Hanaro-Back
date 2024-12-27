@@ -52,7 +52,7 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 
 
 	@Query("SELECT c FROM Call c " +
-		"LEFT JOIN Customer cu ON c.customer.id = u.id " +
+		"LEFT JOIN Customer cu ON c.customer.id = cu.id " +
 		"WHERE (:status IS NULL OR c.status = :status) " +
 		"AND (:category IS NULL OR c.category = :category) " +
 		"AND (:startedAt IS NULL OR c.callDate >= :startedAt) " +
