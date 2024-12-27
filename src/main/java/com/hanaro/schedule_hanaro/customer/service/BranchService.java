@@ -132,8 +132,8 @@ public class BranchService {
 				atm.getAddress(),
 				atm.getBusinessTime(),
 				atm.getBranchType().toString(),
-				DistanceUtils.calculateDistance(userLat, userLon, Double.parseDouble(atm.getYPosition()),
-					Double.parseDouble(atm.getXPosition()))
+				(int)(DistanceUtils.calculateDistance(userLat, userLon, Double.parseDouble(atm.getYPosition()),
+					Double.parseDouble(atm.getXPosition())) * 1000)
 			))
 			.toList());
 		atmInfoDtoList.sort(Comparator.comparing(AtmInfoDto::distance));
