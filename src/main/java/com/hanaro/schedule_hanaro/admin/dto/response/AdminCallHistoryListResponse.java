@@ -9,13 +9,28 @@ import lombok.Builder;
 
 @Builder
 public record AdminCallHistoryListResponse(
-	List<AdminCallHistoryResponse> data,
-	Pagination pagination
+	@JsonProperty("data")
+	List<AdminCallHistoryResponse> calls,
+
+	@JsonProperty("current_page")
+	Integer currentPage,           // 현재 페이지 번호
+
+	@JsonProperty("page_size")
+	Integer pageSize,              // 페이지당 데이터 개수
+
+	@JsonProperty("total_items")
+	Long totalItems,               // 전체 아이템 개수
+
+	@JsonProperty("total_pages")
+	Integer totalPages             // 전체 페이지 수
 ) {
-	@Builder
-	public record Pagination(
-		@JsonProperty("currentPage") int currentPage,
-		@JsonProperty("pageSize") int pageSize,
-		@JsonProperty("hasNext") boolean hasNext
-	) {}
+	public static AdminCallHistoryListResponse from(List<AdminCallHistoryResponse> calls, Integer currentPage, Integer pageSize, Long totalItems, Integer totalPages) {
+		return AdminCallHistoryListResponse.builder()
+			.calls(calls)
+			.currentPage(currentPage)
+			.pageSize(pageSize)
+			.totalItems(totalItems)
+			.totalPages(totalPages)
+			.build();
+	}
 }
