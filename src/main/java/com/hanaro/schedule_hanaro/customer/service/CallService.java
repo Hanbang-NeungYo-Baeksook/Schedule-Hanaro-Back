@@ -2,6 +2,7 @@ package com.hanaro.schedule_hanaro.customer.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -113,7 +114,8 @@ public class CallService {
 		LocalDateTime startOfDay = date.atTime(9, 0);
 		LocalDateTime endOfDay = date.atTime(18, 0);
 
-		LocalDateTime now = LocalDateTime.now();
+		ZoneId zoneId = ZoneId.of("Asia/Seoul");
+		LocalDateTime now = LocalDateTime.now(zoneId);
 
 		if (date.isEqual(LocalDate.now())) {
 			startOfDay = now.isAfter(startOfDay) ? now : startOfDay;
