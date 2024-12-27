@@ -35,6 +35,8 @@ import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
 
 import jakarta.transaction.Transactional;
 
+import static com.hanaro.schedule_hanaro.global.utils.TagRecommender.recommendTagsForQuery;
+
 @Service
 public class VisitService {
 
@@ -94,7 +96,7 @@ public class VisitService {
 		isClosed(branch, now);
 
 		String content = visitReservationCreateRequest.content();
-		String tags = getTags(content);
+		List<String> tags = recommendTagsForQuery(content);
 
 		Long csVisitId = csVisitRepository.findByBranchIdAndDate(
 				branch.getId(),
@@ -129,7 +131,7 @@ public class VisitService {
 				.visitDate(now.toLocalDate())
 				.num(totalNum)
 				.content(content)
-				.tags(tags)
+				.tags(String.join(",", tags))
 				.category(category)
 				.build()
 		);
@@ -161,13 +163,6 @@ public class VisitService {
 		}
 	}
 
-	private String getTags(String content) {
-		StringBuilder builder = new StringBuilder();
-		for (int i = 0; i < 50; i++) {
-			builder.append(Math.random() > 0.5 ? '0' : '1');
-		}
-		return builder.toString();
-	}
 
 	public VisitDetailResponse getVisitDetail(Long visitId) {
 		Visit visit = visitRepository.findById(visitId).orElseThrow();

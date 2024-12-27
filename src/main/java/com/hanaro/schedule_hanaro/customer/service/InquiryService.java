@@ -24,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import static com.hanaro.schedule_hanaro.global.utils.TagRecommender.recommendTagsForQuery;
+
 import java.util.List;
 
 @Service
@@ -46,13 +48,15 @@ public class InquiryService {
 		// 번호 추가
 		int newInquiryNum = maxInquiryNum + 1;
 
+		List<String> tags = recommendTagsForQuery(request.content());
+
 		Inquiry inquiry = Inquiry.builder()
 			.customer(customer)
 			.content(request.content())
 			.inquiryNum(newInquiryNum)
 			.category(category)
 			.status(InquiryStatus.PENDING)
-			.tags("default")
+			.tags(String.join(",", tags))
 			.build();
 
 		Inquiry savedInquiry = inquiryRepository.save(inquiry);
