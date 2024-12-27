@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -111,8 +112,7 @@ public class AdminCallService {
 		// call의 상태를 progress로 변경
 		callRepository.updateStatusWithStartedAt(call.getId(), Status.PROGRESS, LocalDateTime.now());
 
-		String message = "관리자가 새로운 상담을 시작했습니다: 상담 ID " + call.getId();
-		websocketHandler.notifySubscribers(1L, message);
+		websocketHandler.notifySubscribers(1L, String.format("CALL_UPDATE:%d", call.getId()));
 
 		// call memo 빈 문자열로 등록
 		callMemoRepository.save(CallMemo.builder()
@@ -186,36 +186,23 @@ public class AdminCallService {
 	) {
 		Pageable pageable = PageRequest.of(page - 1, size);
 
-		// Repository에서 Slice 형태로 데이터를 조회
-		Slice<Call> callSlice = callRepository.findByFiltering(
-			pageable,
-			status,
-			startedAt,
-			endedAt,
-			category,
-			keyword
+		Page<Call> calls = callRepository.findByFiltering(pageable, status, startedAt, endedAt, category, keyword);
+
+		List<AdminCallHistoryResponse> callDataList = calls.getContent().stream()
+			.map(call -> AdminCallHistoryResponse.builder()
+				.id(call.getId())
+				.content(call.getContent())
+				.category(call.getCategory().toString()).build())
+			.toList();
+
+		return AdminCallHistoryListResponse.from(
+			callDataList,
+			calls.getNumber() + 1,
+			calls.getSize(),
+			calls.getTotalElements(),
+			calls.getTotalPages()
 		);
-
-		// Call 데이터를 AdminCallHistoryResponse 리스트로 변환
-		List<AdminCallHistoryResponse> callDataList = callSlice.getContent().stream()
-			.map(AdminCallHistoryResponse::from) // record의 from 메서드만 사용
-			.collect(Collectors.toList());
-
-
-		// 페이지네이션 정보를 생성
-		AdminCallHistoryListResponse.Pagination pagination = AdminCallHistoryListResponse.Pagination.builder()
-			.currentPage(page)
-			.pageSize(size)
-			.hasNext(callSlice.hasNext())
-			.build();
-
-		// 최종 응답 객체 생성 및 반환
-		return AdminCallHistoryListResponse.builder()
-			.data(callDataList)
-			.pagination(pagination)
-			.build();
 	}
-
 
 	public AdminCallDetailResponse findCall(Long callId) {
 		Call call = callRepository.findById(callId)

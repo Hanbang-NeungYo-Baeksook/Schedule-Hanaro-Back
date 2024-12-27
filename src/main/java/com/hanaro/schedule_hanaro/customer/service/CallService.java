@@ -87,7 +87,7 @@ public class CallService {
 
 				Call savedCall = callRepository.save(newCall);
 
-				websocketHandler.notifySubscribers(1L, "새로운 Call 등록: " + savedCall.getId());
+				websocketHandler.notifySubscribers(1L, String.format("CALL_UPDATE:%d", savedCall.getId()));
 
 				return CallResponse.builder()
 					.callId(savedCall.getId())
@@ -156,7 +156,7 @@ public class CallService {
 		call.setStatus(Status.CANCELED);
 		callRepository.save(call);
 
-		websocketHandler.notifySubscribers(1L, "Call 취소됨: " + callId);
+		websocketHandler.notifySubscribers(1L, String.format("CALL_UPDATE:%d", call.getId()));
 	}
 
 	private LocalDateTime[] getTimeSlotRange(LocalDateTime callDateTime) {

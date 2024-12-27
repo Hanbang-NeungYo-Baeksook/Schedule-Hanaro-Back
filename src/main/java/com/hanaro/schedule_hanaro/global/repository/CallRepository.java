@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -40,7 +41,7 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 	int countByCallDateBetween(@Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
 	Call findByCallNum(int callNum);
 
-	Slice<Call> findByCustomerIdAndStatus(Long customerId, Status status, Pageable pageable);
+	Page<Call> findByCustomerIdAndStatus(Long customerId, Status status, Pageable pageable);
 
 	@Modifying
 	@Query("UPDATE Call c SET c.status = :status, c.endedAt = :endedAt WHERE c.id = :callId")
@@ -62,7 +63,7 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 		"     c.content LIKE %:keyword% OR " +
 		"     cu.name LIKE %:keyword%) " +
 		"ORDER BY c.callDate DESC")
-	Slice<Call> findByFiltering(
+	Page<Call> findByFiltering(
 		Pageable pageable,
 		Status status,
 		@Param("startedAt") LocalDateTime startedAt,
