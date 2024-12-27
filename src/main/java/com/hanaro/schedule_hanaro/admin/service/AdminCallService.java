@@ -186,7 +186,7 @@ public class AdminCallService {
 	) {
 		Pageable pageable = PageRequest.of(page - 1, size);
 
-		Page<Call> calls = callRepository.findByFiltering(pageable, status, startedAt, endedAt, category, keyword);
+		Page<Call> calls = callRepository.findByFiltering(pageable, startedAt, endedAt, category, keyword);
 
 		List<AdminCallHistoryResponse> callDataList = calls.getContent().stream()
 			.map(call -> AdminCallHistoryResponse.builder()

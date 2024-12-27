@@ -1,6 +1,5 @@
 package com.hanaro.schedule_hanaro.global.repository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -14,7 +13,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryStatsDto;
 import com.hanaro.schedule_hanaro.global.domain.Call;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
@@ -65,9 +63,8 @@ public interface CallRepository extends JpaRepository<Call, Long> {
          cu.name LIKE %:keyword%)
     ORDER BY c.callDate DESC
 """)
-	Slice<Call> findByFiltering(
+	Page<Call> findByFiltering(
 		Pageable pageable,
-		Status status,
 		@Param("startedAt") LocalDateTime startedAt,
 		@Param("endedAt") LocalDateTime endedAt,
 		@Param("category") Category category,
