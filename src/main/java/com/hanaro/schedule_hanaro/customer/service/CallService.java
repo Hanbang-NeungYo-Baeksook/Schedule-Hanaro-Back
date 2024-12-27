@@ -41,6 +41,8 @@ import com.hanaro.schedule_hanaro.global.websocket.handler.WebsocketHandler;
 
 import lombok.RequiredArgsConstructor;
 
+import static com.hanaro.schedule_hanaro.global.utils.TagRecommender.recommendTagsForQuery;
+
 @Service
 @RequiredArgsConstructor
 public class CallService {
@@ -69,6 +71,8 @@ public class CallService {
 			throw new GlobalException(ErrorCode.CONFLICTING_CALL_RESERVATION, "같은 시간대에 이미 예약한 내역이 존재합니다.");
 		}
 
+		String tags= recommendTagsForQuery(request.content());
+
 		while (true) {
 			try {
 				int newCallNum = generateNextCallNum(startTime, endTime);
@@ -83,7 +87,7 @@ public class CallService {
 					.callNum(newCallNum)
 					.category(category)
 					.content(request.content())
-					.tags("default")
+					.tags(tags)
 					.build();
 
 				Call savedCall = callRepository.save(newCall);
