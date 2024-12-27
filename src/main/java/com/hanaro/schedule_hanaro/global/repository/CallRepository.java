@@ -52,18 +52,20 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 	void updateStatusWithStartedAt(@Param("callId") Long callId, @Param("status") Status status, @Param("startedAt") LocalDateTime startedAt);
 
 
-	@Query("SELECT c FROM Call c " +
-		"LEFT JOIN Customer cu ON c.customer.id = cu.id " +
-		"WHERE (:status IS NULL OR c.status = :status) " +
-		"AND (:category IS NULL OR c.category = :category) " +
-		"AND (:startedAt IS NULL OR c.callDate >= :startedAt) " +
-		"AND (:endedAt IS NULL OR c.callDate <= :endedAt)" +
-		"AND (:keyword IS NULL OR " +
-		"     c.tags LIKE %:keyword% OR " +
-		"     c.content LIKE %:keyword% OR " +
-		"     cu.name LIKE %:keyword%) " +
-		"ORDER BY c.callDate DESC")
-	Page<Call> findByFiltering(
+	@Query("""
+    SELECT c FROM Call c
+    LEFT JOIN c.customer cu
+    WHERE c.status = 'COMPLETE'
+    AND (:category IS NULL OR c.category = :category)
+    AND (:startedAt IS NULL OR c.callDate >= :startedAt)
+    AND (:endedAt IS NULL OR c.callDate <= :endedAt)
+    AND (:keyword IS NULL OR 
+         c.tags LIKE %:keyword% OR 
+         c.content LIKE %:keyword% OR 
+         cu.name LIKE %:keyword%)
+    ORDER BY c.callDate DESC
+""")
+	Slice<Call> findByFiltering(
 		Pageable pageable,
 		Status status,
 		@Param("startedAt") LocalDateTime startedAt,

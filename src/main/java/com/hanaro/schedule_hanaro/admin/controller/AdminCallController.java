@@ -80,16 +80,15 @@ public class AdminCallController {
 	@Operation(summary = "전화 상담 목록 조회", description = "전화 상담 목록을 내용, 카테고리, 날짜 등으로 필터링해 조회합니다.")
 	@GetMapping()
 	public ResponseEntity<AdminCallHistoryListResponse> getCallList(
-		@RequestParam(value = "status", defaultValue = "COMPLETE") Status status,
 		@RequestParam(value = "page", defaultValue = "1") int page,
 		@RequestParam(value = "size", defaultValue = "5") int size,
-		@RequestParam(required = false) LocalDateTime startedAt,
-		@RequestParam(required = false) LocalDateTime endedAt,
+		@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startedAt,
+		@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endedAt,
 		@RequestParam(required = false) Category category,
 		@RequestParam(required = false) String keyword
 	) {
 		// 전화 상담 목록 조회
-		return ResponseEntity.ok().body(callService.findFilteredCalls(page, size, status, startedAt, endedAt, category, keyword));
+		return ResponseEntity.ok().body(callService.findFilteredCalls(page, size, startedAt, endedAt, category, keyword));
 	}
 
 	@Operation(summary = "전화 상담 상세 조회", description = "특정 전화 상담 항목의 상세 정보를 조회합니다.")
