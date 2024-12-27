@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
@@ -37,32 +36,34 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 
 	@Query("SELECT COUNT(c) FROM Call c WHERE c.callDate BETWEEN :startTime AND :endTime")
 	int countByCallDateBetween(@Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
+
 	Call findByCallNum(int callNum);
 
 	Page<Call> findByCustomerIdAndStatus(Long customerId, Status status, Pageable pageable);
 
 	@Modifying
 	@Query("UPDATE Call c SET c.status = :status, c.endedAt = :endedAt WHERE c.id = :callId")
-	void updateStatusWithEndedAt(@Param("callId") Long callId, @Param("status") Status status, @Param("endedAt") LocalDateTime endedAt);
+	void updateStatusWithEndedAt(@Param("callId") Long callId, @Param("status") Status status,
+		@Param("endedAt") LocalDateTime endedAt);
 
 	@Modifying
 	@Query("UPDATE Call c SET c.status = :status, c.startedAt = :startedAt WHERE c.id = :callId")
-	void updateStatusWithStartedAt(@Param("callId") Long callId, @Param("status") Status status, @Param("startedAt") LocalDateTime startedAt);
-
+	void updateStatusWithStartedAt(@Param("callId") Long callId, @Param("status") Status status,
+		@Param("startedAt") LocalDateTime startedAt);
 
 	@Query("""
-    SELECT c FROM Call c
-    LEFT JOIN c.customer cu
-    WHERE c.status = 'COMPLETE'
-    AND (:category IS NULL OR c.category = :category)
-    AND (:startedAt IS NULL OR c.callDate >= :startedAt)
-    AND (:endedAt IS NULL OR c.callDate <= :endedAt)
-    AND (:keyword IS NULL OR 
-         c.tags LIKE %:keyword% OR 
-         c.content LIKE %:keyword% OR 
-         cu.name LIKE %:keyword%)
-    ORDER BY c.callDate DESC
-""")
+		    SELECT c FROM Call c
+		    LEFT JOIN c.customer cu
+		    WHERE c.status = 'COMPLETE'
+		    AND (:category IS NULL OR c.category = :category)
+		    AND (:startedAt IS NULL OR c.callDate >= :startedAt)
+		    AND (:endedAt IS NULL OR c.callDate <= :endedAt)
+		    AND (:keyword IS NULL OR 
+		         c.tags LIKE %:keyword% OR 
+		         c.content LIKE %:keyword% OR 
+		         cu.name LIKE %:keyword%)
+		    ORDER BY c.callDate DESC
+		""")
 	Page<Call> findByFiltering(
 		Pageable pageable,
 		@Param("startedAt") LocalDateTime startedAt,
@@ -77,19 +78,19 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 	Optional<Call> findFirstByStatusOrderByCallNumAsc(Status status);
 
 	@Query(nativeQuery = true, value = """ 
-		SELECT 
-			CAST(COUNT(CASE WHEN DATE(c.call_date) = CURRENT_DATE THEN 1 END) AS SIGNED) as today, 
-			CAST(COUNT(CASE WHEN c.call_date >= DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY) THEN 1 END) AS SIGNED) as weekly, 
-			CAST(COUNT(CASE WHEN c.call_date >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) THEN 1 END) AS SIGNED) as monthly, 
-			CAST(COUNT(*) AS SIGNED) as total 
-		FROM `Call` c
-		JOIN `Call_Memo` cm ON c.call_id = cm.call_id 
-		WHERE cm.admin_id = :adminId 
-		AND c.status = 'COMPLETE'
-	""")
+			SELECT 
+				CAST(COUNT(CASE WHEN DATE(c.call_date) = CURRENT_DATE THEN 1 END) AS SIGNED) as today, 
+				CAST(COUNT(CASE WHEN c.call_date >= DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY) THEN 1 END) AS SIGNED) as weekly, 
+				CAST(COUNT(CASE WHEN c.call_date >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) THEN 1 END) AS SIGNED) as monthly, 
+				CAST(COUNT(*) AS SIGNED) as total 
+			FROM `Call` c
+			JOIN `Call_Memo` cm ON c.call_id = cm.call_id 
+			WHERE cm.admin_id = :adminId 
+			AND c.status = 'COMPLETE'
+		""")
 	List<Object[]> findStatsByAdminId(@Param("adminId") Long adminId);
 
-	Integer countCallsByCustomer(Customer customer);
+	Integer countCallsByCustomerAndStatusNotIn(Customer customer, Status status);
 
 	@Query("SELECT c " +
 		"FROM Call c " +
@@ -101,7 +102,6 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 		@Param("adminId") Long adminId
 	);
 
-
 	@Query("SELECT c FROM Call c " +
 		"WHERE c.status = 'PENDING' " +
 		"AND (:startDateTime IS NULL OR c.callDate >= :startDateTime) " +
@@ -110,6 +110,5 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 		@Param("startDateTime") LocalDateTime startDateTime,
 		@Param("endDateTime") LocalDateTime endDateTime
 	);
-
 
 }
