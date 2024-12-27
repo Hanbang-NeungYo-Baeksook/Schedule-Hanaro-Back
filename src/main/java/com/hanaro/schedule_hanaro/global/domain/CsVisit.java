@@ -10,7 +10,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import lombok.AccessLevel;
@@ -67,7 +66,7 @@ public class CsVisit {
 		waitAmount += 1;
 	}
 
-	public void increaseTotalNum(){
+	public void increaseTotalNum() {
 		totalNum += 1;
 	}
 }
