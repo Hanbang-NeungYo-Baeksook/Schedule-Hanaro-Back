@@ -28,7 +28,10 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 		@Param("endTime") LocalDateTime endTime);
 
 	@Query("SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END " +
-		"FROM Call c WHERE c.customer.id = :customerId AND c.callDate BETWEEN :startTime AND :endTime")
+		"FROM Call c " +
+		"WHERE c.customer.id = :customerId " +
+		"AND c.callDate BETWEEN :startTime AND :endTime " +
+		"AND c.status <> 'CANCELED'")
 	boolean isExistReservationsInSlot(@Param("customerId") Long customerId,
 		@Param("startTime") LocalDateTime startTime,
 		@Param("endTime") LocalDateTime endTime);
