@@ -12,11 +12,11 @@ public record RecommendListResponse(
 	List<RecommendDetailResponse> recommends,
 
 	@JsonProperty("tags")
-	List<String> tags
+	String tags
 ) {
 	public static RecommendListResponse of(
 		List<RecommendDetailResponse> recommends,
-		List<String> tags
+		String tags
 	) {
 		return RecommendListResponse.builder()
 			.recommends(recommends)
