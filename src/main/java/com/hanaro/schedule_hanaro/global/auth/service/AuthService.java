@@ -1,6 +1,5 @@
 package com.hanaro.schedule_hanaro.global.auth.service;
 
-
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -8,24 +7,24 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.hanaro.schedule_hanaro.global.auth.dto.response.SignUpResponse;
-import com.hanaro.schedule_hanaro.global.auth.info.UserInfo;
-import com.hanaro.schedule_hanaro.global.domain.enums.Role;
-import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
-import com.hanaro.schedule_hanaro.global.exception.GlobalException;
-import com.hanaro.schedule_hanaro.global.repository.AdminRepository;
-import com.hanaro.schedule_hanaro.global.repository.BranchRepository;
 import com.hanaro.schedule_hanaro.global.auth.dto.request.AuthAdminSignUpRequest;
 import com.hanaro.schedule_hanaro.global.auth.dto.request.AuthSignUpRequest;
 import com.hanaro.schedule_hanaro.global.auth.dto.request.SignInRequest;
 import com.hanaro.schedule_hanaro.global.auth.dto.response.JwtTokenDto;
+import com.hanaro.schedule_hanaro.global.auth.dto.response.SignUpResponse;
 import com.hanaro.schedule_hanaro.global.auth.info.CustomUserDetails;
+import com.hanaro.schedule_hanaro.global.auth.info.UserInfo;
 import com.hanaro.schedule_hanaro.global.auth.provider.JwtAuthenticationProvider;
 import com.hanaro.schedule_hanaro.global.auth.provider.JwtTokenProvider;
 import com.hanaro.schedule_hanaro.global.domain.Admin;
 import com.hanaro.schedule_hanaro.global.domain.Branch;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.enums.Gender;
+import com.hanaro.schedule_hanaro.global.domain.enums.Role;
+import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
+import com.hanaro.schedule_hanaro.global.exception.GlobalException;
+import com.hanaro.schedule_hanaro.global.repository.AdminRepository;
+import com.hanaro.schedule_hanaro.global.repository.BranchRepository;
 import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -39,8 +38,7 @@ public class AuthService {
 	private final BCryptPasswordEncoder bCryptPasswordEncoder;
 	private final JwtAuthenticationProvider authenticationProvider;
 	private final JwtTokenProvider jwtTokenProvider;
-	private final RedisTemplate<String,String> redisTemplate;
-
+	private final RedisTemplate<String, String> redisTemplate;
 
 	public JwtTokenDto signIn(SignInRequest signInRequest) {
 		return signIn(signInRequest, Role.CUSTOMER);
@@ -81,7 +79,7 @@ public class AuthService {
 		return response;
 	}
 
-	public SignUpResponse signUp(AuthSignUpRequest authSignUpRequest){
+	public SignUpResponse signUp(AuthSignUpRequest authSignUpRequest) {
 		customerRepository.save(Customer.builder()
 			.authId(authSignUpRequest.authId())
 			.password(bCryptPasswordEncoder.encode(authSignUpRequest.password()))
@@ -94,12 +92,12 @@ public class AuthService {
 	}
 
 	public SignUpResponse adminSignUpAdmin(AuthAdminSignUpRequest authAdminSignUpRequest) {
-		Branch branch = branchRepository.findById(5L).orElseThrow();
+		Branch branch = branchRepository.findById(authAdminSignUpRequest.branch_id()).orElseThrow();
 		adminRepository.save(Admin.builder()
-				.authId(authAdminSignUpRequest.authId())
-				.password(bCryptPasswordEncoder.encode(authAdminSignUpRequest.password()))
-				.name(authAdminSignUpRequest.name())
-				.branch(branch)
+			.authId(authAdminSignUpRequest.authId())
+			.password(bCryptPasswordEncoder.encode(authAdminSignUpRequest.password()))
+			.name(authAdminSignUpRequest.name())
+			.branch(branch)
 			.build()
 		);
 

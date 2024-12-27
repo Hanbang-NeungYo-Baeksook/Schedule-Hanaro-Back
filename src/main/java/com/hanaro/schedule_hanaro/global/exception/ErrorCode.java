@@ -27,12 +27,13 @@ public enum ErrorCode {
 	ALREADY_POST_MEMO(40016, HttpStatus.BAD_REQUEST, "이미 메모가 등록된 상담입니다."),
 	ALREADY_POST_RESPONSE(40017, HttpStatus.BAD_REQUEST, "이미 답변이 등록된 상담입니다."),
 	EMPTY_WAITS(40018, HttpStatus.BAD_REQUEST, "대기 중인 상담이 더이상 없습니다."),
-	ALREADY_PROGRESS_COUNSLATION(40019, HttpStatus.BAD_REQUEST, "이미 진행 중인 상담이 있습니다."),
+	ALREADY_PROGRESS_COUNSELATION(40019, HttpStatus.BAD_REQUEST, "이미 진행 중인 상담이 있습니다."),
 
 	// 401
 	EXPIRED_ACCESS_TOKEN(40101, HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다."),
 	UNSUPPORTED_TOKEN(40102, HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
 	MALFORMED_ACCESS_TOKEN(40103, HttpStatus.BAD_REQUEST, "토큰이 올바르지 않습니다."),
+	CANNOT_AUTHORIZED(40104, HttpStatus.UNAUTHORIZED, "인증을 진행할 수 없습니다."),
 
 	// 403
 	FORBIDDEN_REQUEST(40300, HttpStatus.FORBIDDEN, "권한이 존재하지 않습니다."),

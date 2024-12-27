@@ -17,16 +17,13 @@ import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallHistoryListRespons
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallHistoryResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallInfoResponse;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminCallWaitResponse;
-import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryHistoryResponse;
-
+import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryStatsDto;
 import com.hanaro.schedule_hanaro.global.domain.Admin;
 import com.hanaro.schedule_hanaro.global.domain.Call;
 import com.hanaro.schedule_hanaro.global.domain.CallMemo;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.domain.enums.Status;
-
-import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryStatsDto;
 import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
 import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 import com.hanaro.schedule_hanaro.global.repository.AdminRepository;
@@ -34,12 +31,6 @@ import com.hanaro.schedule_hanaro.global.repository.CallMemoRepository;
 import com.hanaro.schedule_hanaro.global.repository.CallRepository;
 import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
 import com.hanaro.schedule_hanaro.global.repository.InquiryRepository;
-import com.hanaro.schedule_hanaro.global.domain.Admin;
-import com.hanaro.schedule_hanaro.global.domain.Call;
-import com.hanaro.schedule_hanaro.global.domain.CallMemo;
-import com.hanaro.schedule_hanaro.global.domain.Customer;
-import com.hanaro.schedule_hanaro.global.domain.enums.Category;
-import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
 import com.hanaro.schedule_hanaro.global.websocket.handler.WebsocketHandler;
 
@@ -89,7 +80,8 @@ public class AdminCallService {
 		}
 
 		// 대기 중
-		List<AdminCallInfoResponse> pendingCalls = callRepository.findPendingCallsByDateTimeRange(targetDateTimeStart, targetDateTimeEnd)
+		List<AdminCallInfoResponse> pendingCalls = callRepository.findPendingCallsByDateTimeRange(targetDateTimeStart,
+				targetDateTimeEnd)
 			.stream()
 			.map(call -> AdminCallInfoResponse.from(call, callMemoRepository.findByCallId(call.getId())))
 			.toList();
@@ -108,7 +100,7 @@ public class AdminCallService {
 		List<Call> calls = callRepository.findByStatusAndAdminId(Status.PROGRESS, admin.getId());
 
 		if (!calls.isEmpty()) {
-			throw new GlobalException(ErrorCode.ALREADY_PROGRESS_COUNSLATION);
+			throw new GlobalException(ErrorCode.ALREADY_PROGRESS_COUNSELATION);
 		}
 
 		// 대기 번호가 가장 빠른 상담 조회 (비관적 락)
@@ -179,13 +171,12 @@ public class AdminCallService {
 			callMemoRepository.save(newCallMemo);
 		}
 
-
 		return callId;
 	}
 
-	public AdminCallHistoryListResponse findFilteredCalls(int page, int size, Status status, LocalDateTime startedAt, LocalDateTime endedAt, Category category, String keyword) {
+	public AdminCallHistoryListResponse findFilteredCalls(int page, int size, Status status, LocalDateTime startedAt,
+		LocalDateTime endedAt, Category category, String keyword) {
 		Pageable pageable = PageRequest.of(page - 1, size);
-
 
 		Slice<Call> callSlice = callRepository.findByFiltering(pageable, status, startedAt, endedAt, category, keyword);
 
@@ -226,14 +217,13 @@ public class AdminCallService {
 		return AdminCallDetailResponse.from(call, customer, callMemo);
 	}
 
-
 	public AdminInquiryStatsDto getStatsByAdminId(Long adminId) {
 		Object[] result = callRepository.findStatsByAdminId(adminId).get(0);
 		return AdminInquiryStatsDto.of(
-			((Number) result[0]).intValue(),
-			((Number) result[1]).intValue(),
-			((Number) result[2]).intValue(),
-			((Number) result[3]).intValue()
+			((Number)result[0]).intValue(),
+			((Number)result[1]).intValue(),
+			((Number)result[2]).intValue(),
+			((Number)result[3]).intValue()
 		);
 	}
 }

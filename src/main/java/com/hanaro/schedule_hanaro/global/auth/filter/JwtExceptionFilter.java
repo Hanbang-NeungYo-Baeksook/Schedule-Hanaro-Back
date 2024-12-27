@@ -46,8 +46,8 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
 			request.setAttribute("exception", e.getErrorCode());
 			filterChain.doFilter(request, response);
 		} catch (Exception e) {
-			logger.error("JwtExceptionFilter throw Illegal Argument Exception : ");
-			// request.setAttribute("exception",);
+			logger.error("JwtExceptionFilter throw Exception : ");
+			request.setAttribute("exception", ErrorCode.NOT_FOUND_DATA);
 			filterChain.doFilter(request, response);
 		}
 	}

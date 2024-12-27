@@ -19,6 +19,7 @@ import com.hanaro.schedule_hanaro.customer.dto.response.BranchListResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchRecommendationData;
 import com.hanaro.schedule_hanaro.customer.dto.response.BranchWithMetrics;
 import com.hanaro.schedule_hanaro.customer.vo.BankVO;
+import com.hanaro.schedule_hanaro.customer.vo.ReservedListVO;
 import com.hanaro.schedule_hanaro.global.domain.Branch;
 import com.hanaro.schedule_hanaro.global.domain.Section;
 import com.hanaro.schedule_hanaro.global.domain.Visit;
@@ -48,39 +49,42 @@ public class BranchService {
 	public BranchDetailResponse findBranchById(Long branchId, double xPosition, double yPosition,
 		Authentication authentication) {
 		List<BankVO> results = branchRepository.findBranchByBranch_Id(branchId);
-		List<Long> reservedList = getReservedList(authentication);
+		List<ReservedListVO> reservedList = getReservedList(authentication);
 
 		Map<Long, BranchDetailResponse> dtoMap = createBranchDtoMapFromBankVoList(results, reservedList, yPosition,
 			xPosition);
+		System.out.println(dtoMap.get(branchId).visitId());
 
 		return dtoMap.get(branchId);
 	}
 
-	private List<Long> getReservedList(Authentication authentication) {
+	private List<ReservedListVO> getReservedList(Authentication authentication) {
 		List<Visit> visitOptional = visitRepository.findByCustomer_IdAndStatus(PrincipalUtils.getId(authentication),
 			Status.PENDING);
 		return visitOptional.stream()
-			.map(visit -> visit.getSection().getBranch().getId())
+			.map(visit -> ReservedListVO.of(visit.getId(), visit.getSection().getBranch().getId()))
 			.toList();
 	}
 
 	private Map<Long, BranchDetailResponse> createBranchDtoMapFromBankVoList(List<BankVO> bankVoList,
-		List<Long> reservedList, double userLat, double userLon) {
+		List<ReservedListVO> reservedList, double userLat, double userLon) {
 		Map<Long, BranchDetailResponse> dtoMap = new LinkedHashMap<>();
 		System.out.println("예약리스트" + reservedList);
 		bankVoList.forEach(objects -> {
 			dtoMap.computeIfAbsent(objects.branchId(), id -> {
-				boolean reserved = false;
-				for (Long reservedBranchId : reservedList) {
-					if (reservedBranchId.equals(objects.branchId())) {
-						reserved = true;
+				Long visitId = 0L;
+				boolean isReserved = false;
+				for (ReservedListVO reserve : reservedList) {
+					if (reserve.branchId().equals(objects.branchId())) {
+						isReserved = true;
+						visitId = reserve.visitId();
 						break;
 					}
 				}
 				return new BranchDetailResponse(
 					objects.branchId(), objects.name(), objects.xPosition(), objects.yPosition(), objects.address(),
 					objects.tel(), objects.businessHours(), objects.branchType().getBranchType(),
-					reserved, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
+					isReserved, visitId, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
 					(int)(DistanceUtils.calculateDistance(Double.parseDouble(objects.yPosition()),
 						Double.parseDouble(objects.xPosition()), userLat, userLon) * 1000)
 				);
@@ -99,7 +103,7 @@ public class BranchService {
 		List<Branch> atmList = branchRepository.findAllByBranchTypeOrderByIdAsc(BranchType.ATM);
 		List<BankVO> results = branchRepository.findBranchByBranchType(BranchType.BANK);
 
-		List<Long> reservedList = getReservedList(authentication);
+		List<ReservedListVO> reservedList = getReservedList(authentication);
 
 		Map<Long, BranchDetailResponse> dtoMap = createBranchDtoMapFromBankVoList(results, reservedList, userLat,
 			userLon);
@@ -128,8 +132,8 @@ public class BranchService {
 				atm.getAddress(),
 				atm.getBusinessTime(),
 				atm.getBranchType().toString(),
-				DistanceUtils.calculateDistance(userLat, userLon, Double.parseDouble(atm.getYPosition()),
-					Double.parseDouble(atm.getXPosition()))
+				(int)(DistanceUtils.calculateDistance(userLat, userLon, Double.parseDouble(atm.getYPosition()),
+					Double.parseDouble(atm.getXPosition())) * 1000)
 			))
 			.toList());
 		atmInfoDtoList.sort(Comparator.comparing(AtmInfoDto::distance));
