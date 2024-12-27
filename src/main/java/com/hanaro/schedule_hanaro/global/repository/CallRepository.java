@@ -1,6 +1,5 @@
 package com.hanaro.schedule_hanaro.global.repository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -13,7 +12,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryStatsDto;
 import com.hanaro.schedule_hanaro.global.domain.Call;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
@@ -51,20 +49,21 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 	void updateStatusWithStartedAt(@Param("callId") Long callId, @Param("status") Status status, @Param("startedAt") LocalDateTime startedAt);
 
 
-	@Query("SELECT c FROM Call c " +
-		"LEFT JOIN Customer cu ON c.customer.id = cu.id " +
-		"WHERE (:status IS NULL OR c.status = :status) " +
-		"AND (:category IS NULL OR c.category = :category) " +
-		"AND (:startedAt IS NULL OR c.callDate >= :startedAt) " +
-		"AND (:endedAt IS NULL OR c.callDate <= :endedAt)" +
-		"AND (:keyword IS NULL OR " +
-		"     c.tags LIKE %:keyword% OR " +
-		"     c.content LIKE %:keyword% OR " +
-		"     cu.name LIKE %:keyword%) " +
-		"ORDER BY c.callDate DESC")
+	@Query("""
+    SELECT c FROM Call c
+    LEFT JOIN c.customer cu
+    WHERE c.status = 'COMPLETE'
+    AND (:category IS NULL OR c.category = :category)
+    AND (:startedAt IS NULL OR c.callDate >= :startedAt)
+    AND (:endedAt IS NULL OR c.callDate <= :endedAt)
+    AND (:keyword IS NULL OR 
+         c.tags LIKE %:keyword% OR 
+         c.content LIKE %:keyword% OR 
+         cu.name LIKE %:keyword%)
+    ORDER BY c.callDate DESC
+""")
 	Slice<Call> findByFiltering(
 		Pageable pageable,
-		Status status,
 		@Param("startedAt") LocalDateTime startedAt,
 		@Param("endedAt") LocalDateTime endedAt,
 		@Param("category") Category category,

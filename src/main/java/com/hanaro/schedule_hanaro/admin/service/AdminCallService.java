@@ -178,7 +178,6 @@ public class AdminCallService {
 	public AdminCallHistoryListResponse findFilteredCalls(
 		int page,
 		int size,
-		Status status,
 		LocalDateTime startedAt,
 		LocalDateTime endedAt,
 		Category category,
@@ -189,7 +188,6 @@ public class AdminCallService {
 		// Repository에서 Slice 형태로 데이터를 조회
 		Slice<Call> callSlice = callRepository.findByFiltering(
 			pageable,
-			status,
 			startedAt,
 			endedAt,
 			category,
@@ -200,7 +198,6 @@ public class AdminCallService {
 		List<AdminCallHistoryResponse> callDataList = callSlice.getContent().stream()
 			.map(AdminCallHistoryResponse::from) // record의 from 메서드만 사용
 			.collect(Collectors.toList());
-
 
 		// 페이지네이션 정보를 생성
 		AdminCallHistoryListResponse.Pagination pagination = AdminCallHistoryListResponse.Pagination.builder()
@@ -215,6 +212,7 @@ public class AdminCallService {
 			.pagination(pagination)
 			.build();
 	}
+
 
 
 	public AdminCallDetailResponse findCall(Long callId) {
