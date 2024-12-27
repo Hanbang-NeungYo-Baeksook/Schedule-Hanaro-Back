@@ -112,7 +112,8 @@ public class AdminCallService {
 		// call의 상태를 progress로 변경
 		callRepository.updateStatusWithStartedAt(call.getId(), Status.PROGRESS, LocalDateTime.now());
 
-		websocketHandler.notifySubscribers(1L, String.format("CALL_UPDATE:%d", call.getId()));
+		String message = "관리자가 새로운 상담을 시작했습니다: 상담 ID " + call.getId();
+		websocketHandler.notifySubscribers(1L, message);
 
 		// call memo 빈 문자열로 등록
 		callMemoRepository.save(CallMemo.builder()
@@ -178,7 +179,6 @@ public class AdminCallService {
 	public AdminCallHistoryListResponse findFilteredCalls(
 		int page,
 		int size,
-		Status status,
 		LocalDateTime startedAt,
 		LocalDateTime endedAt,
 		Category category,
@@ -186,7 +186,7 @@ public class AdminCallService {
 	) {
 		Pageable pageable = PageRequest.of(page - 1, size);
 
-		Page<Call> calls = callRepository.findByFiltering(pageable, status, startedAt, endedAt, category, keyword);
+		Page<Call> calls = callRepository.findByFiltering(pageable, startedAt, endedAt, category, keyword);
 
 		List<AdminCallHistoryResponse> callDataList = calls.getContent().stream()
 			.map(call -> AdminCallHistoryResponse.builder()
@@ -203,6 +203,7 @@ public class AdminCallService {
 			calls.getTotalPages()
 		);
 	}
+
 
 	public AdminCallDetailResponse findCall(Long callId) {
 		Call call = callRepository.findById(callId)
