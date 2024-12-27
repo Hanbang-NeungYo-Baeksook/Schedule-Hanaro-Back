@@ -80,7 +80,7 @@ public class AdminCallController {
 	@Operation(summary = "전화 상담 목록 조회", description = "전화 상담 목록을 내용, 카테고리, 날짜 등으로 필터링해 조회합니다.")
 	@GetMapping()
 	public ResponseEntity<AdminCallHistoryListResponse> getCallList(
-		@RequestParam(value = "status", defaultValue = "pending") Status status,
+		@RequestParam(value = "status", defaultValue = "COMPLETE") Status status,
 		@RequestParam(value = "page", defaultValue = "1") int page,
 		@RequestParam(value = "size", defaultValue = "5") int size,
 		@RequestParam(required = false) LocalDateTime startedAt,

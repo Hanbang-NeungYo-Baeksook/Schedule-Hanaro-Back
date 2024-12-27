@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -174,32 +175,47 @@ public class AdminCallService {
 		return callId;
 	}
 
-	public AdminCallHistoryListResponse findFilteredCalls(int page, int size, Status status, LocalDateTime startedAt,
-		LocalDateTime endedAt, Category category, String keyword) {
+	public AdminCallHistoryListResponse findFilteredCalls(
+		int page,
+		int size,
+		Status status,
+		LocalDateTime startedAt,
+		LocalDateTime endedAt,
+		Category category,
+		String keyword
+	) {
 		Pageable pageable = PageRequest.of(page - 1, size);
 
-		Slice<Call> callSlice = callRepository.findByFiltering(pageable, status, startedAt, endedAt, category, keyword);
+		// Repository에서 Slice 형태로 데이터를 조회
+		Slice<Call> callSlice = callRepository.findByFiltering(
+			pageable,
+			status,
+			startedAt,
+			endedAt,
+			category,
+			keyword
+		);
 
+		// Call 데이터를 AdminCallHistoryResponse 리스트로 변환
 		List<AdminCallHistoryResponse> callDataList = callSlice.getContent().stream()
-			.map(call -> AdminCallHistoryResponse.builder()
-				.id(call.getId())
-				.content(call.getContent())
-				.category(call.getCategory().toString())
-				.build())
-			.toList();
+			.map(AdminCallHistoryResponse::from) // record의 from 메서드만 사용
+			.collect(Collectors.toList());
 
+
+		// 페이지네이션 정보를 생성
 		AdminCallHistoryListResponse.Pagination pagination = AdminCallHistoryListResponse.Pagination.builder()
 			.currentPage(page)
 			.pageSize(size)
 			.hasNext(callSlice.hasNext())
 			.build();
 
+		// 최종 응답 객체 생성 및 반환
 		return AdminCallHistoryListResponse.builder()
-			.totalItems(callDataList.size())
 			.data(callDataList)
 			.pagination(pagination)
 			.build();
 	}
+
 
 	public AdminCallDetailResponse findCall(Long callId) {
 		Call call = callRepository.findById(callId)

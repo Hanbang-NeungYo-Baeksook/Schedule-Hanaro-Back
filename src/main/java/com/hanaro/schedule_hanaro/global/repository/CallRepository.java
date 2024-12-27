@@ -52,11 +52,16 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 
 
 	@Query("SELECT c FROM Call c " +
-		"WHERE c.status = :status " +
+		"LEFT JOIN Customer cu ON c.customer.id = u.id " +
+		"WHERE (:status IS NULL OR c.status = :status) " +
 		"AND (:category IS NULL OR c.category = :category) " +
-		"AND (:keyword IS NULL OR c.content LIKE %:keyword%) " +
-		"AND (:startedAt IS NULL OR c.startedAt >= :startedAt) " +
-		"AND (:endedAt IS NULL OR c.endedAt <= :endedAt)")
+		"AND (:startedAt IS NULL OR c.callDate >= :startedAt) " +
+		"AND (:endedAt IS NULL OR c.callDate <= :endedAt)" +
+		"AND (:keyword IS NULL OR " +
+		"     c.tags LIKE %:keyword% OR " +
+		"     c.content LIKE %:keyword% OR " +
+		"     cu.name LIKE %:keyword%) " +
+		"ORDER BY c.callDate DESC")
 	Slice<Call> findByFiltering(
 		Pageable pageable,
 		Status status,
