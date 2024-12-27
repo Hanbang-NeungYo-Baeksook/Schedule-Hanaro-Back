@@ -1,6 +1,9 @@
 package com.hanaro.schedule_hanaro.customer.service;
 
+import static com.hanaro.schedule_hanaro.global.utils.TagRecommender.*;
+
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -34,8 +37,6 @@ import com.hanaro.schedule_hanaro.global.utils.GetSectionByCategory;
 import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
 
 import jakarta.transaction.Transactional;
-
-import static com.hanaro.schedule_hanaro.global.utils.TagRecommender.recommendTagsForQuery;
 
 @Service
 public class VisitService {
@@ -93,7 +94,7 @@ public class VisitService {
 			throw new GlobalException(ErrorCode.ALREADY_RESERVED);
 		}
 		isLimitOver(customer, now);
-		isClosed(branch, now);
+		isClosed(branch);
 
 		String content = visitReservationCreateRequest.content();
 		List<String> tags = recommendTagsForQuery(content);
@@ -153,7 +154,8 @@ public class VisitService {
 		}
 	}
 
-	private void isClosed(Branch branch, LocalDateTime now) {
+	private void isClosed(Branch branch) {
+		LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
 		String[] businessTime = branch.getBusinessTime().split("~");
 		String startTime = businessTime[0];
 		String endTime = businessTime[1];
@@ -162,7 +164,6 @@ public class VisitService {
 			throw new GlobalException(ErrorCode.BRANCH_CLOSED);
 		}
 	}
-
 
 	public VisitDetailResponse getVisitDetail(Long visitId) {
 		Visit visit = visitRepository.findById(visitId).orElseThrow();
