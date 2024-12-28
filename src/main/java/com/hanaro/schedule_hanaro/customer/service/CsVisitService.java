@@ -24,7 +24,6 @@ public class CsVisitService {
 	private final CsVisitRepository csVisitRepository;
 	private final BranchRepository branchRepository;
 
-	@Scheduled(cron = "0 0 0 * * ?")
 	@Transactional
 	public void insertCsVisit() {
 		List<Branch> bankList = branchRepository.findAllByBranchType(BranchType.BANK);
