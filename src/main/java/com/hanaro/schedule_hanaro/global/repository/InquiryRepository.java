@@ -44,8 +44,7 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
         CAST(COUNT(CASE WHEN i.created_at >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) THEN 1 END) AS SIGNED) as monthly, 
         CAST(COUNT(*) AS SIGNED) as total 
     FROM Inquiry i 
-    LEFT JOIN Inquiry_Response ir ON i.inquiry_id = ir.inquiry_id
-    WHERE (ir.admin_id = :adminId OR ir.admin_id IS NULL)
+    WHERE i.admin_id = :adminId
 """)
 	List<Object[]> findStatsByAdminId(@Param("adminId") Long adminId);
 
