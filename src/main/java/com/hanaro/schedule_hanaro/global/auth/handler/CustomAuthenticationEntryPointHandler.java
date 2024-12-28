@@ -3,6 +3,7 @@ package com.hanaro.schedule_hanaro.global.auth.handler;
 import java.io.IOException;
 
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
@@ -20,8 +21,10 @@ public class CustomAuthenticationEntryPointHandler implements AuthenticationEntr
 	@Override
 	public void commence(HttpServletRequest request, HttpServletResponse response,
 		AuthenticationException authException) throws IOException, ServletException {
+		System.out.println("exception 진입");
 		ErrorCode errorCode = (ErrorCode)request.getAttribute("exception");
 		System.out.println(errorCode);
+		SecurityContextHolder.clearContext();
 		handleException(response, errorCode);
 	}
 

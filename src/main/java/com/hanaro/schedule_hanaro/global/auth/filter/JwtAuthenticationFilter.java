@@ -47,8 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		String header = request.getHeader("Authorization");
 		if (header == null || !header.startsWith("Bearer ")) {
-			filterChain.doFilter(request,response);
-			return;
+			throw new GlobalException(ErrorCode.NOT_FOUND_TOKEN);
 		}
 		String token = header.substring(7);
 
