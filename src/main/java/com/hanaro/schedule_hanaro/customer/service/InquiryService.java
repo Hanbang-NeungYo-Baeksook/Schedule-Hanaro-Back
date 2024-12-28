@@ -5,9 +5,11 @@ import com.hanaro.schedule_hanaro.customer.dto.response.InquiryCreateResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryListResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryReplyDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryResponse;
+import com.hanaro.schedule_hanaro.global.domain.Admin;
 import com.hanaro.schedule_hanaro.global.domain.enums.Category;
 import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
 import com.hanaro.schedule_hanaro.global.exception.GlobalException;
+import com.hanaro.schedule_hanaro.global.repository.AdminRepository;
 import com.hanaro.schedule_hanaro.global.repository.InquiryRepository;
 import com.hanaro.schedule_hanaro.global.repository.CustomerRepository;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
@@ -26,7 +28,9 @@ import org.springframework.stereotype.Service;
 
 import static com.hanaro.schedule_hanaro.global.utils.TagRecommender.recommendTagsForQuery;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +38,7 @@ public class InquiryService {
 	private final InquiryRepository inquiryRepository;
 	private final CustomerRepository customerRepository;
 	private final InquiryResponseRepository inquiryResponseRepository;
+	private final AdminRepository adminRepository;
 
 	// 1:1 상담 예약
 	@Transactional
@@ -60,6 +65,22 @@ public class InquiryService {
 			.build();
 
 		Inquiry savedInquiry = inquiryRepository.save(inquiry);
+
+		// inquiry response 등록
+		Optional<com.hanaro.schedule_hanaro.global.domain.InquiryResponse> inquiryResponse = inquiryResponseRepository.findFirstByOrderByIdDesc();
+
+		Admin admin = (inquiryResponse.isPresent())
+			? adminRepository.findFirstByIdGreaterThanOrderByIdAsc(inquiryResponse.get().getAdmin().getId())
+			.orElseGet(() -> adminRepository.findFirstByOrderByIdAsc().orElse(null))
+			: adminRepository.findFirstByOrderByIdAsc().orElse(null);
+
+		inquiryResponseRepository.save(com.hanaro.schedule_hanaro.global.domain.InquiryResponse.builder()
+			.inquiry(savedInquiry)
+			.admin(admin)
+			.content("")
+			.createdAt(LocalDateTime.now())
+			.updatedAt(LocalDateTime.now())
+			.build());
 
 		return InquiryCreateResponse.builder()
 			.inquiryId(savedInquiry.getId())

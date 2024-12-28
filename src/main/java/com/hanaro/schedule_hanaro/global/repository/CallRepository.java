@@ -75,7 +75,7 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 	List<Call> findByCustomerId(Long customerId);
 
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
-	Optional<Call> findFirstByStatusOrderByCallNumAsc(Status status);
+	Optional<Call> findFirstByStatusOrderByIdAsc(Status status);
 
 	@Query(nativeQuery = true, value = """ 
 			SELECT 

@@ -11,14 +11,17 @@ public record AdminInquiryResponse(
 	@JsonProperty("inquiry_id") Long inquiryId,
 	@JsonProperty("admin_id") Long adminId,
 	@JsonProperty("content") String content,
-	@JsonProperty("created_at") LocalDateTime createdAt
+	@JsonProperty("created_at") LocalDateTime
+		createdAt,
+	@JsonProperty("updated_at") LocalDateTime updatedAt
 ) {
-	public static AdminInquiryResponse of(Long inquiryId, Long adminId, String content, LocalDateTime createdAt) {
+	public static AdminInquiryResponse of(Long inquiryId, Long adminId, String content, LocalDateTime createdAt, LocalDateTime updatedAt) {
 		return AdminInquiryResponse.builder()
 			.inquiryId(inquiryId)
 			.adminId(adminId)
 			.content(content)
 			.createdAt(createdAt)
+			.updatedAt(updatedAt)
 			.build();
 	}
 }

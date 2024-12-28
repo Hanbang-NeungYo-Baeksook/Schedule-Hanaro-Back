@@ -11,19 +11,19 @@ import lombok.Builder;
 @Builder
 public record AdminInquiryListResponse(
 	@JsonProperty("data")
-	List<InquiryData> inquiryList, // 문의 목록 데이터
+	List<InquiryData> inquiryList,
 
 	@JsonProperty("current_page")
-	Integer currentPage,           // 현재 페이지 번호
+	Integer currentPage,
 
 	@JsonProperty("page_size")
-	Integer pageSize,              // 페이지당 데이터 개수
+	Integer pageSize,
 
 	@JsonProperty("total_items")
-	Long totalItems,               // 전체 아이템 개수
+	Long totalItems,
 
 	@JsonProperty("total_pages")
-	Integer totalPages             // 전체 페이지 수
+	Integer totalPages
 ) {
 	public static AdminInquiryListResponse from(List<InquiryData> data, Integer currentPage, Integer pageSize, Long totalItems, Integer totalPages) {
 		return AdminInquiryListResponse.builder()
@@ -39,6 +39,9 @@ public record AdminInquiryListResponse(
 	public record InquiryData(
 		@JsonProperty("inquiry_id")
 		Long inquiryId,
+
+		@JsonProperty("inquiry_num")
+		Integer inquiryNum,
 
 		@JsonProperty("status")
 		InquiryStatus status,
@@ -61,6 +64,7 @@ public record AdminInquiryListResponse(
 		public static InquiryData from(Inquiry inquiry, String customerName) {
 			return InquiryData.builder()
 				.inquiryId(inquiry.getId())
+				.inquiryNum(inquiry.getInquiryNum())
 				.status(inquiry.getInquiryStatus())
 				.category(inquiry.getCategory().toString())
 				.content(inquiry.getContent())
