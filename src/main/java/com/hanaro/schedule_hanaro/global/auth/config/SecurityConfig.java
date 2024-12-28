@@ -59,10 +59,10 @@ public class SecurityConfig {
 				jwtAuthenticationFilter,
 				UsernamePasswordAuthenticationFilter.class
 			)
-			// .addFilterBefore(
-			// 	new JwtExceptionFilter(),
-			// 	JwtAuthenticationFilter.class
-			// )
+			.addFilterBefore(
+				new JwtExceptionFilter(),
+				JwtAuthenticationFilter.class
+			)
 			.cors(
 				httpSecurityCorsConfigurer -> httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource()))
 			.build();
