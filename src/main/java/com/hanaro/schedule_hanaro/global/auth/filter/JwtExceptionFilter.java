@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hanaro.schedule_hanaro.global.dto.ExceptionDto;
 import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
 import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 
@@ -24,38 +26,38 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
 		} catch (SecurityException e) {
 			System.out.println("시큐리티");
 			logger.error("JwtExceptionFilter throw Security Exception : ");
-			request.setAttribute("exception", ErrorCode.FORBIDDEN_REQUEST);
-			filterChain.doFilter(request, response);
+			handleException(response, ErrorCode.FORBIDDEN_REQUEST);
 		} catch (MalformedJwtException e) {
 			System.out.println("malform");
 			logger.error("JwtExceptionFilter throw Malformed Jwt Exception : ");
-			request.setAttribute("exception", ErrorCode.MALFORMED_ACCESS_TOKEN);
-			filterChain.doFilter(request, response);
+			handleException(response, ErrorCode.MALFORMED_ACCESS_TOKEN);
 		} catch (ExpiredJwtException e) {
 			System.out.println("expired");
 			logger.error("JwtExceptionFilter throw Expired Jwt Exception : ");
-			request.setAttribute("exception", ErrorCode.EXPIRED_ACCESS_TOKEN);
-			filterChain.doFilter(request, response);
+			handleException(response, ErrorCode.EXPIRED_ACCESS_TOKEN);
 		} catch (UnsupportedJwtException e) {
 			System.out.println("unsupported");
 			logger.error("JwtExceptionFilter throw Unsupported Jwt Exception : ");
-			request.setAttribute("exception", ErrorCode.UNSUPPORTED_TOKEN);
-			filterChain.doFilter(request, response);
+			handleException(response, ErrorCode.UNSUPPORTED_TOKEN);
 		} catch (IllegalArgumentException e) {
 			System.out.println("illegal");
 			logger.error("JwtExceptionFilter throw Illegal Argument Exception : ");
-			request.setAttribute("exception", ErrorCode.UNSUPPORTED_TOKEN);
-			filterChain.doFilter(request, response);
+			handleException(response, ErrorCode.UNSUPPORTED_TOKEN);
 		} catch (GlobalException e) {
 			System.out.println("global");
 			logger.error("JwtExceptionFilter throw Global Exception : ");
-			request.setAttribute("exception", e.getErrorCode());
-			filterChain.doFilter(request, response);
+			handleException(response, e.getErrorCode());
 		} catch (Exception e) {
 			System.out.println("exception");
 			logger.error("JwtExceptionFilter throw Exception : ");
-			request.setAttribute("exception", ErrorCode.NOT_FOUND_DATA);
-			filterChain.doFilter(request, response);
+			handleException(response, ErrorCode.NOT_FOUND_DATA);
 		}
+	}
+
+	private void handleException(HttpServletResponse response, ErrorCode errorCode) throws IOException {
+		response.setStatus(errorCode.getHttpStatus().value());
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+		response.getWriter().write(new ObjectMapper().writeValueAsString(new ExceptionDto(errorCode)));
 	}
 }

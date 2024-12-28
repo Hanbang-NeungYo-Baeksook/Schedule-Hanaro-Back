@@ -3,14 +3,10 @@ package com.hanaro.schedule_hanaro.global.auth.filter;
 import java.io.IOException;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.hanaro.schedule_hanaro.global.auth.info.CustomUserDetails;
 import com.hanaro.schedule_hanaro.global.auth.info.UserInfo;
 import com.hanaro.schedule_hanaro.global.auth.provider.JwtAuthenticationProvider;
 import com.hanaro.schedule_hanaro.global.auth.provider.JwtTokenProvider;
@@ -19,7 +15,6 @@ import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
 import com.hanaro.schedule_hanaro.global.exception.GlobalException;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -49,7 +44,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		String header = request.getHeader("Authorization");
 		if (header == null || !header.startsWith("Bearer ")) {
-			throw new GlobalException(ErrorCode.NOT_FOUND_TOKEN);
+			filterChain.doFilter(request,response);
+			return;
+			// throw new GlobalException(ErrorCode.NOT_FOUND_TOKEN);
 		}
 		String token = header.substring(7);
 
