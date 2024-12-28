@@ -28,14 +28,14 @@ public class Recommend {
 	@Column(length = 500, nullable = false)
 	private String query;
 
-	@Column(length = 500, nullable = false)
+	@Column(length = 1024, nullable = false)
 	private String response;
 
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private Category category;
 
-	@Column(name = "query_vector", length = 405, nullable = false)
+	@Column(name = "query_vector", length = 2000, nullable = false)
 	private String queryVector;
 
 	@Builder

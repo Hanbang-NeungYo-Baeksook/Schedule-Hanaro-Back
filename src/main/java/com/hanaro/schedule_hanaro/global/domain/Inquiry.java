@@ -49,14 +49,18 @@ public class Inquiry extends BaseEntity{
 	@Column(name = "tags", nullable = false)
 	private String tags;
 
+	@Column(name = "query_vector", nullable = false)
+	private String queryVector;
+
 	@Builder
-	public Inquiry(Customer customer, String content, int inquiryNum, Category category, InquiryStatus status, String tags) {
+	public Inquiry(Customer customer, String content, int inquiryNum, Category category, InquiryStatus status, String tags, String queryVector) {
 		this.customer = customer;
 		this.content = content;
 		this.inquiryNum = inquiryNum;
 		this.category = category;
 		this.inquiryStatus = status;
 		this.tags = tags;
+		this.queryVector = queryVector;
 	}
 
 	public void setStatus(InquiryStatus status) {
