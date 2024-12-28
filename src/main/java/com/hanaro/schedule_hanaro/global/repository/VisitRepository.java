@@ -4,13 +4,10 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import javax.swing.text.html.Option;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.hanaro.schedule_hanaro.global.domain.Branch;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.Section;
 import com.hanaro.schedule_hanaro.global.domain.Visit;
@@ -56,30 +53,61 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
 	@Query("SELECT v FROM Visit v WHERE v.id = :id")
 	Optional<Visit> findByIdWithPessimisticLock(@Param("id") Long id);
 
-	@Query("SELECT v FROM Visit v WHERE v.section.id = :sectionId AND v.status = :status ORDER BY v.num ASC")
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
-	List<Visit> findNextPendingVisitsWithPessimisticLock(@Param("sectionId") Long sectionId, @Param("status") Status status);
+	@Query("SELECT v FROM Visit v " +
+	       "WHERE v.section.id = :sectionId " +
+	       "AND CAST(v.status AS string) = :#{#status.name()} " +
+	       "AND v.visitDate = CURRENT_DATE " +
+	       "ORDER BY v.num ASC")
+	List<Visit> findNextPendingVisitsWithPessimisticLock(
+		@Param("sectionId") Long sectionId,
+		@Param("status") Status status
+	);
 
 	// JPQL 쿼리 사용 (권장)
 
 	@Query("SELECT v FROM Visit v " +
-	       "WHERE v.section.id = :sectionId " +
-	       "AND v.status = :status " +
+	       "WHERE v.status = :status " +
 	       "AND v.visitDate = CURRENT_DATE " +
 	       "ORDER BY v.num DESC " +
 	       "LIMIT 1")
 	Optional<Visit> findCurrentProgressVisit(
-		@Param("sectionId") Long sectionId, 
 		@Param("status") Status status
 	);
 
 	// 현재 방문의 이전 방문을 찾는 쿼리 추가
 	@Query("SELECT v FROM Visit v " +
-	       "WHERE v.section.id = :sectionId " +
-		   "AND v.visitDate = CURRENT_DATE " +
+	       "WHERE v.visitDate = CURRENT_DATE " +
 	       "AND v.num < :currentNum " +
 	       "ORDER BY v.num DESC " +
 	       "LIMIT 1")
-	Optional<Visit> findPreviousVisit(@Param("sectionId") Long sectionId, @Param("currentNum") int currentNum);
+	Optional<Visit> findPreviousVisit(@Param("currentNum") int currentNum);
+
+	@Query("SELECT v FROM Visit v " +
+	       "WHERE v.visitDate = CURRENT_DATE " +
+	       "AND v.status = :status " +
+	       "ORDER BY v.num ASC " +
+	       "LIMIT 1")
+	Optional<Visit> findNextPendingVisitByDate(@Param("status") Status status);
+
+	@Query("SELECT v FROM Visit v " +
+	       "WHERE v.visitDate = CURRENT_DATE " +
+	       "AND v.status = :status " +
+	       "ORDER BY v.num ASC")
+	List<Visit> findNextPendingVisitsByDate(@Param("status") Status status);
+
+	@Query("SELECT v FROM Visit v " +
+	       "WHERE v.visitDate = CURRENT_DATE " +
+	       "AND v.status = :status " +
+	       "ORDER BY v.num DESC " +
+	       "LIMIT 1")
+	Optional<Visit> findCurrentProgressVisitByDate(@Param("status") Status status);
+
+	@Query("SELECT v FROM Visit v " +
+	       "WHERE v.visitDate = CURRENT_DATE " +
+	       "AND v.num < :currentNum " +
+	       "ORDER BY v.num DESC " +
+	       "LIMIT 1")
+	Optional<Visit> findPreviousVisitByDate(@Param("currentNum") int currentNum);
 
 }

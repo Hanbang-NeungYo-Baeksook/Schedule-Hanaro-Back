@@ -21,7 +21,9 @@ public interface CsVisitRepository extends JpaRepository<CsVisit, Long> {
 
 	@Query("SELECT cv FROM CsVisit cv " +
 		   "WHERE cv.branch.id = :branchId " +
-		   "AND cv.date = :date")
+		   "AND cv.date = :date " +
+		   "ORDER BY cv.id DESC " +
+		   "LIMIT 1")
 	Optional<CsVisit> findByBranchIdAndDate(@Param("branchId") Long branchId, @Param("date") LocalDate date);
 
 	Optional<CsVisit> findByBranchId(Long id);

@@ -11,12 +11,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Tag(name = "Admin-Visit", description = "관리자 방문 상담 API")
 @RestController
 @RequestMapping("/admin/api/visits")
 @RequiredArgsConstructor
 public class AdminVisitController {
+
+    private static final Logger log = LoggerFactory.getLogger(AdminVisitController.class);
 
     private final AdminVisitService  adminVisitService;
 
@@ -33,7 +37,11 @@ public class AdminVisitController {
     public ResponseEntity<AdminVisitStatusUpdateResponse> updateVisitStatus(
             @PathVariable("visit-id") Long visitId
     ) {
+        log.info("=== Start updateVisitStatus API ===");
+        log.info("Visit ID: {}", visitId);
+        
         AdminVisitStatusUpdateResponse response = adminVisitService.updateVisitStatus(visitId);
+        log.info("=== End updateVisitStatus API ===");
         return ResponseEntity.ok().body(response);
     }
 
