@@ -85,10 +85,11 @@ public class AdminCallController {
 		@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startedAt,
 		@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endedAt,
 		@RequestParam(required = false) Category category,
-		@RequestParam(required = false) String keyword
+		@RequestParam(required = false) String keyword,
+		Authentication authentication
 	) {
 		// 전화 상담 목록 조회
-		return ResponseEntity.ok().body(callService.findFilteredCalls(page, size, startedAt, endedAt, category, keyword));
+		return ResponseEntity.ok().body(callService.findFilteredCalls(authentication, page, size, startedAt, endedAt, category, keyword));
 	}
 
 	@Operation(summary = "전화 상담 상세 조회", description = "특정 전화 상담 항목의 상세 정보를 조회합니다.")

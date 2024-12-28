@@ -37,6 +37,10 @@ public class Inquiry extends BaseEntity{
 	@Column(name = "inquiry_num", nullable = false)
 	private Integer inquiryNum;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "admin_id", nullable = false)
+	private Admin admin;
+
 	@Enumerated(EnumType.STRING)
 	@Column(name = "category", nullable = false)
 	private Category category;
@@ -53,8 +57,9 @@ public class Inquiry extends BaseEntity{
 	private String queryVector;
 
 	@Builder
-	public Inquiry(Customer customer, String content, int inquiryNum, Category category, InquiryStatus status, String tags, String queryVector) {
+	public Inquiry(Customer customer, Admin admin, String content, int inquiryNum, Category category, InquiryStatus status, String tags, String queryVector) {
 		this.customer = customer;
+		this.admin = admin;
 		this.content = content;
 		this.inquiryNum = inquiryNum;
 		this.category = category;

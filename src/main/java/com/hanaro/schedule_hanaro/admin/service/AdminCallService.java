@@ -177,6 +177,7 @@ public class AdminCallService {
 	}
 
 	public AdminCallHistoryListResponse findFilteredCalls(
+		Authentication authentication,
 		int page,
 		int size,
 		LocalDateTime startedAt,
@@ -186,7 +187,10 @@ public class AdminCallService {
 	) {
 		Pageable pageable = PageRequest.of(page - 1, size);
 
-		Page<Call> calls = callRepository.findByFiltering(pageable, startedAt, endedAt, category, keyword);
+		Admin admin = adminRepository.findById(PrincipalUtils.getId(authentication))
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_ADMIN));
+
+		Page<Call> calls = callRepository.findCallsByFilters(admin.getId(), pageable, startedAt, endedAt, category, keyword);
 
 		List<AdminCallHistoryResponse> callDataList = calls.getContent().stream()
 			.map(call -> AdminCallHistoryResponse.builder()
