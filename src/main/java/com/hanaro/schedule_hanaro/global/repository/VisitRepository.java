@@ -56,7 +56,8 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query("SELECT v FROM Visit v " +
 	       "WHERE v.section.id = :sectionId " +
-	       "AND v.status = :status " +
+	       "AND CAST(v.status AS string) = :#{#status.name()} " +
+	       "AND v.visitDate = CURRENT_DATE " +
 	       "ORDER BY v.num ASC")
 	List<Visit> findNextPendingVisitsWithPessimisticLock(
 		@Param("sectionId") Long sectionId,

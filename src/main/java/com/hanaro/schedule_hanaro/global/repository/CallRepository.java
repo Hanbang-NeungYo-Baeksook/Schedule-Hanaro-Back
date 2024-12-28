@@ -88,10 +88,9 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 				CAST(COUNT(CASE WHEN c.call_date >= DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY) THEN 1 END) AS SIGNED) as weekly, 
 				CAST(COUNT(CASE WHEN c.call_date >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) THEN 1 END) AS SIGNED) as monthly, 
 				CAST(COUNT(*) AS SIGNED) as total 
-			FROM `Call` c
-			JOIN `Call_Memo` cm ON c.call_id = cm.call_id 
-			WHERE cm.admin_id = :adminId 
-			AND c.status = 'COMPLETE'
+			FROM `Call` c 
+			LEFT JOIN Call_Memo cm ON c.call_id = cm.call_id 
+			WHERE (cm.admin_id = :adminId OR cm.admin_id IS NULL)
 		""")
 	List<Object[]> findStatsByAdminId(@Param("adminId") Long adminId);
 
