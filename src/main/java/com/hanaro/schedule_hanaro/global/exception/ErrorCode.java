@@ -34,6 +34,7 @@ public enum ErrorCode {
 	UNSUPPORTED_TOKEN(40102, HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
 	MALFORMED_ACCESS_TOKEN(40103, HttpStatus.BAD_REQUEST, "토큰이 올바르지 않습니다."),
 	CANNOT_AUTHORIZED(40104, HttpStatus.UNAUTHORIZED, "인증을 진행할 수 없습니다."),
+	NOT_FOUND_TOKEN(40105, HttpStatus.UNAUTHORIZED, "토큰이 존재하지 않습니다."),
 
 	// 403
 	FORBIDDEN_REQUEST(40300, HttpStatus.FORBIDDEN, "권한이 존재하지 않습니다."),
