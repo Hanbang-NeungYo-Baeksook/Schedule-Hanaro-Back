@@ -42,7 +42,6 @@ public class AdminInquiryService {
 	public AdminInquiryListResponse findInquiryList(AdminInquiryListRequest request) {
 		Pageable pageable = PageRequest.of(request.page() - 1, request.size());
 
-
 		Page<Inquiry> inquiries = inquiryRepository.findFilteredInquiries(
 			request.inquiryStatus() == null ? null : request.inquiryStatus(),
 			request.category() == null ? null : request.category(),
@@ -116,30 +115,31 @@ public class AdminInquiryService {
 		Admin admin = adminRepository.findById(PrincipalUtils.getId(authentication))
 			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_ADMIN));
 
-		InquiryResponse response = inquiryResponseRepository.findByInquiryId(inquiryId).orElse(null);
+		InquiryResponse response = inquiryResponseRepository.findByInquiryId(inquiryId).orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_INQUIRY_RESPONSE));
 
-		if (response != null) {
+		if (!response.getContent().isEmpty()) {
 			throw new GlobalException(ErrorCode.ALREADY_POST_RESPONSE);
 		}
+
+		InquiryResponse updatedResponse = InquiryResponse.builder()
+			.admin(admin)
+			.inquiry(inquiry)
+			.content(content)
+			.createdAt(response.getCreatedAt())
+			.updatedAt(LocalDateTime.now())
+			.build();
+
+		inquiryResponseRepository.save(updatedResponse);
 
 		// inquiry 상태 변경
 		inquiryRepository.changeStatusById(inquiry.getId());
 
-		// 답변 저장
-		InquiryResponse inquiryResponse = InquiryResponse.builder()
-			.inquiry(inquiry)
-			.admin(admin)
-			.content(content)
-			.createdAt(LocalDateTime.now())
-			.build();
-
-		InquiryResponse savedResponse = inquiryResponseRepository.save(inquiryResponse);
-
 		return AdminInquiryResponse.of(
-			savedResponse.getInquiry().getId(),
-			savedResponse.getAdmin().getId(),
-			savedResponse.getContent(),
-			savedResponse.getCreatedAt()
+			updatedResponse.getInquiry().getId(),
+			updatedResponse.getAdmin().getId(),
+			content,
+			updatedResponse.getCreatedAt(),
+			updatedResponse.getUpdatedAt()
 		);
 	}
 }

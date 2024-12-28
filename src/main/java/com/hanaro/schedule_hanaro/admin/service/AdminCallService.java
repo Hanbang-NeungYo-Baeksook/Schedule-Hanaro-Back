@@ -106,7 +106,7 @@ public class AdminCallService {
 		}
 
 		// 대기 번호가 가장 빠른 상담 조회 (비관적 락)
-		Call call = callRepository.findFirstByStatusOrderByCallNumAsc(Status.PENDING)
+		Call call = callRepository.findFirstByStatusOrderByIdAsc(Status.PENDING)
 			.orElseThrow(() -> new GlobalException(ErrorCode.EMPTY_WAITS));
 
 		// call의 상태를 progress로 변경
