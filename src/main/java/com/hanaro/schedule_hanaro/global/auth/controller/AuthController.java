@@ -1,6 +1,7 @@
 package com.hanaro.schedule_hanaro.global.auth.controller;
 
-import org.apache.tomcat.util.http.HeaderUtil;
+import java.util.Arrays;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,12 +12,15 @@ import com.hanaro.schedule_hanaro.global.auth.dto.request.AuthAdminSignUpRequest
 import com.hanaro.schedule_hanaro.global.auth.dto.request.AuthSignUpRequest;
 import com.hanaro.schedule_hanaro.global.auth.dto.request.SignInRequest;
 import com.hanaro.schedule_hanaro.global.auth.dto.response.JwtTokenDto;
+import com.hanaro.schedule_hanaro.global.auth.dto.response.SignInResponse;
 import com.hanaro.schedule_hanaro.global.auth.dto.response.SignUpResponse;
 import com.hanaro.schedule_hanaro.global.auth.service.AuthService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,9 +42,16 @@ public class AuthController {
 
 	@Operation(summary = "사용자 로그인", description = "Schedule Hanaro 사용자에게 로그인 서비스를 제공합니다.")
 	@PostMapping("/sign-in")
-	public ResponseEntity<JwtTokenDto> signIn(@RequestBody SignInRequest signInRequest) {
-		JwtTokenDto response = authService.signIn(signInRequest);
-		return ResponseEntity.ok().body(response);
+	public ResponseEntity<SignInResponse> signIn(@RequestBody SignInRequest signInRequest, HttpServletResponse response) {
+		JwtTokenDto tokenDto = authService.signIn(signInRequest);
+
+		Cookie cookie = new Cookie("refresh-token", tokenDto.refreshToken());
+		cookie.setMaxAge(3*60*60);
+		cookie.setHttpOnly(true);
+		cookie.setPath("/");
+		response.addCookie(cookie);
+
+		return ResponseEntity.ok().body(SignInResponse.of(tokenDto.accessToken(), tokenDto.refreshToken()));
 	}
 
 	@Operation(summary = "관리자 회원가입", description = "Schedule Hanaro 서비스 관리자 페이지에 관리자를 등록합니다.")
@@ -60,6 +71,8 @@ public class AuthController {
 	@PostMapping("/reissue")
 	public ResponseEntity<JwtTokenDto> reissue(HttpServletRequest request) {
 		String refreshToken = request.getHeader("Authorization").substring(7);
+		String refreshToken1 = Arrays.toString(request.getCookies());
+		System.out.println(refreshToken1);
 		JwtTokenDto response = authService.refresh(refreshToken);
 		return ResponseEntity.ok().body(response);
 	}
