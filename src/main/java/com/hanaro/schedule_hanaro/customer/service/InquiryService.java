@@ -58,15 +58,16 @@ public class InquiryService {
 		List<String> tags = recommendTagsForQuery(request.content());
 
 		// 상담 할당받을 admin 구하기
-		Optional<com.hanaro.schedule_hanaro.global.domain.InquiryResponse> inquiryResponse = inquiryResponseRepository.findFirstByOrderByIdDesc();
+		Optional<Inquiry> inquiry = inquiryRepository.findFirstByOrderByIdDesc();
 
-		Admin admin = (inquiryResponse.isPresent())
-			? adminRepository.findFirstByIdGreaterThanOrderByIdAsc(inquiryResponse.get().getAdmin().getId())
+		Admin admin = (inquiry.isPresent())
+			? adminRepository.findFirstByIdGreaterThanOrderByIdAsc(
+				inquiry.get().getAdmin().getId())
 			.orElseGet(() -> adminRepository.findFirstByOrderByIdAsc().orElse(null))
 			: adminRepository.findFirstByOrderByIdAsc().orElse(null);
 
 		// inquiry 등록
-		Inquiry inquiry = Inquiry.builder()
+		Inquiry savedInquiry = inquiryRepository.save(Inquiry.builder()
 			.customer(customer)
 			.admin(admin)
 			.content(request.content())
@@ -76,9 +77,7 @@ public class InquiryService {
 			.tags(String.join(",", tags))
 			// TODO 여기 문자열로 처리해야되는데 급해서 toString()으로 함. 적절하게 바꿔주세요
 			.queryVector(recommendService.getQueryVector(request.content()).toString())
-			.build();
-
-		Inquiry savedInquiry = inquiryRepository.save(inquiry);
+			.build());
 
 		// inquiryResponse 등록
 		inquiryResponseRepository.save(com.hanaro.schedule_hanaro.global.domain.InquiryResponse.builder()

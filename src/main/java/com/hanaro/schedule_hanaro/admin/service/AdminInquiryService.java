@@ -136,7 +136,7 @@ public class AdminInquiryService {
 
 		return AdminInquiryResponse.of(
 			updatedResponse.getInquiry().getId(),
-			updatedResponse.getAdmin().getId(),
+			admin.getId(),
 			content,
 			updatedResponse.getCreatedAt(),
 			updatedResponse.getUpdatedAt()

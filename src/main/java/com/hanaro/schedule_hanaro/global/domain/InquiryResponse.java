@@ -22,10 +22,6 @@ public class InquiryResponse {
 	@JoinColumn(name = "inquiry_id", nullable = false, unique = true)
 	private Inquiry inquiry;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "admin_id", nullable = false)
-	private Admin admin;
-
 	@Column(name = "content",length = 500, nullable = false)
 	private String content;
 
@@ -38,7 +34,6 @@ public class InquiryResponse {
 	@Builder
 	public InquiryResponse(Inquiry inquiry, Admin admin, String content, LocalDateTime createdAt, LocalDateTime updatedAt) {
 		this.inquiry = inquiry;
-		this.admin = admin;
 		this.content = content;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
