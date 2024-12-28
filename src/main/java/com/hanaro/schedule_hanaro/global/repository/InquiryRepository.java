@@ -20,6 +20,7 @@ import com.hanaro.schedule_hanaro.global.domain.enums.InquiryStatus;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryDto;
 import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryStatsDto;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryResponse;
+import com.hanaro.schedule_hanaro.global.domain.enums.Status;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,11 +31,6 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
 	// 번호 추가
 	@Query("SELECT COALESCE(MAX(i.inquiryNum), 0) FROM Inquiry i")
 	int findMaxInquiryNum();
-
-	Page<Inquiry> findByInquiryStatus(InquiryStatus status, Pageable pageable);
-
-	@Query("SELECT i FROM Inquiry i WHERE i.customer.id = :customerId")
-	List<Inquiry> findByCustomerId(Long customerId);
 
 	List<Inquiry> findAllByCustomerId(Long customerId);
 
@@ -62,7 +58,8 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
 
 	@Query("SELECT i FROM Inquiry i " +
 		"LEFT JOIN Customer c ON i.customer.id = c.id " +
-		"WHERE (:status IS NULL OR i.inquiryStatus = :status) " +
+		"WHERE (i.admin.id = :adminId)" +
+		"AND (:status IS NULL OR i.inquiryStatus = :status) " +
 		"AND (:category IS NULL OR i.category = :category) " +
 		"AND (:searchContent IS NULL OR " +
 		"     i.tags LIKE %:searchContent% OR " +
@@ -70,6 +67,7 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
 		"     c.name LIKE %:searchContent%) " +
 		"ORDER BY i.createdAt DESC")
 	Page<Inquiry> findFilteredInquiries(
+		@Param("adminId") Long adminId,
 		@Param("status") InquiryStatus status,
 		@Param("category") Category category,
 		@Param("searchContent") String searchContent,
@@ -86,4 +84,6 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
 	@Modifying
 	@Query("UPDATE Inquiry i SET i.inquiryStatus = 'REGISTRATIONCOMPLETE' WHERE i.id = :inquiryId")
 	void changeStatusById(Long inquiryId);
+
+	int countByAdminIdAndInquiryStatus(Long adminId, InquiryStatus status);
 }

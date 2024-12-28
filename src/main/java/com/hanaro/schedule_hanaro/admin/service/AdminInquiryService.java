@@ -40,10 +40,14 @@ public class AdminInquiryService {
 	private final InquiryRepository inquiryRepository;
 	private final RecommendService recommendService;
 
-	public AdminInquiryListResponse findInquiryList(AdminInquiryListRequest request) {
+	public AdminInquiryListResponse findInquiryList(Authentication authentication, AdminInquiryListRequest request) {
 		Pageable pageable = PageRequest.of(request.page() - 1, request.size());
 
+		Admin admin = adminRepository.findById(PrincipalUtils.getId(authentication))
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_ADMIN));
+
 		Page<Inquiry> inquiries = inquiryRepository.findFilteredInquiries(
+			admin.getId(),
 			request.inquiryStatus() == null ? null : request.inquiryStatus(),
 			request.category() == null ? null : request.category(),
 			request.searchContent(),
@@ -59,9 +63,6 @@ public class AdminInquiryService {
 				0          // 총 페이지 수
 			);
 		}
-
-
-
 
 		List<AdminInquiryListResponse.InquiryData> inquiryDataList = inquiries.getContent().stream()
 			.map(inquiry -> AdminInquiryListResponse.InquiryData.from(
@@ -117,10 +118,6 @@ public class AdminInquiryService {
 			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_ADMIN));
 
 		InquiryResponse response = inquiryResponseRepository.findByInquiryId(inquiryId).orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_INQUIRY_RESPONSE));
-
-		if (!response.getContent().isEmpty()) {
-			throw new GlobalException(ErrorCode.ALREADY_POST_RESPONSE);
-		}
 
 		InquiryResponse updatedResponse = InquiryResponse.builder()
 			.admin(admin)

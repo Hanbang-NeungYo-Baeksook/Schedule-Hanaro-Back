@@ -10,10 +10,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public record InquiryResponse(
 	@JsonProperty("inquiry_id") Long inquiryId,
 	@JsonProperty("inquiry_num") int inquiryNum,
+	@JsonProperty("admin_id") Long adminId,
 	@JsonProperty("customer_name") String customerName,
 	String category,
 	String status,
 	String content,
-	List<String> tags
+	List<String> tags,
+	@JsonProperty("waiting_amount")
+	int waitingAmount
 ) {
 }

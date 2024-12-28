@@ -57,9 +57,18 @@ public class InquiryService {
 
 		List<String> tags = recommendTagsForQuery(request.content());
 
+		// 상담 할당받을 admin 구하기
+		Optional<com.hanaro.schedule_hanaro.global.domain.InquiryResponse> inquiryResponse = inquiryResponseRepository.findFirstByOrderByIdDesc();
 
+		Admin admin = (inquiryResponse.isPresent())
+			? adminRepository.findFirstByIdGreaterThanOrderByIdAsc(inquiryResponse.get().getAdmin().getId())
+			.orElseGet(() -> adminRepository.findFirstByOrderByIdAsc().orElse(null))
+			: adminRepository.findFirstByOrderByIdAsc().orElse(null);
+
+		// inquiry 등록
 		Inquiry inquiry = Inquiry.builder()
 			.customer(customer)
+			.admin(admin)
 			.content(request.content())
 			.inquiryNum(newInquiryNum)
 			.category(category)
@@ -71,14 +80,7 @@ public class InquiryService {
 
 		Inquiry savedInquiry = inquiryRepository.save(inquiry);
 
-		// inquiry response 등록
-		Optional<com.hanaro.schedule_hanaro.global.domain.InquiryResponse> inquiryResponse = inquiryResponseRepository.findFirstByOrderByIdDesc();
-
-		Admin admin = (inquiryResponse.isPresent())
-			? adminRepository.findFirstByIdGreaterThanOrderByIdAsc(inquiryResponse.get().getAdmin().getId())
-			.orElseGet(() -> adminRepository.findFirstByOrderByIdAsc().orElse(null))
-			: adminRepository.findFirstByOrderByIdAsc().orElse(null);
-
+		// inquiryResponse 등록
 		inquiryResponseRepository.save(com.hanaro.schedule_hanaro.global.domain.InquiryResponse.builder()
 			.inquiry(savedInquiry)
 			.admin(admin)
@@ -127,14 +129,21 @@ public class InquiryService {
 		Inquiry inquiry = inquiryRepository.findById(inquiryId)
 			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_INQUIRY));
 
+		// 대기 중인 인수 구하기
+		int waitingAmount = inquiryRepository.countByAdminIdAndInquiryStatus(inquiry.getAdmin().getId(), InquiryStatus.PENDING);
+
+		System.out.println("waitingAmount = " + waitingAmount);
+
 		return InquiryResponse.builder()
 			.inquiryId(inquiry.getId())
 			.inquiryNum(inquiry.getInquiryNum())
+			.adminId(inquiry.getAdmin().getId())
 			.category(inquiry.getCategory().toString())
 			.status(inquiry.getInquiryStatus().toString())
 			.customerName(inquiry.getCustomer().getName())
 			.content(inquiry.getContent())
 			.tags(List.of(inquiry.getTags().split(",")))
+			.waitingAmount(waitingAmount)
 			.build();
 	}
 

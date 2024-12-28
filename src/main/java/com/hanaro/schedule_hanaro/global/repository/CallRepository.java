@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 
 import com.hanaro.schedule_hanaro.global.domain.Call;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
@@ -52,19 +53,23 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 		@Param("startedAt") LocalDateTime startedAt);
 
 	@Query("""
-		    SELECT c FROM Call c
-		    LEFT JOIN c.customer cu
-		    WHERE c.status = 'COMPLETE'
-		    AND (:category IS NULL OR c.category = :category)
-		    AND (:startedAt IS NULL OR c.callDate >= :startedAt)
-		    AND (:endedAt IS NULL OR c.callDate <= :endedAt)
-		    AND (:keyword IS NULL OR 
-		         c.tags LIKE %:keyword% OR 
-		         c.content LIKE %:keyword% OR 
-		         cu.name LIKE %:keyword%)
-		    ORDER BY c.callDate DESC
-		""")
-	Page<Call> findByFiltering(
+    SELECT c FROM Call c
+        WHERE c.status = 'COMPLETE'
+        AND (:category IS NULL OR c.category = :category)
+        AND (:startedAt IS NULL OR c.callDate >= :startedAt)
+        AND (:endedAt IS NULL OR c.callDate <= :endedAt)
+        AND (:keyword IS NULL OR\s
+             c.tags LIKE %:keyword% OR\s
+             c.content LIKE %:keyword%)
+        AND EXISTS (
+            SELECT cm FROM CallMemo cm\s
+            WHERE cm.call.id = c.id\s
+            AND cm.admin.id = :adminId
+        )
+        ORDER BY c.callDate DESC
+""")
+	Page<Call> findCallsByFilters(
+		@Param("adminId") Long adminId,
 		Pageable pageable,
 		@Param("startedAt") LocalDateTime startedAt,
 		@Param("endedAt") LocalDateTime endedAt,

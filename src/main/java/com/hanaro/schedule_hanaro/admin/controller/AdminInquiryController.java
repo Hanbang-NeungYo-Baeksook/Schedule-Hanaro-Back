@@ -37,15 +37,15 @@ public class AdminInquiryController {
 		@RequestParam(required = false) Category category,
 		@RequestParam(value = "search_content", required = false) String searchContent,
 		@RequestParam(defaultValue = "0") Integer page,
-		@RequestParam(defaultValue = "10") Integer size
+		@RequestParam(defaultValue = "10") Integer size,
+		Authentication authentication
 	) {
-		// Category enumCategory = (category != null) ? category : Category.LOAN;
 
 		AdminInquiryListRequest request = AdminInquiryListRequest.from(
 			inquiryStatus, category, searchContent, page, size
 		);
 
-		AdminInquiryListResponse response = adminInquiryService.findInquiryList(request);
+		AdminInquiryListResponse response = adminInquiryService.findInquiryList(authentication, request);
 		return ResponseEntity.ok().body(response);
 	}
 
