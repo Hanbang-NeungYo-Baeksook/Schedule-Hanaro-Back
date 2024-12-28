@@ -4,8 +4,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.apache.commons.math3.linear.RealVector;
+
+import com.hanaro.schedule_hanaro.admin.dto.RecommendRegisterDto;
 import com.hanaro.schedule_hanaro.customer.dto.response.RecommendDetailResponse;
 import com.hanaro.schedule_hanaro.customer.dto.response.RecommendListResponse;
+import com.hanaro.schedule_hanaro.global.domain.InquiryResponse;
 import com.hanaro.schedule_hanaro.global.domain.Recommend;
 import com.hanaro.schedule_hanaro.global.repository.RecommendRepository;
 import com.hanaro.schedule_hanaro.global.utils.FAQTokenizer;
@@ -23,6 +26,17 @@ public class RecommendService {
 
 	public RecommendService(RecommendRepository recommendRepository) {
 		this.recommendRepository = recommendRepository;
+	}
+
+	public void registerRecommend(RecommendRegisterDto registerDto) {
+		recommendRepository.save(
+			new Recommend(
+				registerDto.query(),
+				registerDto.response(),
+				registerDto.category(),
+				registerDto.queryVector()
+			)
+		);
 	}
 
 	public RecommendListResponse getRecommends(String query) {
@@ -55,7 +69,23 @@ public class RecommendService {
 				allRecommends
 		);
 
-		return RecommendListResponse.of(recommendDetails, recommendedTags);
+		return RecommendListResponse.of(queryVector, recommendDetails, recommendedTags);
+	}
+
+	public RealVector getQueryVector(String query) {
+		// TODO 위에 getRecommends 부분에서 따왔는데 적절하게 리팩토링되면 좋을것 같음
+		if (query == null || query.isEmpty()) {
+			throw new GlobalException(ErrorCode.MISSING_REQUEST_PARAMETER, "Query is null or empty.");
+		}
+		List<Recommend> allRecommends = recommendRepository.findAll();
+		if (allRecommends.isEmpty()) {
+			throw new GlobalException(ErrorCode.NOT_FOUND_DATA, "No recommendations found in the database.");
+		}
+		List<String> allTokens = getAllUniqueTokens(allRecommends);
+		List<String> questions = getQuestionList(allRecommends);
+		Map<String, Double> idfMap = calculateIDF(questions);
+
+		return  TFIDFVectorizer.createTFIDFVectorForNewQuestion(query, idfMap, allTokens);
 	}
 
 	private List<String> getAllUniqueTokens(List<Recommend> recommends) {

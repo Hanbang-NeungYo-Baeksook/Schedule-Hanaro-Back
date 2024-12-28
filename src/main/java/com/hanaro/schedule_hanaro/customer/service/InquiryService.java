@@ -16,6 +16,7 @@ import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.Inquiry;
 import com.hanaro.schedule_hanaro.global.domain.enums.InquiryStatus;
 import com.hanaro.schedule_hanaro.global.repository.InquiryResponseRepository;
+import com.hanaro.schedule_hanaro.global.service.RecommendService;
 import com.hanaro.schedule_hanaro.global.utils.PrincipalUtils;
 
 import org.springframework.data.domain.PageRequest;
@@ -39,6 +40,7 @@ public class InquiryService {
 	private final CustomerRepository customerRepository;
 	private final InquiryResponseRepository inquiryResponseRepository;
 	private final AdminRepository adminRepository;
+	private final RecommendService recommendService;
 
 	// 1:1 상담 예약
 	@Transactional
@@ -55,6 +57,7 @@ public class InquiryService {
 
 		List<String> tags = recommendTagsForQuery(request.content());
 
+
 		Inquiry inquiry = Inquiry.builder()
 			.customer(customer)
 			.content(request.content())
@@ -62,6 +65,8 @@ public class InquiryService {
 			.category(category)
 			.status(InquiryStatus.PENDING)
 			.tags(String.join(",", tags))
+			// TODO 여기 문자열로 처리해야되는데 급해서 toString()으로 함. 적절하게 바꿔주세요
+			.queryVector(recommendService.getQueryVector(request.content()).toString())
 			.build();
 
 		Inquiry savedInquiry = inquiryRepository.save(inquiry);
