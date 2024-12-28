@@ -5,11 +5,14 @@ import com.hanaro.schedule_hanaro.admin.dto.response.AdminInquiryStatsDto;
 import com.hanaro.schedule_hanaro.customer.dto.response.InquiryResponse;
 import com.hanaro.schedule_hanaro.global.domain.Customer;
 import com.hanaro.schedule_hanaro.global.domain.Inquiry;
+
+import jakarta.persistence.LockModeType;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -86,4 +89,7 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
 	void changeStatusById(Long inquiryId);
 
 	int countByAdminIdAndInquiryStatus(Long adminId, InquiryStatus status);
+
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	Optional<Inquiry> findFirstByOrderByIdDesc();
 }

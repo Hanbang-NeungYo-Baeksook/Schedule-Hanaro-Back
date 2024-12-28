@@ -17,7 +17,4 @@ public interface InquiryResponseRepository extends JpaRepository<InquiryResponse
 	Optional<InquiryResponse> findByInquiryId(@Param("inquiryId") Long inquiryId);
 	Optional<InquiryResponse> findByInquiry(Inquiry inquiry);
 
-	@Lock(LockModeType.PESSIMISTIC_WRITE)
-	Optional<InquiryResponse> findFirstByOrderByIdDesc();
-
 }
