@@ -73,6 +73,7 @@ public class RecommendService {
 	}
 
 	public RealVector getQueryVector(String query) {
+		// TODO 위에 getRecommends 부분에서 따왔는데 적절하게 리팩토링되면 좋을것 같음
 		if (query == null || query.isEmpty()) {
 			throw new GlobalException(ErrorCode.MISSING_REQUEST_PARAMETER, "Query is null or empty.");
 		}
