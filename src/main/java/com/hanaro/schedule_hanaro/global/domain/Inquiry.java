@@ -53,7 +53,7 @@ public class Inquiry extends BaseEntity{
 	@Column(name = "tags", nullable = false)
 	private String tags;
 
-	@Column(name = "query_vector", nullable = false)
+	@Column(name = "query_vector",length = 2000, nullable = false)
 	private String queryVector;
 
 	@Builder

@@ -39,41 +39,43 @@ public class RecommendService {
 		);
 	}
 
+	public RealVector getQueryVector(String query) {
+		System.out.println("Input query: " + query);
+		
+		RealVector vector = createQueryVector(query);
+		
+		System.out.println("Generated vector: " + vector.toString());
+		System.out.println("Vector dimension: " + vector.getDimension());
+		
+		return vector;
+	}
+
 	public RecommendListResponse getRecommends(String query) {
-		if (query == null || query.isEmpty()) {
-			throw new GlobalException(ErrorCode.MISSING_REQUEST_PARAMETER, "Query is null or empty.");
-		}
-
-		List<Recommend> allRecommends = recommendRepository.findAll();
-		if (allRecommends.isEmpty()) {
-			throw new GlobalException(ErrorCode.NOT_FOUND_DATA, "No recommendations found in the database.");
-		}
-
-		List<String> allTokens = getAllUniqueTokens(allRecommends);
-		List<String> questions = getQuestionList(allRecommends);
-		Map<String, Double> idfMap = calculateIDF(questions);
-
-		RealVector queryVector = TFIDFVectorizer.createTFIDFVectorForNewQuestion(query, idfMap, allTokens);
+		RealVector queryVector = createQueryVector(query);
 		List<String> recommendedTags = TagRecommender.recommendTagsForQuery(query);
 
 		if (recommendedTags == null) {
 			throw new GlobalException(ErrorCode.MISSING_REQUEST_PARAMETER, "Failed to recommend tags.");
 		}
 
+		List<Recommend> allRecommends = recommendRepository.findAll();
 		Map<String, Map<String, Object>> tokenizedFAQ = convertRecommendsToTokenizedFAQ(allRecommends);
-		Map<String, RealVector> tfidfVectors = TFIDFVectorizer.createTFIDFVectors(tokenizedFAQ, idfMap, allTokens);
+		Map<String, RealVector> tfidfVectors = TFIDFVectorizer.createTFIDFVectors(
+			tokenizedFAQ, 
+			calculateIDF(getQuestionList(allRecommends)), 
+			getAllUniqueTokens(allRecommends)
+		);
 
 		List<RecommendDetailResponse> recommendDetails = getTop3SimilarQuestionsTFIDF(
-				tfidfVectors,
-				queryVector,
-				allRecommends
+			tfidfVectors,
+			queryVector,
+			allRecommends
 		);
 
 		return RecommendListResponse.of(queryVector, recommendDetails, recommendedTags);
 	}
 
-	public RealVector getQueryVector(String query) {
-		// TODO 위에 getRecommends 부분에서 따왔는데 적절하게 리팩토링되면 좋을것 같음
+	private RealVector createQueryVector(String query) {
 		if (query == null || query.isEmpty()) {
 			throw new GlobalException(ErrorCode.MISSING_REQUEST_PARAMETER, "Query is null or empty.");
 		}
@@ -81,11 +83,15 @@ public class RecommendService {
 		if (allRecommends.isEmpty()) {
 			throw new GlobalException(ErrorCode.NOT_FOUND_DATA, "No recommendations found in the database.");
 		}
+		
+		List<String> tokens = FAQTokenizer.tokenizeNewQuestion(query);
+		System.out.println("Tokenized query: " + tokens);
+		
 		List<String> allTokens = getAllUniqueTokens(allRecommends);
 		List<String> questions = getQuestionList(allRecommends);
 		Map<String, Double> idfMap = calculateIDF(questions);
 
-		return  TFIDFVectorizer.createTFIDFVectorForNewQuestion(query, idfMap, allTokens);
+		return TFIDFVectorizer.createTFIDFVectorForNewQuestion(query, idfMap, allTokens);
 	}
 
 	private List<String> getAllUniqueTokens(List<Recommend> recommends) {
