@@ -2,6 +2,11 @@ package com.hanaro.schedule_hanaro.global.auth.controller;
 
 import java.util.Arrays;
 
+import com.hanaro.schedule_hanaro.global.auth.dto.response.AdminSignInResponse;
+import com.hanaro.schedule_hanaro.global.domain.Admin;
+import com.hanaro.schedule_hanaro.global.exception.ErrorCode;
+import com.hanaro.schedule_hanaro.global.exception.GlobalException;
+import com.hanaro.schedule_hanaro.global.repository.AdminRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class AuthController {
 	private final AuthService authService;
+	private final AdminRepository adminRepository;
 
 	@Operation(summary = "사용자 회원가입", description = "Schedule Hanaro 사용자에게 회원가입 서비스를 제공합니다.")
 	@PostMapping("/sign-up")
@@ -63,8 +69,21 @@ public class AuthController {
 
 	@Operation(summary = "관리자 로그인", description = "Schedule Hanaro 서비스 관리자 페이지에 로그인합니다.")
 	@PostMapping("/admin/sign-in")
-	public ResponseEntity<JwtTokenDto> signInAdmin(@RequestBody SignInRequest signInRequest) {
-		JwtTokenDto response = authService.adminSignIn(signInRequest);
+	public ResponseEntity<AdminSignInResponse> signInAdmin(@RequestBody SignInRequest signInRequest) {
+		Admin admin = adminRepository.findByAuthId(signInRequest.authId())
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_ADMIN));
+
+		JwtTokenDto tokenDto = authService.adminSignIn(signInRequest);
+		
+		AdminSignInResponse response = AdminSignInResponse.of(
+			tokenDto,
+			admin.getId(),
+			admin.getName(),
+			admin.getBranch().getName()
+		);
+		
+		log.info("Admin login successful - authId: {}, name: {}", admin.getAuthId(), admin.getName());
+		
 		return ResponseEntity.ok().body(response);
 	}
 
