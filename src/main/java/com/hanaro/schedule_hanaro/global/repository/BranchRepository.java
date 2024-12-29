@@ -27,7 +27,13 @@ public interface BranchRepository extends JpaRepository<Branch, Long> {
 		from Branch b
 		left join Section s on s.branch.id=b.id
 		where b.branchType=:branchType
-		order by b.id asc, s.sectionType asc
+		order by b.id asc,
+			case s.sectionType 
+					when com.hanaro.schedule_hanaro.global.domain.enums.SectionType.DEPOSIT then 1
+					when com.hanaro.schedule_hanaro.global.domain.enums.SectionType.PERSONAL_LOAN then 2
+					when com.hanaro.schedule_hanaro.global.domain.enums.SectionType.OTHERS then 3
+					else 99
+			end 
 		""")
 	List<BankVO> findBranchByBranchType(BranchType branchType);
 
@@ -38,7 +44,13 @@ public interface BranchRepository extends JpaRepository<Branch, Long> {
 		from Branch b
 		left join Section s on s.branch.id=b.id
 		where b.id=:branchId
-		order by s.sectionType asc
+		order by
+			case s.sectionType 
+					when com.hanaro.schedule_hanaro.global.domain.enums.SectionType.DEPOSIT then 1
+					when com.hanaro.schedule_hanaro.global.domain.enums.SectionType.PERSONAL_LOAN then 2
+					when com.hanaro.schedule_hanaro.global.domain.enums.SectionType.OTHERS then 3
+					else 99
+			end 
 		""")
 	List<BankVO> findBranchByBranch_Id(Long branchId);
 }
