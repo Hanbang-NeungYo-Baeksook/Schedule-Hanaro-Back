@@ -48,7 +48,7 @@ public class CallService {
 	private final AdminCallService adminCallService;
 
 	private static final int MAX_RESERVATION = 60;
-	private static final int CONSULTANTS = 25;
+	private static final int CONSULTANTS = 4;
 	private static final int CONSULTATION_TIME_MINUTE = 15;
 
 	@Transactional
