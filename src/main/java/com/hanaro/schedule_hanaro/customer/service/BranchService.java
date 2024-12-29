@@ -97,7 +97,7 @@ public class BranchService {
 		return dtoMap;
 	}
 
-	public BranchListResponse listBranch(double userLat, double userLon, String key, String category,
+	public BranchListResponse listBranch(double userLat, double userLon, String key, String section,
 		Authentication authentication) {
 
 		List<Branch> atmList = branchRepository.findAllByBranchTypeOrderByIdAsc(BranchType.ATM);
@@ -114,11 +114,13 @@ public class BranchService {
 			bankList.sort(Comparator.comparing(BranchDetailResponse::distance));
 			System.out.println("거리정렬완료");
 		} else if (key.equals("wait")) {
-			SectionType sectionType = GetSectionByCategory.getSectionTypeByCategory(
-				Category.fromCategoryName(category));
+			System.out.println("시간 진입");
+			SectionType sectionType = SectionType.valueOf(section);
+			System.out.println("섹션 가져옴");
 			bankList.sort(
 				Comparator.comparing(branchDetailResponse -> branchDetailResponse.waitTime()
 					.get(branchDetailResponse.sectionTypes().indexOf(sectionType.getType()))));
+			System.out.println("정렬 완료");
 		} else {
 			throw new GlobalException(ErrorCode.WRONG_REQUEST_PARAMETER);
 		}
