@@ -1,5 +1,8 @@
-# 상담을 하나로, 스케줄 하나로
 스케줄 하나로 BE 레포지토리입니다.
+# 상담을 하나로, 스케줄 하나로
+<a href="https://schedulehanaro.digital" target="_blank">
+<img src="https://github.com/user-attachments/assets/ee91f214-576d-4df2-9813-6747de86670c" />
+</a>
 
 ## ✒️ 프로젝트 소개
 디지털 하나路 개발 4기 4팀 한방능요백숙
@@ -7,9 +10,12 @@
 
 Frontend Repository 👉 [🖥️ 스케줄 하나로 Frontend](https://github.com/Hanbang-NeungYo-Baeksook/Schedule-Hanaro-Front)
 
-배포 진행했으나 AWS 비용문제로..
-
 시연 영상 👉 [📲 스케줄 하나로 시연영상](https://youtu.be/kT28dcnj_g0?si=DK9P1Hp0PvpFGAkX)
+<br/>
+### 주요 기능
+![image](https://github.com/user-attachments/assets/9d2cbd82-3470-418b-af2c-a776dca7fcd2)
+![image](https://github.com/user-attachments/assets/d006a736-6001-468f-bced-8d1123e52063)
+![image](https://github.com/user-attachments/assets/20931673-1a18-408a-8535-c2dd88eaf22a)
 
 ## 🗓️ 개발기간
 2024.12.13 ~ 2024.12.30
