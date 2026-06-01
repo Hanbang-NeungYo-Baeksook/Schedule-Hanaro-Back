@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import com.hanaro.schedule_hanaro.customer.dto.CancelReservationDto;
 import com.hanaro.schedule_hanaro.customer.dto.RegisterReservationDto;
@@ -54,9 +55,12 @@ public class VisitService {
 	private final CsVisitService csVisitService;
 	private final SectionService sectionService;
 
+	private final TransactionTemplate transactionTemplate;
+
 	public VisitService(VisitRepository visitRepository, BranchRepository branchRepository,
 		CustomerRepository customerRepository, CsVisitRepository csVisitRepository,
-		SectionRepository sectionRepository, CsVisitService csVisitService, SectionService sectionService) {
+		SectionRepository sectionRepository, CsVisitService csVisitService, SectionService sectionService,
+		TransactionTemplate transactionTemplate) {
 		this.visitRepository = visitRepository;
 		this.branchRepository = branchRepository;
 		this.customerRepository = customerRepository;
@@ -64,6 +68,7 @@ public class VisitService {
 		this.sectionRepository = sectionRepository;
 		this.csVisitService = csVisitService;
 		this.sectionService = sectionService;
+		this.transactionTemplate = transactionTemplate;
 	}
 
 	public CreateVisitResponse addVisitReservation(
@@ -105,15 +110,18 @@ public class VisitService {
 			)
 			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_FOUND_CS_VISIT)).getId();
 
-		int totalNum;
+		Integer totalNum;
 		while (true) {
 			try {
-				RegisterReservationDto registerReservationDto = RegisterReservationDto.of(csVisitId, section.getId(),
-					category.getWaitTime());
-				totalNum = csVisitService.increaseWait(registerReservationDto);
-				System.out.println("totalNum 갱신:" + totalNum);
-				sectionService.increaseWait(registerReservationDto);
-				System.out.println("section갱신");
+				totalNum = transactionTemplate.execute(status -> {
+					RegisterReservationDto registerReservationDto = RegisterReservationDto.of(csVisitId, section.getId(),
+						category.getWaitTime());
+					int num = csVisitService.increaseWait(registerReservationDto);
+					// System.out.println("totalNum 갱신:" + totalNum);
+					sectionService.increaseWait(registerReservationDto);
+					System.out.println("section갱신");
+					return num;
+				});
 				break;
 			} catch (OptimisticLockingFailureException ex) {
 				String threadName = Thread.currentThread().getName();

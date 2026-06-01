@@ -96,3 +96,10 @@ jacocoTestReport {
 clean {
     delete file('src/main/generated')
 }
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "failed", "skipped" // 👈 passed를 넣어야 성공한 것도 콘솔에 찍힙니다.
+    }
+}
